@@ -36,3 +36,4 @@ from matpy.builtins import advanced_math as _advanced_math
 from matpy.builtins import sparse as _sparse
 from matpy.builtins import string_array as _string_array
 from matpy.builtins import common as _common
+from matpy.builtins import extra as _extra

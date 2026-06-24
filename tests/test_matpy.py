@@ -347,5 +347,312 @@ class TestNdimArray:
         assert B.shape == (3,)
 
 
+class TestDistributionFunctions:
+    def test_normcdf(self):
+        interp = run_matlab("p = normcdf(0);")
+        p = interp.global_env.get("p")
+        val = p.data.flat[0] if isinstance(p, Mat) else p
+        assert abs(val - 0.5) < 0.01
+
+    def test_norminv(self):
+        interp = run_matlab("x = norminv(0.975);")
+        x = interp.global_env.get("x")
+        val = x.data.flat[0] if isinstance(x, Mat) else x
+        assert abs(val - 1.96) < 0.01
+
+    def test_chi2cdf(self):
+        interp = run_matlab("p = chi2cdf(3.84, 1);")
+        p = interp.global_env.get("p")
+        val = p.data.flat[0] if isinstance(p, Mat) else p
+        assert abs(val - 0.95) < 0.01
+
+    def test_tcdf(self):
+        interp = run_matlab("p = tcdf(1.96, 100);")
+        p = interp.global_env.get("p")
+        val = p.data.flat[0] if isinstance(p, Mat) else p
+        assert abs(val - 0.975) < 0.01
+
+    def test_normpdf(self):
+        interp = run_matlab("p = normpdf(0);")
+        p = interp.global_env.get("p")
+        val = p.data.flat[0] if isinstance(p, Mat) else p
+        assert abs(val - 0.3989) < 0.01
+
+
+class TestStatisticalFunctions:
+    def test_geomean(self):
+        interp = run_matlab("x = [1 2 4 8];\nm = geomean(x);")
+        m = interp.global_env.get("m")
+        val = m.data.flat[0] if isinstance(m, Mat) else m
+        assert abs(val - 2.828) < 0.01
+
+    def test_harmmean(self):
+        interp = run_matlab("x = [1 2 4];\nm = harmmean(x);")
+        m = interp.global_env.get("m")
+        val = m.data.flat[0] if isinstance(m, Mat) else m
+        assert abs(val - 1.714) < 0.01
+
+    def test_iqr(self):
+        interp = run_matlab("x = [1 2 3 4 5 6 7 8 9 10];\nr = iqr(x);")
+        r = interp.global_env.get("r")
+        val = r.data.flat[0] if isinstance(r, Mat) else r
+        assert abs(val - 4.5) < 0.01
+
+    def test_cov(self):
+        interp = run_matlab("x = [1 2 3];\ny = [4 5 6];\nc = cov(x, y);")
+        c = interp.global_env.get("c")
+        assert isinstance(c, Mat)
+        assert c.shape == (2, 2)
+
+    def test_corrcoef(self):
+        interp = run_matlab("x = [1 2 3];\ny = [4 5 6];\nr = corrcoef(x, y);")
+        r = interp.global_env.get("r")
+        assert isinstance(r, Mat)
+        assert abs(r.data[0, 1] - 1.0) < 0.01
+
+    def test_zscore(self):
+        interp = run_matlab("x = [1 2 3 4 5];\nz = zscore(x);")
+        z = interp.global_env.get("z")
+        assert isinstance(z, Mat)
+
+    def test_cov(self):
+        interp = run_matlab("x = [1 2 3];\ny = [4 5 6];\nc = cov(x, y);")
+        c = interp.global_env.get("c")
+        assert isinstance(c, Mat)
+        assert c.shape == (2, 2)
+
+    def test_corrcoef(self):
+        interp = run_matlab("x = [1 2 3];\ny = [4 5 6];\nr = corrcoef(x, y);")
+        r = interp.global_env.get("r")
+        assert isinstance(r, Mat)
+        assert abs(r.data[0, 1] - 1.0) < 0.01
+
+
+class TestMatrixOperations:
+    def test_lu(self):
+        interp = run_matlab("A = [1 2; 3 4];\n[L, U] = lu(A);")
+        L = interp.global_env.get("L")
+        U = interp.global_env.get("U")
+        assert isinstance(L, Mat)
+        assert isinstance(U, Mat)
+
+    def test_qr(self):
+        interp = run_matlab("A = [1 2; 3 4];\n[Q, R] = qr(A);")
+        Q = interp.global_env.get("Q")
+        R = interp.global_env.get("R")
+        assert isinstance(Q, Mat)
+        assert isinstance(R, Mat)
+
+    def test_eig(self):
+        interp = run_matlab("A = [1 0; 0 2];\n[V, D] = eig(A);")
+        V = interp.global_env.get("V")
+        D = interp.global_env.get("D")
+        assert isinstance(V, Mat)
+        assert isinstance(D, Mat)
+
+    def test_svd(self):
+        interp = run_matlab("A = [1 2; 3 4];\n[U, S, V] = svd(A);")
+        U = interp.global_env.get("U")
+        S = interp.global_env.get("S")
+        V = interp.global_env.get("V")
+        assert isinstance(U, Mat)
+        assert isinstance(S, Mat)
+        assert isinstance(V, Mat)
+
+    def test_inv(self):
+        interp = run_matlab("A = [1 2; 3 4];\nB = inv(A);")
+        B = interp.global_env.get("B")
+        assert isinstance(B, Mat)
+        assert abs(B.data[0, 0] - (-2.0)) < 0.01
+
+    def test_det(self):
+        interp = run_matlab("A = [1 2; 3 4];\nd = det(A);")
+        d = interp.global_env.get("d")
+        assert abs(d - (-2.0)) < 0.01
+
+    def test_rank(self):
+        interp = run_matlab("A = [1 2; 3 4];\nr = rank(A);")
+        r = interp.global_env.get("r")
+        assert r == 2
+
+    def test_norm(self):
+        interp = run_matlab("A = [1 2; 3 4];\nn = norm(A);")
+        n = interp.global_env.get("n")
+        assert n > 0
+
+    def test_cond(self):
+        interp = run_matlab("A = [1 2; 3 4];\nc = cond(A);")
+        c = interp.global_env.get("c")
+        assert c > 1
+
+    def test_trace(self):
+        interp = run_matlab("A = [1 2; 3 4];\nt = sum(diag(A));")
+        t = interp.global_env.get("t")
+        val = t.data.flat[0] if isinstance(t, Mat) else t
+        assert val == 5
+
+
+class TestStringOperations:
+    def test_strcmp(self):
+        interp = run_matlab("r = strcmp('hello', 'hello');")
+        r = interp.global_env.get("r")
+        assert r == True
+
+    def test_strcat(self):
+        interp = run_matlab("s = strcat('hello', ' ', 'world');")
+        s = interp.global_env.get("s")
+        assert s == "hello world"
+
+    def test_upper(self):
+        interp = run_matlab("s = upper('hello');")
+        s = interp.global_env.get("s")
+        assert s == "HELLO"
+
+    def test_lower(self):
+        interp = run_matlab("s = lower('HELLO');")
+        s = interp.global_env.get("s")
+        assert s == "hello"
+
+    def test_strtrim(self):
+        interp = run_matlab("s = strtrim('  hello  ');")
+        s = interp.global_env.get("s")
+        assert s == "hello"
+
+    def test_num2str(self):
+        interp = run_matlab("s = num2str(42);")
+        s = interp.global_env.get("s")
+        assert "42" in str(s)
+
+    def test_str2double(self):
+        interp = run_matlab("x = str2double('3.14');")
+        x = interp.global_env.get("x")
+        assert abs(x - 3.14) < 0.01
+
+
+class TestCellOperations:
+    def test_cell_create(self):
+        interp = run_matlab("c = cell(2, 3);")
+        c = interp.global_env.get("c")
+        assert isinstance(c, CellArray)
+
+    def test_struct_create(self):
+        interp = run_matlab("s.name = 'test';\ns.value = 42;")
+        s = interp.global_env.get("s")
+        assert isinstance(s, Struct)
+        assert s.get_field("name") == "test"
+        assert s.get_field("value") == 42
+
+    def test_fieldnames(self):
+        interp = run_matlab("s.name = 'test';\ns.value = 42;")
+        s = interp.global_env.get("s")
+        assert isinstance(s, Struct)
+        assert "name" in s.field_names()
+        assert "value" in s.field_names()
+
+
+class TestSparseOperations:
+    def test_speye(self):
+        interp = run_matlab("A = speye(3);")
+        A = interp.global_env.get("A")
+        assert isinstance(A, Mat)
+        assert A.shape == (3, 3)
+
+    def test_spzeros(self):
+        interp = run_matlab("A = spzeros(3, 3);")
+        A = interp.global_env.get("A")
+        assert isinstance(A, Mat)
+        assert A.shape == (3, 3)
+
+    def test_sparse_full(self):
+        interp = run_matlab("A = speye(3);\nB = full(A);\nC = sparse(B);")
+        B = interp.global_env.get("B")
+        C = interp.global_env.get("C")
+        assert isinstance(B, Mat)
+        assert isinstance(C, Mat)
+
+
+class TestTimingFunctions:
+    def test_tic_toc(self):
+        interp = run_matlab("t = tic;\npause(0.01);\nelapsed = toc(t);")
+        elapsed = interp.global_env.get("elapsed")
+        assert elapsed > 0
+
+    def test_now(self):
+        interp = run_matlab("t = now;")
+        t = interp.global_env.get("t")
+        assert t > 0
+
+    def test_date(self):
+        interp = run_matlab("d = date;")
+        d = interp.global_env.get("d")
+        assert isinstance(d, str)
+        assert len(d) > 0
+
+
+class TestTypeFunctions:
+    def test_class(self):
+        interp = run_matlab("x = 42;")
+        x = interp.global_env.get("x")
+        assert isinstance(x, (int, float))
+
+    def test_isa(self):
+        interp = run_matlab("x = 42;\nr = isa(x, 'double');")
+        r = interp.global_env.get("r")
+        assert r == True
+
+    def test_cast(self):
+        interp = run_matlab("x = [1.5 2.5 3.5];\ny = cast(x, 'int32');")
+        y = interp.global_env.get("y")
+        assert isinstance(y, Mat)
+        assert y.dtype == np.int32
+
+
+class TestDisplayFunctions:
+    def test_disp(self):
+        interp = run_matlab("disp(42);")
+        # Just check it doesn't error
+
+    def test_disp_string(self):
+        interp = run_matlab("disp('hello');")
+        # Just check it doesn't error
+
+
+class TestEdgeCases:
+    def test_empty_matrix(self):
+        interp = run_matlab("x = [];")
+        x = interp.global_env.get("x")
+        assert isinstance(x, Mat)
+
+    def test_scalar(self):
+        interp = run_matlab("x = 42;")
+        x = interp.global_env.get("x")
+        assert x == 42
+
+    def test_complex(self):
+        interp = run_matlab("x = 1 + 2i;")
+        x = interp.global_env.get("x")
+        assert isinstance(x, complex)
+
+    def test_string(self):
+        interp = run_matlab("s = 'hello';")
+        s = interp.global_env.get("s")
+        assert s == "hello"
+
+    def test_nested_expressions(self):
+        interp = run_matlab("x = (1 + 2) * (3 + 4);")
+        x = interp.global_env.get("x")
+        assert x == 21
+
+    def test_multiple_statements(self):
+        interp = run_matlab("x = 1; y = 2; z = x + y;")
+        z = interp.global_env.get("z")
+        assert z == 3
+
+    def test_function_recursive(self):
+        interp = run_matlab("function r = fact(n)\nif n <= 1\n  r = 1;\nelse\n  r = n * fact(n-1);\nend\nend\nx = fact(5);")
+        x = interp.global_env.get("x")
+        assert x == 120
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
