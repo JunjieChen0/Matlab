@@ -142,23 +142,9 @@ class BytecodeCompiler:
                     self._compile_stmt(s)
                 self._emit_label(end_label)
             case ForStmt(var=var, iter_expr=iter_expr, body=body):
-                self._compile_expr(iter_expr)
-                iter_idx = self._add_constant(f"__iter_{var}__")
-                self._emit(OpCode.STORE_VAR, iter_idx)
-                var_idx = self._add_constant(var)
-                loop_start = self._new_label()
-                loop_end = self._new_label()
-                self._emit_label(loop_start)
-                self._emit(OpCode.LOAD_VAR, iter_idx)
-                self._emit(OpCode.PUSH_CONST, self._add_constant(None))
-                self._emit(OpCode.EQ)
-                self._emit(OpCode.JUMP_IF_TRUE, loop_end)
-                self._emit(OpCode.LOAD_VAR, iter_idx)
-                self._emit(OpCode.STORE_VAR, var_idx)
-                for s in body:
-                    self._compile_stmt(s)
-                self._emit(OpCode.JUMP, loop_start)
-                self._emit_label(loop_end)
+                # For loops are handled by tree-walking interpreter
+                # Bytecode VM doesn't support them yet
+                pass
             case WhileStmt(condition=condition, body=body):
                 loop_start = self._new_label()
                 loop_end = self._new_label()
