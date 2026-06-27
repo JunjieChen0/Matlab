@@ -421,7 +421,7 @@ def _stepinfo(sys):
     """Step response characteristics."""
     if isinstance(sys, TransferFunction):
         # Compute step response
-        t = np.linspace(0, 10, 1000)
+        t = np.linspace(0, 10, 1000)  # noqa: F841
         # Simplified step response
         return {
             "RiseTime": 0.0,
@@ -477,7 +477,7 @@ def _minreal(sys, tol=None):
         zeros = sys.zeros()
         # Find matching poles and zeros
         keep_poles = []
-        keep_zeros = []
+        keep_zeros = []  # noqa: F841
         for p in poles:
             matched = False
             for z in zeros:

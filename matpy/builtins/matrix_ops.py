@@ -3,7 +3,6 @@
 import numpy as np
 from matpy.builtins import register
 from matpy.runtime.types import Mat, CellArray
-from matpy.runtime.matrix import to_mat
 
 
 @register("zeros")
@@ -1018,7 +1017,7 @@ def _null(A):
     _, s, Vh = np.linalg.svd(A_data)
     tol = max(A_data.shape) * np.max(s) * np.finfo(float).eps
     mask = s > tol
-    null_space = Vh[mask == False].T.conj()
+    null_space = Vh[~mask].T.conj()
     return Mat(null_space)
 
 

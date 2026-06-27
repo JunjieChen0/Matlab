@@ -1,9 +1,6 @@
 """Comprehensive tests for environment.py and bytecode.py to boost coverage."""
 
-import pytest
-import numpy as np
 from tests.conftest import run_matlab, get_val
-from matpy.runtime.types import Mat
 
 
 class TestEnvironmentFunctions:
@@ -27,8 +24,8 @@ class TestEnvironmentFunctions:
 
         env = Environment()
         env.set("x", 42)
-        assert env.has("x") == True
-        assert env.has("y") == False
+        assert env.has("x")
+        assert not env.has("y")
 
     def test_environment_child(self):
         from matpy.environment import Environment

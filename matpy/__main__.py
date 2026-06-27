@@ -5,7 +5,7 @@ import os
 
 from matpy.lexer import Lexer, LexError
 from matpy.parser import Parser, ParseError
-from matpy.interpreter import Interpreter, InterpreterError, MatPyError
+from matpy.interpreter import Interpreter, MatPyError
 
 
 def run_source(
@@ -69,7 +69,7 @@ def _show_source_context(source: str, line: int, col: int, context: int = 2):
     start = max(0, line - context - 1)
     end = min(len(lines), line + context)
 
-    print(f"\n  Context:", file=sys.stderr)
+    print("\n  Context:", file=sys.stderr)
     for i in range(start, end):
         marker = ">>>" if i == line - 1 else "   "
         print(f"  {marker} {i + 1:4d} | {lines[i]}", file=sys.stderr)
@@ -199,7 +199,7 @@ def repl():
         if readline:
             try:
                 readline.write_history_file(os.path.expanduser("~/.matpy_history"))
-            except:
+            except Exception:
                 pass
 
         # Special commands
@@ -434,13 +434,13 @@ def repl():
                 print("Stepping...")
                 continue
             elif stripped == "dbcont":
-                debug_mode = False
-                debug_step = False
+                debug_mode = False  # noqa: F841
+                debug_step = False  # noqa: F841
                 print("Continuing...")
                 continue
             elif stripped == "dbquit":
-                debug_mode = False
-                debug_step = False
+                debug_mode = False  # noqa: F841
+                debug_step = False  # noqa: F841
                 breakpoints.clear()
                 print("Debug mode exited.")
                 continue

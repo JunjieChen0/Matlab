@@ -1,8 +1,7 @@
 """Comprehensive tests for control.py and image.py to boost coverage."""
 
-import pytest
 import numpy as np
-from tests.conftest import run_matlab, get_val
+from tests.conftest import run_matlab
 from matpy.runtime.types import Mat
 
 

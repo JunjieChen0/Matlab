@@ -363,7 +363,7 @@ def _tabulate(x):
     unique, counts = np.unique(data, return_counts=True)
     pct = counts / len(data) * 100
     table = np.column_stack([unique, counts, pct])
-    print(f"  Value  Count  Percent")
+    print("  Value  Count  Percent")
     for row in table:
         print(f"  {int(row[0]):5d}  {int(row[1]):5d}  {row[2]:6.2f}%")
     return Mat(table)

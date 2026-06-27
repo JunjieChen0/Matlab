@@ -1,7 +1,6 @@
 """Shared fixtures for MatPy tests."""
 
 import pytest
-import numpy as np
 from matpy.lexer import Lexer
 from matpy.parser import Parser
 from matpy.interpreter import Interpreter

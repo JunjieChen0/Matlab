@@ -18,8 +18,8 @@ def _get_plt():
     return _plt
 
 
-from matpy.builtins import register
-from matpy.runtime.types import Mat
+from matpy.builtins import register  # noqa: E402
+from matpy.runtime.types import Mat  # noqa: E402
 
 
 @register("figure")
@@ -28,9 +28,9 @@ def _figure(n=None):
     plt = _get_plt()
     _fig_counter += 1
     if n is not None:
-        fig = plt.figure(int(n))
+        fig = plt.figure(int(n))  # noqa: F841
     else:
-        fig = plt.figure(_fig_counter)
+        fig = plt.figure(_fig_counter)  # noqa: F841
     return _fig_counter
 
 
@@ -400,7 +400,6 @@ def _drawnow():
 def _plot3(x, y, z, *args):
     """3-D line plot."""
     plt = _get_plt()
-    from mpl_toolkits.mplot3d import Axes3D
 
     fig = plt.gcf()
     ax = fig.add_subplot(111, projection="3d")
@@ -414,7 +413,6 @@ def _plot3(x, y, z, *args):
 def _surf(x, y, z):
     """3-D surface plot."""
     plt = _get_plt()
-    from mpl_toolkits.mplot3d import Axes3D
 
     fig = plt.gcf()
     ax = fig.add_subplot(111, projection="3d")
@@ -427,7 +425,6 @@ def _surf(x, y, z):
 def _mesh(x, y, z):
     """3-D mesh plot."""
     plt = _get_plt()
-    from mpl_toolkits.mplot3d import Axes3D
 
     fig = plt.gcf()
     ax = fig.add_subplot(111, projection="3d")
@@ -476,7 +473,6 @@ def _quiver(x, y, u, v):
 def _scatter3(x, y, z, s=None, c=None):
     """3-D scatter plot."""
     plt = _get_plt()
-    from mpl_toolkits.mplot3d import Axes3D
 
     fig = plt.gcf()
     ax = fig.add_subplot(111, projection="3d")
@@ -490,7 +486,6 @@ def _scatter3(x, y, z, s=None, c=None):
 def _bar3(x):
     """3-D bar plot."""
     plt = _get_plt()
-    from mpl_toolkits.mplot3d import Axes3D
 
     fig = plt.gcf()
     ax = fig.add_subplot(111, projection="3d")
@@ -502,7 +497,6 @@ def _bar3(x):
 def _stem3(x, y, z):
     """3-D stem plot."""
     plt = _get_plt()
-    from mpl_toolkits.mplot3d import Axes3D
 
     fig = plt.gcf()
     ax = fig.add_subplot(111, projection="3d")
@@ -516,7 +510,6 @@ def _stem3(x, y, z):
 def _waterfall(x, y, z):
     """Waterfall plot."""
     plt = _get_plt()
-    from mpl_toolkits.mplot3d import Axes3D
 
     fig = plt.gcf()
     ax = fig.add_subplot(111, projection="3d")

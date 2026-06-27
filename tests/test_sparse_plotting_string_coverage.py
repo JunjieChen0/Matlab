@@ -1,6 +1,5 @@
 """Comprehensive tests for sparse.py, plotting.py, string_array.py to boost coverage."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat
@@ -45,12 +44,12 @@ class TestSparseFunctions:
     def test_issparse_true(self):
         interp = run_matlab("S = speye(3);\nr = issparse(S);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_issparse_false(self):
         interp = run_matlab("A = eye(3);\nr = issparse(A);")
         r = interp.global_env.get("r")
-        assert r == False
+        assert not r
 
     def test_sprand(self):
         from matpy.builtins.sparse import _sprand
@@ -92,7 +91,7 @@ class TestSparseFunctions:
     def test_issparse_interpreter(self):
         interp = run_matlab("S = speye(3);\nr = issparse(S);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_full_interpreter(self):
         interp = run_matlab("S = speye(3);\nF = full(S);")
@@ -209,7 +208,7 @@ class TestPlottingFunctions:
     def test_axes(self):
         from matpy.builtins.plotting import _axes
 
-        result = _axes()
+        _axes()
         # May return None
         assert True
 
@@ -287,13 +286,13 @@ class TestStringArrayFunctions:
         from matpy.builtins.string import _startsWith
 
         result = _startsWith("hello", "hel")
-        assert result == True
+        assert result
 
     def test_string_endsWith(self):
         from matpy.builtins.string import _endsWith
 
         result = _endsWith("hello", "llo")
-        assert result == True
+        assert result
 
     def test_string_find(self):
         from matpy.builtins.string import _strfind
@@ -328,38 +327,38 @@ class TestSparseIntegration:
     def test_issparse_interpreter(self):
         interp = run_matlab("S = speye(3);\nr = issparse(S);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
 
 class TestPlottingIntegration:
     """Integration tests through interpreter."""
 
     def test_figure_interpreter(self):
-        interp = run_matlab("figure;")
+        run_matlab("figure;")
         assert True
 
     def test_subplot_interpreter(self):
-        interp = run_matlab("subplot(2, 2, 1);")
+        run_matlab("subplot(2, 2, 1);")
         assert True
 
     def test_title_interpreter(self):
-        interp = run_matlab("title('Test');")
+        run_matlab("title('Test');")
         assert True
 
     def test_xlabel_interpreter(self):
-        interp = run_matlab("xlabel('X');")
+        run_matlab("xlabel('X');")
         assert True
 
     def test_ylabel_interpreter(self):
-        interp = run_matlab("ylabel('Y');")
+        run_matlab("ylabel('Y');")
         assert True
 
     def test_grid_interpreter(self):
-        interp = run_matlab("grid on;")
+        run_matlab("grid on;")
         assert True
 
     def test_legend_interpreter(self):
-        interp = run_matlab("legend('Test');")
+        run_matlab("legend('Test');")
         assert True
 
 
@@ -383,5 +382,5 @@ class TestStringArrayIntegration:
 
     def test_string_lower_interpreter(self):
         interp = run_matlab('s = "HELLO";\nl = lower(s);')
-        l = interp.global_env.get("l")
-        assert str(l) == "hello" or l == "hello"
+        result = interp.global_env.get("l")
+        assert str(result) == "hello" or result == "hello"

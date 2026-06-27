@@ -1,68 +1,65 @@
 """Boost tests for plotting.py."""
 
-import pytest
-import numpy as np
-from tests.conftest import run_matlab, get_val
-from matpy.runtime.types import Mat
+from tests.conftest import run_matlab
 
 
 class TestPlottingBoost:
     """Boost plotting coverage."""
 
     def test_figure_interpreter(self):
-        interp = run_matlab("figure;")
+        run_matlab("figure;")
         assert True
 
     def test_subplot_interpreter(self):
-        interp = run_matlab("subplot(2, 2, 1);")
+        run_matlab("subplot(2, 2, 1);")
         assert True
 
     def test_title_interpreter(self):
-        interp = run_matlab("title('Test');")
+        run_matlab("title('Test');")
         assert True
 
     def test_xlabel_interpreter(self):
-        interp = run_matlab("xlabel('X');")
+        run_matlab("xlabel('X');")
         assert True
 
     def test_ylabel_interpreter(self):
-        interp = run_matlab("ylabel('Y');")
+        run_matlab("ylabel('Y');")
         assert True
 
     def test_legend_interpreter(self):
-        interp = run_matlab("legend('Test');")
+        run_matlab("legend('Test');")
         assert True
 
     def test_grid_interpreter(self):
-        interp = run_matlab("grid on;")
+        run_matlab("grid on;")
         assert True
 
     def test_axis_interpreter(self):
-        interp = run_matlab("axis([0 10 0 10]);")
+        run_matlab("axis([0 10 0 10]);")
         assert True
 
     def test_xlim_interpreter(self):
-        interp = run_matlab("xlim([0 10]);")
+        run_matlab("xlim([0 10]);")
         assert True
 
     def test_ylim_interpreter(self):
-        interp = run_matlab("ylim([0 10]);")
+        run_matlab("ylim([0 10]);")
         assert True
 
     def test_hold_interpreter(self):
-        interp = run_matlab("hold on;")
+        run_matlab("hold on;")
         assert True
 
     def test_clf_interpreter(self):
-        interp = run_matlab("clf;")
+        run_matlab("clf;")
         assert True
 
     def test_close_interpreter(self):
-        interp = run_matlab("close;")
+        run_matlab("close;")
         assert True
 
     def test_text_interpreter(self):
-        interp = run_matlab("text(0.5, 0.5, 'Hello');")
+        run_matlab("text(0.5, 0.5, 'Hello');")
         assert True
 
     def test_gcf_interpreter(self):
@@ -80,39 +77,39 @@ class TestPlottingBoost:
     def test_axes_interpreter(self):
         from matpy.builtins.plotting import _axes
 
-        result = _axes()
+        _axes()
         assert True
 
     def test_plot_interpreter(self):
-        interp = run_matlab("x = [1 2 3];\ny = [4 5 6];\nplot(x, y);")
+        run_matlab("x = [1 2 3];\ny = [4 5 6];\nplot(x, y);")
         assert True
 
     def test_scatter_interpreter(self):
-        interp = run_matlab("x = [1 2 3];\ny = [4 5 6];\nscatter(x, y);")
+        run_matlab("x = [1 2 3];\ny = [4 5 6];\nscatter(x, y);")
         assert True
 
     def test_bar_interpreter(self):
-        interp = run_matlab("x = [1 2 3];\nbar(x);")
+        run_matlab("x = [1 2 3];\nbar(x);")
         assert True
 
     def test_hist_interpreter(self):
-        interp = run_matlab("x = randn(100, 1);\nbar(x);")
+        run_matlab("x = randn(100, 1);\nbar(x);")
         assert True
 
     def test_surf_interpreter(self):
-        interp = run_matlab(
+        run_matlab(
             "[X, Y] = meshgrid(-2:0.5:2, -2:0.5:2);\nZ = X.^2 + Y.^2;\nsurf(X, Y, Z);"
         )
         assert True
 
     def test_mesh_interpreter(self):
-        interp = run_matlab(
+        run_matlab(
             "[X, Y] = meshgrid(-2:0.5:2, -2:0.5:2);\nZ = X.^2 + Y.^2;\nmesh(X, Y, Z);"
         )
         assert True
 
     def test_contour_interpreter(self):
-        interp = run_matlab(
+        run_matlab(
             "[X, Y] = meshgrid(-2:0.5:2, -2:0.5:2);\nZ = X.^2 + Y.^2;\ncontour(X, Y, Z);"
         )
         assert True
@@ -136,13 +133,13 @@ class TestPlottingBoost:
     def test_set_interpreter(self):
         from matpy.builtins.plotting import _gcf
 
-        result = _gcf()
+        _gcf()
         assert True
 
     def test_get_interpreter(self):
         from matpy.builtins.plotting import _gcf
 
-        result = _gcf()
+        _gcf()
         assert True
 
     def test_drawnow_interpreter(self):
@@ -152,7 +149,7 @@ class TestPlottingBoost:
         assert True
 
     def test_pause_interpreter(self):
-        interp = run_matlab("pause(0.01);")
+        run_matlab("pause(0.01);")
         assert True
 
     def test_title_func(self):
@@ -254,7 +251,7 @@ class TestPlottingBoost:
     def test_axes_func(self):
         from matpy.builtins.plotting import _axes
 
-        result = _axes()
+        _axes()
         assert True
 
     def test_annotation_func(self):

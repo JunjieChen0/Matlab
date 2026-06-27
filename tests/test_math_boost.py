@@ -1,6 +1,5 @@
 """Boost tests for math.py and other modules."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat, CellArray, Struct
@@ -429,47 +428,47 @@ class TestInterpreterBoost:
 
     def test_comparison_eq(self):
         interp = run_matlab("x = (1 == 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_neq(self):
         interp = run_matlab("x = (1 ~= 2);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_lt(self):
         interp = run_matlab("x = (1 < 2);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_gt(self):
         interp = run_matlab("x = (2 > 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_le(self):
         interp = run_matlab("x = (1 <= 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_ge(self):
         interp = run_matlab("x = (1 >= 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_logical_and(self):
         interp = run_matlab("x = (1 && 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_logical_or(self):
         interp = run_matlab("x = (0 || 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_logical_not(self):
         interp = run_matlab("x = ~0;")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_bitwise_and(self):
         interp = run_matlab("x = 1 & 1;")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_bitwise_or(self):
         interp = run_matlab("x = 0 | 1;")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_matrix_add(self):
         interp = run_matlab("A = [1 2; 3 4];\nB = [5 6; 7 8];\nC = A + B;")

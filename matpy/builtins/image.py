@@ -496,7 +496,7 @@ def _bwlabel(img, connectivity=8):
 @register("regionprops")
 def _regionprops(img):
     """Measure properties of image regions."""
-    from scipy.ndimage import find_objects, center_of_mass
+    from scipy.ndimage import center_of_mass
 
     data = img.data if isinstance(img, Mat) else np.array(img)
     labels = np.unique(data)

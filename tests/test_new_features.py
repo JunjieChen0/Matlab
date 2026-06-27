@@ -1,11 +1,10 @@
 """Tests for newly added features in MatPy."""
 
 import pytest
-import numpy as np
 from matpy.lexer import Lexer
 from matpy.parser import Parser
 from matpy.interpreter import Interpreter
-from matpy.runtime.types import Mat, MException, Struct
+from matpy.runtime.types import Mat
 
 
 def run_matlab(source: str):

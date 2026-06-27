@@ -1,6 +1,5 @@
 """Boost tests for sparse.py and string_array.py."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat
@@ -45,12 +44,12 @@ class TestSparseBoost:
     def test_issparse_true(self):
         interp = run_matlab("S = speye(3);\nr = issparse(S);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_issparse_false(self):
         interp = run_matlab("A = eye(3);\nr = issparse(A);")
         r = interp.global_env.get("r")
-        assert r == False
+        assert not r
 
     def test_sprand(self):
         from matpy.builtins.sparse import _sprand
@@ -146,13 +145,13 @@ class TestStringArrayBoost:
         from matpy.builtins.string import _startsWith
 
         result = _startsWith("hello", "hel")
-        assert result == True
+        assert result
 
     def test_string_endsWith(self):
         from matpy.builtins.string import _endsWith
 
         result = _endsWith("hello", "llo")
-        assert result == True
+        assert result
 
 
 class TestStatisticsBoost:

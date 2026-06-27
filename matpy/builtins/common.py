@@ -855,6 +855,8 @@ def _seconds(x):
 @register("between")
 def _between(t1, t2):
     """Time between two datetimes."""
+    from matpy.runtime.types import Datetime
+
     if isinstance(t1, Datetime) and isinstance(t2, Datetime):
         return t2 - t1
     return None
@@ -863,6 +865,8 @@ def _between(t1, t2):
 @register("year")
 def _year(dt):
     """Extract year from datetime."""
+    from matpy.runtime.types import Datetime
+
     if isinstance(dt, Datetime):
         return dt.Year
     import datetime
@@ -873,6 +877,8 @@ def _year(dt):
 @register("month")
 def _month(dt):
     """Extract month from datetime."""
+    from matpy.runtime.types import Datetime
+
     if isinstance(dt, Datetime):
         return dt.Month
     import datetime
@@ -883,6 +889,8 @@ def _month(dt):
 @register("day")
 def _day(dt):
     """Extract day from datetime."""
+    from matpy.runtime.types import Datetime
+
     if isinstance(dt, Datetime):
         return dt.Day
     import datetime
@@ -893,6 +901,8 @@ def _day(dt):
 @register("hour")
 def _hour(dt):
     """Extract hour from datetime."""
+    from matpy.runtime.types import Datetime
+
     if isinstance(dt, Datetime):
         return dt.Hour
     return 0
@@ -901,6 +911,8 @@ def _hour(dt):
 @register("minute")
 def _minute(dt):
     """Extract minute from datetime."""
+    from matpy.runtime.types import Datetime
+
     if isinstance(dt, Datetime):
         return dt.Minute
     return 0
@@ -909,6 +921,8 @@ def _minute(dt):
 @register("second")
 def _second(dt):
     """Extract second from datetime."""
+    from matpy.runtime.types import Datetime
+
     if isinstance(dt, Datetime):
         return dt.Second
     return 0
@@ -917,6 +931,8 @@ def _second(dt):
 @register("weekday")
 def _weekday(dt):
     """Day of week."""
+    from matpy.runtime.types import Datetime
+
     if isinstance(dt, Datetime):
         return dt._dt.weekday() + 1
     return 1
@@ -952,6 +968,8 @@ def _categorical(x, categories=None):
 @register("categories")
 def _categories(x):
     """Get categories."""
+    from matpy.runtime.types import Categorical
+
     if isinstance(x, Categorical):
         return x.categories
     return []
@@ -960,6 +978,8 @@ def _categories(x):
 @register("isundefined")
 def _isundefined(x):
     """Check for undefined categorical elements."""
+    from matpy.runtime.types import Categorical
+
     if isinstance(x, Categorical):
         return Mat(x.isundefined())
     return Mat(np.array([]))
@@ -976,6 +996,8 @@ def _iscategorical(x):
 @register("addcats")
 def _addcats(x, newcats):
     """Add categories to categorical array."""
+    from matpy.runtime.types import Categorical
+
     if isinstance(x, Categorical):
         cats = x.categories.copy()
         if isinstance(newcats, (list, Mat)):
@@ -991,6 +1013,8 @@ def _addcats(x, newcats):
 @register("removecats")
 def _removecats(x, rmcats):
     """Remove categories from categorical array."""
+    from matpy.runtime.types import Categorical
+
     if isinstance(x, Categorical):
         cats = x.categories.copy()
         if isinstance(rmcats, (list, Mat)):
@@ -1009,6 +1033,8 @@ def _removecats(x, rmcats):
 @register("mergecats")
 def _mergecats(x, cats, newname):
     """Merge categories."""
+    from matpy.runtime.types import Categorical
+
     if isinstance(x, Categorical):
         cats_list = x.categories.copy()
         if isinstance(cats, (list, Mat)):
@@ -1026,6 +1052,8 @@ def _mergecats(x, cats, newname):
 @register("renamecats")
 def _renamecats(x, oldnames, newnames):
     """Rename categories."""
+    from matpy.runtime.types import Categorical
+
     if isinstance(x, Categorical):
         cats = x.categories.copy()
         if isinstance(oldnames, (list, Mat)):

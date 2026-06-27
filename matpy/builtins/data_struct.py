@@ -205,6 +205,8 @@ def _containers_map(*args, **kwargs):
 @register("isKey")
 def _iskey(m, key):
     """Check if key exists in Map."""
+    from matpy.runtime.types import Map
+
     if isinstance(m, Map):
         return m.isKey(key)
     return False
@@ -213,6 +215,8 @@ def _iskey(m, key):
 @register("keys")
 def _keys(m):
     """Get keys from Map."""
+    from matpy.runtime.types import Map
+
     if isinstance(m, Map):
         return m.keys()
     return []
@@ -221,6 +225,8 @@ def _keys(m):
 @register("values")
 def _values(m):
     """Get values from Map."""
+    from matpy.runtime.types import Map
+
     if isinstance(m, Map):
         return m.values()
     return []
@@ -366,30 +372,11 @@ def _containers_map(*args, **kwargs):
     return Map(**kwargs)
 
 
-def _iskey(m, key):
-    """Check if key exists in Map."""
-    if isinstance(m, Map):
-        return m.isKey(key)
-    return False
-
-
-def _keys(m):
-    """Get keys from Map."""
-    if isinstance(m, Map):
-        return m.keys()
-    return []
-
-
-def _values(m):
-    """Get values from Map."""
-    if isinstance(m, Map):
-        return m.values()
-    return []
-
-
 @register("remove")
 def _remove(m, key):
     """Remove key from Map."""
+    from matpy.runtime.types import Map
+
     if isinstance(m, Map):
         m.remove(key)
     return m

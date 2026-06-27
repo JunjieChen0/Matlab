@@ -1,6 +1,5 @@
 """Interpreter tests for MatPy."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat, Struct, ClassInstance

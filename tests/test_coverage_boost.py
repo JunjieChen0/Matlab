@@ -1,6 +1,5 @@
 """Comprehensive tests to boost coverage for low-coverage modules."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat, CellArray, Struct
@@ -41,14 +40,14 @@ class TestDataStructFunctions:
 
         s = Struct({"a": 1})
         result = _isfield(s, "a")
-        assert result == True
+        assert result
 
     def test_isfield_false(self):
         from matpy.builtins.data_struct import _isfield
 
         s = Struct({"a": 1})
         result = _isfield(s, "b")
-        assert result == False
+        assert not result
 
     def test_rmfield(self):
         from matpy.builtins.data_struct import _rmfield
@@ -242,17 +241,18 @@ class TestOptimizationFunctions:
 
     def test_fzero(self):
         from matpy.builtins.optimization import _fzero
-        import numpy as np
 
         # fzero finds root of x^2 - 4 = 0 near x=1, should find x=2
-        f = lambda x: x**2 - 4
+        def f(x):
+            return x**2 - 4
         result = _fzero(f, 1.0)
         assert abs(result - 2.0) < 0.01
 
     def test_fminbnd(self):
         from matpy.builtins.optimization import _fminbnd
 
-        f = lambda x: (x - 2) ** 2
+        def f(x):
+            return (x - 2) ** 2
         result = _fminbnd(f, 0, 4)
         # result may be a tuple (x, fval)
         x = result[0] if isinstance(result, tuple) else result
@@ -261,7 +261,8 @@ class TestOptimizationFunctions:
     def test_fminsearch(self):
         from matpy.builtins.optimization import _fminsearch
 
-        f = lambda x: (x[0] - 1) ** 2 + (x[1] - 2) ** 2
+        def f(x):
+            return (x[0] - 1) ** 2 + (x[1] - 2) ** 2
         result = _fminsearch(f, Mat(np.array([0, 0])))
         # result may be a tuple (x, fval)
         assert result is not None
@@ -288,7 +289,8 @@ class TestOptimizationFunctions:
     def test_fsolve(self):
         from matpy.builtins.optimization import _fsolve
 
-        f = lambda x: [x[0] ** 2 + x[1] ** 2 - 1, x[0] - x[1]]
+        def f(x):
+            return [x[0] ** 2 + x[1] ** 2 - 1, x[0] - x[1]]
         result = _fsolve(f, Mat(np.array([0.5, 0.5])))
         assert result is not None
 
@@ -571,12 +573,12 @@ class TestSparseFunctions:
     def test_issparse_true(self):
         interp = run_matlab("S = speye(3);\nr = issparse(S);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_issparse_false(self):
         interp = run_matlab("A = eye(3);\nr = issparse(A);")
         r = interp.global_env.get("r")
-        assert r == False
+        assert not r
 
     def test_sprand(self):
         interp = run_matlab("S = sprand(3, 3, 0.5);")
@@ -624,8 +626,8 @@ class TestStringArrayFunctions:
 
     def test_string_lower(self):
         interp = run_matlab('s = "HELLO";\nl = lower(s);')
-        l = interp.global_env.get("l")
-        assert str(l) == "hello" or l == "hello"
+        result = interp.global_env.get("l")
+        assert str(result) == "hello" or result == "hello"
 
     def test_string_strip(self):
         interp = run_matlab('s = "  hello  ";\nt = strip(s);')
@@ -635,7 +637,7 @@ class TestStringArrayFunctions:
     def test_string_contains(self):
         interp = run_matlab('s = "hello world";\nr = contains(s, "world");')
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_string_replace(self):
         interp = run_matlab('s = "hello world";\nr = replace(s, "world", "matlab");')
@@ -658,7 +660,7 @@ class TestFileIOFunctions:
 
     def test_fprintf(self, tmp_path):
         filepath = tmp_path / "test.txt"
-        interp = run_matlab(
+        run_matlab(
             f"fid = fopen('{filepath}', 'w');\nfprintf(fid, 'hello');\nfclose(fid);"
         )
         assert filepath.exists()
@@ -704,24 +706,24 @@ class TestFileIOFunctions:
         filepath.write_text("hello")
         interp = run_matlab(f"r = exist('{filepath}', 'file');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_exist_dir(self, tmp_path):
         interp = run_matlab(f"r = exist('{tmp_path}', 'dir');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isfile(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
         interp = run_matlab(f"r = isfile('{filepath}');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isfolder(self, tmp_path):
         interp = run_matlab(f"r = isfolder('{tmp_path}');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_pwd(self):
         interp = run_matlab("d = pwd();")
@@ -789,7 +791,7 @@ class TestFileIOFunctions:
 
     def test_csvwrite(self, tmp_path):
         filepath = tmp_path / "test.csv"
-        interp = run_matlab(f"csvwrite('{filepath}', [1 2; 3 4]);")
+        run_matlab(f"csvwrite('{filepath}', [1 2; 3 4]);")
         assert filepath.exists()
 
     def test_csvread(self, tmp_path):
@@ -1067,7 +1069,7 @@ class TestInterpreterFixes:
     def test_try_catch_return(self):
         """C-1: try/catch should not swallow return."""
         # Test that return inside try block works correctly
-        from matpy.interpreter import Interpreter, ReturnSignal
+        from matpy.interpreter import Interpreter
 
         interp = Interpreter()
         # Create a simple function that returns from try block
@@ -1118,22 +1120,22 @@ class TestInterpreterFixes:
         """H-4: && should short-circuit."""
         interp = run_matlab("x = 0;\nr = (x ~= 0) && (1/x > 1);")
         r = interp.global_env.get("r")
-        assert r == False
+        assert not r
 
     def test_short_circuit_or(self):
         """H-4: || should short-circuit."""
         interp = run_matlab("x = 1;\nr = (x ~= 0) || (1/x > 1);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_scalar_bitwise_and(self):
         """H-6: scalar & should return bool."""
         interp = run_matlab("r = 1 & 1;")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_scalar_bitwise_or(self):
         """H-6: scalar | should return bool."""
         interp = run_matlab("r = 0 | 1;")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r

@@ -1,10 +1,8 @@
 """Comprehensive tests for file_io.py to boost coverage."""
 
-import pytest
 import numpy as np
 import os
-import tempfile
-from tests.conftest import run_matlab, get_val
+from tests.conftest import run_matlab
 from matpy.runtime.types import Mat, Struct
 
 
@@ -101,7 +99,7 @@ class TestMatFileFunctions:
 
     def test_save_load_struct(self, tmp_path):
         filepath = tmp_path / "test.mat"
-        from matpy.builtins.file_io import _save, _load
+        from matpy.builtins.file_io import _save
 
         s = Struct({"a": Mat(np.array([1, 2, 3]))})
         result = _save(str(filepath), s)
@@ -178,41 +176,41 @@ class TestExistFunctions:
         filepath.write_text("hello")
         from matpy.builtins.file_io import _exist
 
-        assert _exist(str(filepath), "file") == True
+        assert _exist(str(filepath), "file")
 
     def test_exist_dir(self, tmp_path):
         from matpy.builtins.file_io import _exist
 
-        assert _exist(str(tmp_path), "dir") == True
+        assert _exist(str(tmp_path), "dir")
 
     def test_exist_func(self):
         from matpy.builtins.file_io import _exist
 
-        assert _exist("sin", "func") == True
+        assert _exist("sin", "func")
 
     def test_exist_builtin(self):
         from matpy.builtins.file_io import _exist
 
-        assert _exist("zeros", "builtin") == True
+        assert _exist("zeros", "builtin")
 
     def test_exist_any(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
         from matpy.builtins.file_io import _exist
 
-        assert _exist(str(filepath)) == True
+        assert _exist(str(filepath))
 
     def test_isfile(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
         from matpy.builtins.file_io import _isfile
 
-        assert _isfile(str(filepath)) == True
+        assert _isfile(str(filepath))
 
     def test_isfolder(self, tmp_path):
         from matpy.builtins.file_io import _isfolder
 
-        assert _isfolder(str(tmp_path)) == True
+        assert _isfolder(str(tmp_path))
 
 
 class TestPathFunctions:
@@ -349,12 +347,12 @@ class TestFileIOIntegration:
     def test_fopen_fclose_interpreter(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
-        interp = run_matlab(f"fid = fopen('{filepath}');\nfclose(fid);")
+        run_matlab(f"fid = fopen('{filepath}');\nfclose(fid);")
         assert True
 
     def test_csvwrite_interpreter(self, tmp_path):
         filepath = tmp_path / "test.csv"
-        interp = run_matlab(f"csvwrite('{filepath}', [1 2; 3 4]);")
+        run_matlab(f"csvwrite('{filepath}', [1 2; 3 4]);")
         assert filepath.exists()
 
     def test_csvread_interpreter(self, tmp_path):
@@ -369,19 +367,19 @@ class TestFileIOIntegration:
         filepath.write_text("hello")
         interp = run_matlab(f"r = exist('{filepath}', 'file');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isfile_interpreter(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
         interp = run_matlab(f"r = isfile('{filepath}');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isfolder_interpreter(self, tmp_path):
         interp = run_matlab(f"r = isfolder('{tmp_path}');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_pwd_interpreter(self):
         interp = run_matlab("d = pwd();")

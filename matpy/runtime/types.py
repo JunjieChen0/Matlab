@@ -162,7 +162,7 @@ class Struct:
         elif isinstance(val, str):
             return f"'{val}'"
         elif isinstance(val, Struct):
-            return f"[1x1 struct]"
+            return "[1x1 struct]"
         elif isinstance(val, CellArray):
             return f"{{{val.shape[0]}x{val.shape[1]} cell}}"
         else:

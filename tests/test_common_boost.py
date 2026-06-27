@@ -1,9 +1,7 @@
 """Boost tests for common.py and other modules."""
 
-import pytest
 import numpy as np
-from tests.conftest import run_matlab, get_val
-from matpy.runtime.types import Mat, CellArray, Struct
+from matpy.runtime.types import Mat
 
 
 class TestCommonBoost:
@@ -59,13 +57,13 @@ class TestCommonBoost:
         from matpy.builtins.common import _isa_enhanced
 
         result = _isa_enhanced(Mat(np.array([1, 2, 3])), "double")
-        assert result == True
+        assert result
 
     def test_isa_char(self):
         from matpy.builtins.common import _isa_enhanced
 
         result = _isa_enhanced("hello", "char")
-        assert result == True
+        assert result
 
     def test_cast_double(self):
         from matpy.builtins.common import _cast
@@ -165,7 +163,7 @@ class TestIOBoost:
         from matpy.builtins.io import _validateattributes
 
         result = _validateattributes(Mat(np.array([1, 2, 3])), ["numeric"])
-        assert result == True
+        assert result
 
 
 class TestAdvancedMathBoost:
@@ -708,19 +706,19 @@ class TestFileIOBoost:
         filepath.write_text("hello")
         from matpy.builtins.file_io import _exist
 
-        assert _exist(str(filepath), "file") == True
+        assert _exist(str(filepath), "file")
 
     def test_isfile(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
         from matpy.builtins.file_io import _isfile
 
-        assert _isfile(str(filepath)) == True
+        assert _isfile(str(filepath))
 
     def test_isfolder(self, tmp_path):
         from matpy.builtins.file_io import _isfolder
 
-        assert _isfolder(str(tmp_path)) == True
+        assert _isfolder(str(tmp_path))
 
     def test_pwd(self):
         from matpy.builtins.file_io import _pwd

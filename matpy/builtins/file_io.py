@@ -3,7 +3,7 @@
 import os
 import numpy as np
 from matpy.builtins import register
-from matpy.runtime.types import Mat, Struct, CellArray
+from matpy.runtime.types import Mat, Struct
 
 _file_handles: dict[int, object] = {}
 _next_handle = 1
@@ -241,7 +241,7 @@ def _save(filename, *args):
 def _matfile(filename, mode="r"):
     """MATLAB .mat file access."""
     try:
-        from scipy.io import loadmat, savemat
+        from scipy.io import loadmat
 
         filename = str(filename)
         if mode == "r":
@@ -323,7 +323,7 @@ def _h5info(filename):
 
         with h5py.File(str(filename), "r") as f:
             print(f"File: {filename}")
-            print(f"Datasets:")
+            print("Datasets:")
             for key in f.keys():
                 ds = f[key]
                 print(f"  {key}: shape={ds.shape}, dtype={ds.dtype}")

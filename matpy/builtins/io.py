@@ -4,7 +4,6 @@ import sys
 import numpy as np
 from matpy.builtins import register
 from matpy.runtime.types import Mat
-from matpy.runtime.matrix import mat_str
 
 
 @register("input")
@@ -418,7 +417,7 @@ def _rethrow(exc):
     """Rethrow a caught MException.
     Usage: try ... catch e; rethrow(e); end
     """
-    from matpy.runtime.types import MException, MatPyRethrowError
+    from matpy.runtime.types import MException
 
     if isinstance(exc, MException):
         exc.throw()
@@ -459,7 +458,7 @@ def _warning(*args):
 
     if len(args) >= 2:
         action = str(args[0]).lower()
-        warning_id = str(args[1])
+        warning_id = str(args[1])  # noqa: F841
 
         if action == "off":
             # Suppress warning (store in global state)

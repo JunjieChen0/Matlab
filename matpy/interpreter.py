@@ -49,7 +49,6 @@ from matpy.runtime.types import (
     MException,
     Table,
 )
-from matpy.runtime.matrix import to_mat, from_mat, mat_str
 from matpy.builtins import get_builtin
 
 
@@ -557,104 +556,104 @@ class Interpreter(NodeVisitor):
     def _eval_binop(self, op: str, left: Expr, right: Expr, env: Environment) -> Any:
         # Short-circuit operators: only evaluate right operand if needed
         if op == "&&":
-            l = self._eval(left, env)
-            if not self._is_truthy(l):
+            left_val = self._eval(left, env)
+            if not self._is_truthy(left_val):
                 return False
             r = self._eval(right, env)
             return self._is_truthy(r)
         elif op == "||":
-            l = self._eval(left, env)
-            if self._is_truthy(l):
+            left_val = self._eval(left, env)
+            if self._is_truthy(left_val):
                 return True
             r = self._eval(right, env)
             return self._is_truthy(r)
 
-        l = self._eval(left, env)
-        r = self._eval(right, env)
+        left_val = self._eval(left, env)
+        right_val = self._eval(right, env)
 
-        if isinstance(l, Mat):
-            l = l.data
-        if isinstance(r, Mat):
-            r = r.data
+        if isinstance(left_val, Mat):
+            left_val = left_val.data
+        if isinstance(right_val, Mat):
+            right_val = right_val.data
 
         match op:
             case "+":
-                result = l + r
+                result = left_val + right_val
             case "-":
-                result = l - r
+                result = left_val - right_val
             case "*":
-                if isinstance(l, np.ndarray) and isinstance(r, np.ndarray):
-                    result = l @ r
+                if isinstance(left_val, np.ndarray) and isinstance(right_val, np.ndarray):
+                    result = left_val @ right_val
                 else:
-                    result = l * r
+                    result = left_val * right_val
             case "/":
-                if isinstance(l, np.ndarray) and isinstance(r, np.ndarray):
+                if isinstance(left_val, np.ndarray) and isinstance(right_val, np.ndarray):
                     try:
-                        result = np.linalg.solve(r.T, l.T).T
+                        result = np.linalg.solve(right_val.T, left_val.T).T
                     except np.linalg.LinAlgError:
                         # Use least-squares for non-square or singular matrices
-                        result, _, _, _ = np.linalg.lstsq(r.T, l.T, rcond=None)
+                        result, _, _, _ = np.linalg.lstsq(right_val.T, left_val.T, rcond=None)
                         result = result.T
                 else:
-                    result = l / r
+                    result = left_val / right_val
             case "\\":
-                if isinstance(l, np.ndarray):
+                if isinstance(left_val, np.ndarray):
                     try:
-                        result = np.linalg.solve(l, r)
+                        result = np.linalg.solve(left_val, right_val)
                     except np.linalg.LinAlgError:
                         # Use least-squares for non-square or singular matrices
-                        result, _, _, _ = np.linalg.lstsq(l, r, rcond=None)
+                        result, _, _, _ = np.linalg.lstsq(left_val, right_val, rcond=None)
                 else:
-                    result = r / l
+                    result = right_val / left_val
             case "^":
-                if isinstance(l, np.ndarray):
+                if isinstance(left_val, np.ndarray):
                     # Check if exponent is effectively an integer
-                    if isinstance(r, (int, np.integer)) or (
-                        isinstance(r, float) and r == int(r)
+                    if isinstance(right_val, (int, np.integer)) or (
+                        isinstance(right_val, float) and right_val == int(right_val)
                     ):
-                        result = np.linalg.matrix_power(l, int(r))
-                    elif l.shape[0] == l.shape[1]:
+                        result = np.linalg.matrix_power(left_val, int(right_val))
+                    elif left_val.shape[0] == left_val.shape[1]:
                         # Fractional matrix power via eigendecomposition for square matrices
-                        eigvals, eigvecs = np.linalg.eig(l)
-                        result = eigvecs @ np.diag(eigvals**r) @ np.linalg.inv(eigvecs)
+                        eigvals, eigvecs = np.linalg.eig(left_val)
+                        result = eigvecs @ np.diag(eigvals**right_val) @ np.linalg.inv(eigvecs)
                         result = np.real(result)
                     else:
                         raise InterpreterError(
                             "Matrix power with non-integer exponent requires a square matrix"
                         )
                 else:
-                    result = l**r
+                    result = left_val**right_val
             case ".*":
-                result = l * r
+                result = left_val * right_val
             case "./":
-                result = l / r
+                result = left_val / right_val
             case ".\\":
-                result = r / l
+                result = right_val / left_val
             case ".^":
-                result = l**r
+                result = left_val**right_val
             case "==":
-                result = l == r
+                result = left_val == right_val
             case "~=":
-                result = l != r
+                result = left_val != right_val
             case "<":
-                result = l < r
+                result = left_val < right_val
             case ">":
-                result = l > r
+                result = left_val > right_val
             case "<=":
-                result = l <= r
+                result = left_val <= right_val
             case ">=":
-                result = l >= r
+                result = left_val >= right_val
             case "&":
                 result = (
-                    np.logical_and(l, r)
-                    if isinstance(l, np.ndarray)
-                    else bool(bool(l) and bool(r))
+                    np.logical_and(left_val, right_val)
+                    if isinstance(left_val, np.ndarray)
+                    else bool(bool(left_val) and bool(right_val))
                 )
             case "|":
                 result = (
-                    np.logical_or(l, r)
-                    if isinstance(l, np.ndarray)
-                    else bool(bool(l) or bool(r))
+                    np.logical_or(left_val, right_val)
+                    if isinstance(left_val, np.ndarray)
+                    else bool(bool(left_val) or bool(right_val))
                 )
             case _:
                 raise InterpreterError(f"Unknown operator: {op}")

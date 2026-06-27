@@ -1,8 +1,7 @@
 """Phase 1 tests: Language core enhancements."""
 
 import numpy as np
-import pytest
-from tests.conftest import run_matlab, get_val
+from tests.conftest import get_val
 
 
 class TestCommandSyntax:
@@ -10,25 +9,25 @@ class TestCommandSyntax:
 
     def test_disp_command(self, run):
         """Test disp with command syntax."""
-        interp = run("disp hello")
+        run("disp hello")
         # Should not raise
 
     def test_load_command(self, run):
         """Test load with command syntax."""
         # Just verify it parses correctly
-        interp = run("load data.mat")
+        run("load data.mat")
 
     def test_multiple_args(self, run):
         """Test command syntax with multiple arguments."""
-        interp = run("disp hello world")
+        run("disp hello world")
 
     def test_grid_on(self, run):
         """Test grid on command."""
-        interp = run("grid on")
+        run("grid on")
 
     def test_hold_on(self, run):
         """Test hold on command."""
-        interp = run("hold on")
+        run("hold on")
 
 
 class TestSwitchCaseCell:
@@ -130,7 +129,7 @@ class TestNestedFunctions:
 
     def test_nested_modifies_outer(self, run):
         """Test nested function modifying outer variable."""
-        interp = run("""
+        run("""
             function result = outer()
                 x = 10;
                 inner();

@@ -1,8 +1,7 @@
 """Phase 5 tests: Engineering quality - comprehensive test coverage."""
 
 import numpy as np
-import pytest
-from tests.conftest import run_matlab, get_val
+from tests.conftest import get_val
 
 
 class TestDatetimeTypes:
@@ -58,7 +57,7 @@ class TestDatetimeTypes:
             dt = datetime(2024, 1, 1);
             result = isdatetime(dt);
         """)
-        assert interp.global_env.get("result") == True
+        assert interp.global_env.get("result")
 
     def test_isduration(self, run):
         """Test isduration function."""
@@ -66,7 +65,7 @@ class TestDatetimeTypes:
             d = duration(1, 0, 0);
             result = isduration(d);
         """)
-        assert interp.global_env.get("result") == True
+        assert interp.global_env.get("result")
 
 
 class TestCategoricalTypes:
@@ -95,7 +94,7 @@ class TestCategoricalTypes:
             c = categorical([1, 2, 3]);
             result = iscategorical(c);
         """)
-        assert interp.global_env.get("result") == True
+        assert interp.global_env.get("result")
 
 
 class TestAdditionalMathFunctions:
@@ -113,8 +112,8 @@ class TestAdditionalMathFunctions:
             r1 = isprime(7);
             r2 = isprime(4);
         """)
-        assert interp.global_env.get("r1") == True
-        assert interp.global_env.get("r2") == False
+        assert interp.global_env.get("r1")
+        assert not interp.global_env.get("r2")
 
     def test_primes(self, run):
         """Test primes function."""
@@ -206,7 +205,7 @@ class TestArrayQueryFunctions:
             A = [1, 2, 3];
             r = isvector(A);
         """)
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isscalar(self, run):
         """Test isscalar function."""
@@ -214,7 +213,7 @@ class TestArrayQueryFunctions:
             A = 5;
             r = isscalar(A);
         """)
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isempty(self, run):
         """Test isempty function."""
@@ -222,7 +221,7 @@ class TestArrayQueryFunctions:
             A = [];
             r = isempty(A);
         """)
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isequal(self, run):
         """Test isequal function."""
@@ -231,7 +230,7 @@ class TestArrayQueryFunctions:
             B = [1, 2, 3];
             r = isequal(A, B);
         """)
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isfinite(self, run):
         """Test isfinite function."""
@@ -455,7 +454,7 @@ class TestSparseFunctions:
             S = speye(3);
             r = issparse(S);
         """)
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_nnz(self, run):
         """Test nnz function."""
@@ -472,7 +471,7 @@ class TestStringFunctions:
     def test_strcmp(self, run):
         """Test strcmp function."""
         interp = run("r = strcmp('hello', 'hello');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_strcat(self, run):
         """Test strcat function."""

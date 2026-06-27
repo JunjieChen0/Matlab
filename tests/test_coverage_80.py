@@ -1,6 +1,5 @@
 """Coverage boost tests to reach 80% target."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat, CellArray, Struct
@@ -39,47 +38,47 @@ class TestCoverage80:
 
     def test_comparison_eq(self):
         interp = run_matlab("x = (1 == 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_neq(self):
         interp = run_matlab("x = (1 ~= 2);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_lt(self):
         interp = run_matlab("x = (1 < 2);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_gt(self):
         interp = run_matlab("x = (2 > 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_le(self):
         interp = run_matlab("x = (1 <= 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_ge(self):
         interp = run_matlab("x = (1 >= 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_logical_and(self):
         interp = run_matlab("x = (1 && 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_logical_or(self):
         interp = run_matlab("x = (0 || 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_logical_not(self):
         interp = run_matlab("x = ~0;")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_bitwise_and(self):
         interp = run_matlab("x = 1 & 1;")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_bitwise_or(self):
         interp = run_matlab("x = 0 | 1;")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_matrix_add(self):
         interp = run_matlab("A = [1 2; 3 4];\nB = [5 6; 7 8];\nC = A + B;")
@@ -619,7 +618,7 @@ class TestCoverage80:
     def test_strcmp(self):
         interp = run_matlab('r = strcmp("hello", "hello");')
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_strcat(self):
         interp = run_matlab('s = strcat("hello", " world");')
@@ -652,12 +651,12 @@ class TestCoverage80:
         assert d is not None
 
     def test_disp(self, capsys):
-        interp = run_matlab("disp('hello');")
+        run_matlab("disp('hello');")
         captured = capsys.readouterr()
         assert "hello" in captured.out
 
     def test_disp_number(self, capsys):
-        interp = run_matlab("disp(42);")
+        run_matlab("disp(42);")
         captured = capsys.readouterr()
         assert "42" in captured.out
 
@@ -669,7 +668,7 @@ class TestCoverage80:
     def test_isa_func(self):
         interp = run_matlab("x = 42;\nr = isa(x, 'double');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_tic_toc(self):
         interp = run_matlab("tic;\nx = 0;\nfor i = 1:1000; x = x + i; end\nt = toc;")
@@ -694,12 +693,12 @@ class TestCoverage80:
     def test_fopen_fclose(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
-        interp = run_matlab(f"fid = fopen('{filepath}');\nfclose(fid);")
+        run_matlab(f"fid = fopen('{filepath}');\nfclose(fid);")
         assert True
 
     def test_csvwrite(self, tmp_path):
         filepath = tmp_path / "test.csv"
-        interp = run_matlab(f"csvwrite('{filepath}', [1 2; 3 4]);")
+        run_matlab(f"csvwrite('{filepath}', [1 2; 3 4]);")
         assert filepath.exists()
 
     def test_csvread(self, tmp_path):
@@ -714,19 +713,19 @@ class TestCoverage80:
         filepath.write_text("hello")
         interp = run_matlab(f"r = exist('{filepath}', 'file');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isfile(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
         interp = run_matlab(f"r = isfile('{filepath}');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isfolder(self, tmp_path):
         interp = run_matlab(f"r = isfolder('{tmp_path}');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_pwd(self):
         interp = run_matlab("d = pwd();")

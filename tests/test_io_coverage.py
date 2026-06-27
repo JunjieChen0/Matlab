@@ -2,7 +2,7 @@
 
 import pytest
 import numpy as np
-from tests.conftest import run_matlab, get_val
+from tests.conftest import run_matlab
 from matpy.runtime.types import Mat
 
 
@@ -73,7 +73,7 @@ class TestIOFunctions:
         from matpy.builtins.io import _validateattributes
 
         result = _validateattributes(Mat(np.array([1, 2, 3])), ["numeric"])
-        assert result == True
+        assert result
 
     def test_validateattributes_positive(self):
         from matpy.builtins.io import _validateattributes
@@ -81,7 +81,7 @@ class TestIOFunctions:
         result = _validateattributes(
             Mat(np.array([1, 2, 3])), ["numeric"], ["positive"]
         )
-        assert result == True
+        assert result
 
     def test_validateattributes_nonempty(self):
         from matpy.builtins.io import _validateattributes
@@ -89,7 +89,7 @@ class TestIOFunctions:
         result = _validateattributes(
             Mat(np.array([1, 2, 3])), ["numeric"], ["nonempty"]
         )
-        assert result == True
+        assert result
 
 
 class TestDisplayFunctions:
@@ -149,13 +149,13 @@ class TestClassFunctions:
         from matpy.builtins.common import _isa_enhanced
 
         result = _isa_enhanced(Mat(np.array([1, 2, 3])), "double")
-        assert result == True
+        assert result
 
     def test_isa_char(self):
         from matpy.builtins.common import _isa_enhanced
 
         result = _isa_enhanced("hello", "char")
-        assert result == True
+        assert result
 
     def test_isa_numeric(self):
         from matpy.builtins.common import _isa_enhanced
@@ -215,12 +215,12 @@ class TestIOIntegration:
     """Integration tests through interpreter."""
 
     def test_disp_interpreter(self, capsys):
-        interp = run_matlab("disp('hello');")
+        run_matlab("disp('hello');")
         captured = capsys.readouterr()
         assert "hello" in captured.out
 
     def test_disp_mat_interpreter(self, capsys):
-        interp = run_matlab("A = [1 2; 3 4];\ndisp(A);")
+        run_matlab("A = [1 2; 3 4];\ndisp(A);")
         captured = capsys.readouterr()
         assert "1" in captured.out
 
@@ -232,7 +232,7 @@ class TestIOIntegration:
     def test_isa_interpreter(self):
         interp = run_matlab("x = 42;\nr = isa(x, 'double');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_now_interpreter(self):
         interp = run_matlab("t = now();")

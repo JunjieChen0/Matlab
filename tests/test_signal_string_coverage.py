@@ -1,6 +1,5 @@
 """Comprehensive tests for signal.py and string.py to boost coverage."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat
@@ -170,13 +169,13 @@ class TestStringFunctions:
         from matpy.builtins.string import _strcmp
 
         result = _strcmp("hello", "hello")
-        assert result == True
+        assert result
 
     def test_strcmp_false(self):
         from matpy.builtins.string import _strcmp
 
         result = _strcmp("hello", "world")
-        assert result == False
+        assert not result
 
     def test_strcat(self):
         from matpy.builtins.string import _strcat
@@ -240,19 +239,19 @@ class TestStringFunctions:
         from matpy.builtins.string import _startsWith
 
         result = _startsWith("hello", "hel")
-        assert result == True
+        assert result
 
     def test_endsWith(self):
         from matpy.builtins.string import _endsWith
 
         result = _endsWith("hello", "llo")
-        assert result == True
+        assert result
 
     def test_contains(self):
         from matpy.builtins.string import _contains
 
         result = _contains("hello world", "world")
-        assert result == True
+        assert result
 
     def test_isempty_true(self):
         interp = run_matlab('r = isempty("");')
@@ -314,7 +313,7 @@ class TestStringIntegration:
     def test_strcmp_interpreter(self):
         interp = run_matlab('r = strcmp("hello", "hello");')
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_strcat_interpreter(self):
         interp = run_matlab('s = strcat("hello", " world");')

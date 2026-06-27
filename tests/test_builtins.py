@@ -1,6 +1,5 @@
 """Built-in function tests for MatPy."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat, CellArray
@@ -157,7 +156,7 @@ class TestStatisticalFunctions:
 class TestStringFunctions:
     def test_strcmp(self):
         interp = run_matlab("r = strcmp('hello', 'hello');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_strcat(self):
         interp = run_matlab("s = strcat('hello', ' ', 'world');")
@@ -266,7 +265,7 @@ class TestTypeFunctions:
 
     def test_isa(self):
         interp = run_matlab("x = 42;\nr = isa(x, 'double');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_cast(self):
         interp = run_matlab("x = [1.5 2.5 3.5];\ny = cast(x, 'int32');")
@@ -277,7 +276,7 @@ class TestTypeFunctions:
 
 class TestDisplayFunctions:
     def test_disp(self):
-        interp = run_matlab("disp(42);")
+        interp = run_matlab("disp(42);")  # noqa: F841
 
     def test_disp_string(self):
-        interp = run_matlab("disp('hello');")
+        interp = run_matlab("disp('hello');")  # noqa: F841

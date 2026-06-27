@@ -1,7 +1,5 @@
 """Bytecode compiler and VM tests for MatPy."""
 
-import pytest
-import numpy as np
 from matpy.lexer import Lexer
 from matpy.parser import Parser
 from matpy.bytecode import BytecodeCompiler, BytecodeVM

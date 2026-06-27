@@ -1,6 +1,5 @@
 """Final boost tests to reach 80% coverage target."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat, CellArray, Struct, StringArray
@@ -39,47 +38,47 @@ class TestInterpreterCore:
 
     def test_comparison_eq(self):
         interp = run_matlab("x = (1 == 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_neq(self):
         interp = run_matlab("x = (1 ~= 2);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_lt(self):
         interp = run_matlab("x = (1 < 2);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_gt(self):
         interp = run_matlab("x = (2 > 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_le(self):
         interp = run_matlab("x = (1 <= 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_comparison_ge(self):
         interp = run_matlab("x = (1 >= 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_logical_and(self):
         interp = run_matlab("x = (1 && 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_logical_or(self):
         interp = run_matlab("x = (0 || 1);")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_logical_not(self):
         interp = run_matlab("x = ~0;")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_bitwise_and(self):
         interp = run_matlab("x = 1 & 1;")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_bitwise_or(self):
         interp = run_matlab("x = 0 | 1;")
-        assert interp.global_env.get("x") == True
+        assert interp.global_env.get("x")
 
     def test_matrix_addition(self):
         interp = run_matlab("A = [1 2; 3 4];\nB = [5 6; 7 8];\nC = A + B;")
@@ -462,8 +461,8 @@ class TestRuntimeTypes:
         from matpy.runtime.types import Struct
 
         s = Struct({"a": 1, "b": 2})
-        assert s.has_field("a") == True
-        assert s.has_field("c") == False
+        assert s.has_field("a")
+        assert not s.has_field("c")
 
     def test_func_handle_create(self):
         from matpy.runtime.types import FuncHandle
@@ -478,13 +477,11 @@ class TestRuntimeTypes:
         assert f(5) == 10
 
     def test_string_array_create(self):
-        from matpy.runtime.types import StringArray
 
         s = StringArray("hello")
         assert s is not None
 
     def test_string_array_data(self):
-        from matpy.runtime.types import StringArray
 
         s = StringArray("hello")
         assert s.data is not None
@@ -531,8 +528,8 @@ class TestRuntimeTypes:
 
         m = Map()
         m["a"] = 1
-        assert m.isKey("a") == True
-        assert m.isKey("b") == False
+        assert m.isKey("a")
+        assert not m.isKey("b")
 
     def test_datetime_create(self):
         from matpy.runtime.types import Datetime
@@ -557,17 +554,17 @@ class TestCommonFunctions:
     """Test common built-in functions."""
 
     def test_disp(self, capsys):
-        interp = run_matlab("disp('hello');")
+        run_matlab("disp('hello');")
         captured = capsys.readouterr()
         assert "hello" in captured.out
 
     def test_disp_number(self, capsys):
-        interp = run_matlab("disp(42);")
+        run_matlab("disp(42);")
         captured = capsys.readouterr()
         assert "42" in captured.out
 
     def test_display(self, capsys):
-        interp = run_matlab("x = [1 2 3];\ndisplay(x);")
+        run_matlab("x = [1 2 3];\ndisplay(x);")
         captured = capsys.readouterr()
         assert "1" in captured.out
 
@@ -579,7 +576,7 @@ class TestCommonFunctions:
     def test_isa_func(self):
         interp = run_matlab("x = 42;\nr = isa(x, 'double');")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_whos(self, capsys):
         from matpy.builtins.common import _disp_enhanced

@@ -1,8 +1,7 @@
 """Additional coverage tests for MatPy - all tests verified to pass."""
 
 import numpy as np
-import pytest
-from tests.conftest import run_matlab, get_val
+from tests.conftest import get_val
 
 
 class TestMathTrig:
@@ -256,11 +255,11 @@ class TestStringFunctions:
 
     def test_strcmp(self, run):
         interp = run("r = strcmp('hello', 'hello');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_strcmp_false(self, run):
         interp = run("r = strcmp('hello', 'world');")
-        assert interp.global_env.get("r") == False
+        assert not interp.global_env.get("r")
 
     def test_strcat(self, run):
         interp = run("s = strcat('hello', ' ', 'world');")
@@ -638,11 +637,11 @@ class TestPlotFunctions:
         assert interp.global_env.get("n") is not None
 
     def test_clf(self, run):
-        interp = run("clf;")
+        run("clf;")
         # Just verify no error
 
     def test_close(self, run):
-        interp = run("close;")
+        run("close;")
         # Just verify no error
 
 
@@ -650,11 +649,11 @@ class TestIOFunctions:
     """Test I/O functions."""
 
     def test_disp(self, run):
-        interp = run("disp('Hello');")
+        run("disp('Hello');")
         # Just verify no error
 
     def test_disp_number(self, run):
-        interp = run("disp(42);")
+        run("disp(42);")
         # Just verify no error
 
 
@@ -699,27 +698,27 @@ class TestTypeFunctions:
 
     def test_isnumeric(self, run):
         interp = run("r = isnumeric([1, 2, 3]);")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isempty(self, run):
         interp = run("r = isempty([]);")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isvector(self, run):
         interp = run("r = isvector([1, 2, 3]);")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isscalar(self, run):
         interp = run("r = isscalar(5);")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_ismatrix(self, run):
         interp = run("r = ismatrix([1, 2; 3, 4]);")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isequal(self, run):
         interp = run("r = isequal([1, 2], [1, 2]);")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isfinite(self, run):
         interp = run("B = isfinite([1, 2, 3]);")
@@ -733,15 +732,15 @@ class TestTypeFunctions:
 
     def test_ischar(self, run):
         interp = run("r = ischar('hello');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isstring(self, run):
         interp = run("r = isstring('hello');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_iscell(self, run):
         interp = run("r = iscell(cell(1));")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
 
 class TestKronDiagOps:
@@ -763,23 +762,23 @@ class TestAdvancedStringOps:
 
     def test_strcmpi(self, run):
         interp = run("r = strcmpi('Hello', 'hello');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_strncmp(self, run):
         interp = run("r = strncmp('Hello', 'Help', 3);")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_startsWith(self, run):
         interp = run("r = startsWith('hello', 'hel');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_endsWith(self, run):
         interp = run("r = endsWith('hello', 'llo');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_contains(self, run):
         interp = run("r = contains('hello world', 'world');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_replace(self, run):
         interp = run("s = replace('hello world', 'world', 'MATLAB');")
@@ -794,7 +793,7 @@ class TestAdvancedIO:
     """Test advanced I/O functions."""
 
     def test_fprintf(self, run):
-        interp = run("fprintf('Hello %s', 'World');")
+        run("fprintf('Hello %s', 'World');")
         # Just verify no error
 
     def test_sprintf(self, run):
@@ -802,7 +801,7 @@ class TestAdvancedIO:
         assert interp.global_env.get("s") == "Hello World"
 
     def test_fopen_fclose(self, run):
-        interp = run("""
+        run("""
             fid = fopen('test.txt', 'w');
             fclose(fid);
         """)
@@ -814,7 +813,7 @@ class TestAdvancedIO:
 
     def test_isfolder(self, run):
         interp = run("r = isfolder('.');")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_pwd(self, run):
         interp = run("d = pwd;")
@@ -841,7 +840,7 @@ class TestSparseAdvanced:
 
     def test_issparse(self, run):
         interp = run("r = issparse(speye(3));")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_nonzeros(self, run):
         interp = run("v = nonzeros(speye(3));")
@@ -867,43 +866,43 @@ class TestPlottingAdvanced:
     """Test advanced plotting functions."""
 
     def test_plot(self, run):
-        interp = run("plot([1, 2, 3], [1, 4, 9]);")
+        run("plot([1, 2, 3], [1, 4, 9]);")
         # Just verify no error
 
     def test_scatter(self, run):
-        interp = run("scatter([1, 2, 3], [1, 4, 9]);")
+        run("scatter([1, 2, 3], [1, 4, 9]);")
         # Just verify no error
 
     def test_bar(self, run):
-        interp = run("bar([1, 2, 3, 4, 5]);")
+        run("bar([1, 2, 3, 4, 5]);")
         # Just verify no error
 
     def test_title(self, run):
-        interp = run("title('Test');")
+        run("title('Test');")
         # Just verify no error
 
     def test_xlabel(self, run):
-        interp = run("xlabel('X');")
+        run("xlabel('X');")
         # Just verify no error
 
     def test_ylabel(self, run):
-        interp = run("ylabel('Y');")
+        run("ylabel('Y');")
         # Just verify no error
 
     def test_legend(self, run):
-        interp = run("legend('data');")
+        run("legend('data');")
         # Just verify no error
 
     def test_grid(self, run):
-        interp = run("grid on;")
+        run("grid on;")
         # Just verify no error
 
     def test_hold(self, run):
-        interp = run("hold on;")
+        run("hold on;")
         # Just verify no error
 
     def test_subplot(self, run):
-        interp = run("subplot(2, 2, 1);")
+        run("subplot(2, 2, 1);")
         # Just verify no error
 
 
@@ -977,11 +976,11 @@ class TestDatetimeFunctions:
 
     def test_isdatetime(self, run):
         interp = run("r = isdatetime(datetime(2024, 1, 1));")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_isduration(self, run):
         interp = run("r = isduration(duration(1, 0, 0));")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
 
 class TestCategoricalFunctions:
@@ -994,7 +993,7 @@ class TestCategoricalFunctions:
 
     def test_iscategorical(self, run):
         interp = run("r = iscategorical(categorical([1, 2, 3]));")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
 
 class TestMathExtended:
@@ -1007,7 +1006,7 @@ class TestMathExtended:
 
     def test_isprime(self, run):
         interp = run("r = isprime(7);")
-        assert interp.global_env.get("r") == True
+        assert interp.global_env.get("r")
 
     def test_primes(self, run):
         interp = run("p = primes(20);")

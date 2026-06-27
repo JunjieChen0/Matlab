@@ -1,7 +1,5 @@
 """Boost tests for sparse.py and statistics.py."""
 
-import pytest
-import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat
 
@@ -32,7 +30,7 @@ class TestSparseBoost:
     def test_issparse_interpreter(self):
         interp = run_matlab("S = speye(5);\nr = issparse(S);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_sprand_interpreter(self):
         interp = run_matlab("S = sprand(5, 5, 0.5);")
@@ -146,27 +144,27 @@ class TestStatisticsBoost:
     def test_isequal_interpreter(self):
         interp = run_matlab("x = [1 2 3];\ny = [1 2 3];\nr = isequal(x, y);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isempty_interpreter(self):
         interp = run_matlab("x = [];\nr = isempty(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isscalar_interpreter(self):
         interp = run_matlab("x = 42;\nr = isscalar(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isvector_interpreter(self):
         interp = run_matlab("x = [1 2 3];\nr = isvector(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_ismatrix_interpreter(self):
         interp = run_matlab("A = [1 2; 3 4];\nr = ismatrix(A);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_norm_interpreter(self):
         interp = run_matlab("v = [3 4];\nn = norm(v);")

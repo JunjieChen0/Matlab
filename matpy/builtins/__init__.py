@@ -1,7 +1,7 @@
 """Built-in function registry for MatPy."""
 
 from __future__ import annotations
-from typing import Any, Callable
+from typing import Callable
 
 _BUILTINS: dict[str, Callable] = {}
 
@@ -25,20 +25,20 @@ def all_builtins() -> dict[str, Callable]:
     return dict(_BUILTINS)
 
 
-# Import sub-modules to trigger registration
-from matpy.builtins import math as _math
-from matpy.builtins import matrix_ops as _matrix_ops
-from matpy.builtins import io as _io
-from matpy.builtins import plotting as _plotting
-from matpy.builtins import data_struct as _data_struct
-from matpy.builtins import string as _string
-from matpy.builtins import file_io as _file_io
-from matpy.builtins import advanced_math as _advanced_math
-from matpy.builtins import sparse as _sparse
-from matpy.builtins import string_array as _string_array
-from matpy.builtins import common as _common
-from matpy.builtins import control as _control
-from matpy.builtins import signal as _signal
-from matpy.builtins import optimization as _optimization
-from matpy.builtins import statistics as _statistics
-from matpy.builtins import image as _image
+# Import sub-modules to trigger registration (must be after register function)
+from matpy.builtins import math as _math  # noqa: E402, F401
+from matpy.builtins import matrix_ops as _matrix_ops  # noqa: E402, F401
+from matpy.builtins import io as _io  # noqa: E402, F401
+from matpy.builtins import plotting as _plotting  # noqa: E402, F401
+from matpy.builtins import data_struct as _data_struct  # noqa: E402, F401
+from matpy.builtins import string as _string  # noqa: E402, F401
+from matpy.builtins import file_io as _file_io  # noqa: E402, F401
+from matpy.builtins import advanced_math as _advanced_math  # noqa: E402, F401
+from matpy.builtins import sparse as _sparse  # noqa: E402, F401
+from matpy.builtins import string_array as _string_array  # noqa: E402, F401
+from matpy.builtins import common as _common  # noqa: E402, F401
+from matpy.builtins import control as _control  # noqa: E402, F401
+from matpy.builtins import signal as _signal  # noqa: E402, F401
+from matpy.builtins import optimization as _optimization  # noqa: E402, F401
+from matpy.builtins import statistics as _statistics  # noqa: E402, F401
+from matpy.builtins import image as _image  # noqa: E402, F401

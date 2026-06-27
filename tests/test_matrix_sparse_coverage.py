@@ -1,6 +1,5 @@
 """Comprehensive tests for matrix_ops.py and sparse.py to boost coverage."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat
@@ -71,51 +70,51 @@ class TestMatrixOpsFunctions:
         # isscalar is not directly importable, test through interpreter
         interp = run_matlab("x = 42;\nr = isscalar(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isscalar_false(self):
         interp = run_matlab("x = [1 2 3];\nr = isscalar(x);")
         r = interp.global_env.get("r")
-        assert r == False
+        assert not r
 
     def test_isvector_true(self):
         interp = run_matlab("x = [1 2 3];\nr = isvector(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isvector_false(self):
         interp = run_matlab("x = [1 2; 3 4];\nr = isvector(x);")
         r = interp.global_env.get("r")
-        assert r == False
+        assert not r
 
     def test_ismatrix_true(self):
         interp = run_matlab("x = [1 2; 3 4];\nr = ismatrix(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isempty_true(self):
         from matpy.builtins.matrix_ops import _isempty
 
         result = _isempty(Mat(np.array([])))
-        assert result == True
+        assert result
 
     def test_isempty_false(self):
         from matpy.builtins.matrix_ops import _isempty
 
         result = _isempty(Mat(np.array([1, 2, 3])))
-        assert result == False
+        assert not result
 
     def test_isequal_true(self):
         from matpy.builtins.matrix_ops import _isequal
 
         result = _isequal(Mat(np.array([1, 2, 3])), Mat(np.array([1, 2, 3])))
-        assert result == True
+        assert result
 
     def test_isequal_false(self):
         from matpy.builtins.matrix_ops import _isequal
 
         result = _isequal(Mat(np.array([1, 2, 3])), Mat(np.array([4, 5, 6])))
-        assert result == False
+        assert not result
 
     def test_transpose(self):
         from matpy.builtins.matrix_ops import _transpose
@@ -359,12 +358,12 @@ class TestSparseFunctions:
     def test_issparse_true(self):
         interp = run_matlab("S = speye(3);\nr = issparse(S);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_issparse_false(self):
         interp = run_matlab("A = eye(3);\nr = issparse(A);")
         r = interp.global_env.get("r")
-        assert r == False
+        assert not r
 
     def test_sprand(self):
         from matpy.builtins.sparse import _sprand

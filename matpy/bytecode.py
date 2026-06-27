@@ -17,7 +17,6 @@ from matpy.ast_nodes import (
     UnaryOp,
     RangeExpr,
     MatrixLiteral,
-    CellLiteral,
     IndexExpr,
     FieldAccess,
     FuncCallExpr,
@@ -29,11 +28,10 @@ from matpy.ast_nodes import (
     WhileStmt,
     SwitchStmt,
     ReturnStmt,
-    BreakStmt,
-    ContinueStmt,
     FuncDef,
     GlobalStmt,
     PersistentStmt,
+    TryCatchStmt,
     Expr,
     Stmt,
 )
@@ -749,7 +747,6 @@ class BytecodeVM:
     def _call_user_func(self, name: str, args: list) -> Any:
         """Call a user-defined function using the tree-walking interpreter."""
         from matpy.interpreter import Interpreter
-        from matpy.environment import Environment
 
         func_def = self.functions[name]
 

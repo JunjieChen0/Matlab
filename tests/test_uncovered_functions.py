@@ -1,9 +1,8 @@
 """Tests for uncovered functions to boost coverage to 80%."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
-from matpy.runtime.types import Mat, CellArray, Struct
+from matpy.runtime.types import Mat
 
 
 class TestUncoveredMatrixOps:
@@ -40,32 +39,32 @@ class TestUncoveredCommon:
     def test_isempty(self):
         interp = run_matlab("r = isempty([]);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isvector(self):
         interp = run_matlab("x = [1 2 3];\nr = isvector(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_ismatrix(self):
         interp = run_matlab("A = [1 2; 3 4];\nr = ismatrix(A);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isscalar(self):
         interp = run_matlab("x = 42;\nr = isscalar(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_isrow(self):
         interp = run_matlab("x = [1 2 3];\nr = isrow(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
     def test_iscolumn(self):
         interp = run_matlab("x = [1; 2; 3];\nr = iscolumn(x);")
         r = interp.global_env.get("r")
-        assert r == True
+        assert r
 
 
 class TestUncoveredIO:
@@ -74,7 +73,7 @@ class TestUncoveredIO:
     def test_fscanf(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("1 2 3")
-        interp = run_matlab(f"fid = fopen('{filepath}');\nfclose(fid);")
+        run_matlab(f"fid = fopen('{filepath}');\nfclose(fid);")
         assert True
 
     def test_sprintf(self):
@@ -84,7 +83,7 @@ class TestUncoveredIO:
 
     def test_fprintf_func(self, tmp_path):
         filepath = tmp_path / "test.txt"
-        interp = run_matlab(
+        run_matlab(
             f"fid = fopen('{filepath}', 'w');\nfprintf(fid, '%d', 42);\nfclose(fid);"
         )
         assert True

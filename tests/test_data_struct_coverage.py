@@ -1,6 +1,5 @@
 """Comprehensive tests for data_struct.py to boost coverage."""
 
-import pytest
 import numpy as np
 from tests.conftest import run_matlab, get_val
 from matpy.runtime.types import Mat, CellArray, Struct, Map, Table
@@ -38,8 +37,8 @@ class TestCellFunctions:
         from matpy.builtins.data_struct import _iscell
 
         c = CellArray([[1, 2]])
-        assert _iscell(c) == True
-        assert _iscell(Mat(np.array([1]))) == False
+        assert _iscell(c)
+        assert not _iscell(Mat(np.array([1])))
 
     def test_celldisp(self, capsys):
         from matpy.builtins.data_struct import _celldisp
@@ -139,19 +138,19 @@ class TestStructFunctions:
         from matpy.builtins.data_struct import _isfield
 
         s = Struct({"a": 1, "b": 2})
-        assert _isfield(s, "a") == True
-        assert _isfield(s, "b") == True
+        assert _isfield(s, "a")
+        assert _isfield(s, "b")
 
     def test_isfield_false(self):
         from matpy.builtins.data_struct import _isfield
 
         s = Struct({"a": 1, "b": 2})
-        assert _isfield(s, "c") == False
+        assert not _isfield(s, "c")
 
     def test_isfield_non_struct(self):
         from matpy.builtins.data_struct import _isfield
 
-        assert _isfield(Mat(np.array([1])), "a") == False
+        assert not _isfield(Mat(np.array([1])), "a")
 
     def test_rmfield(self):
         from matpy.builtins.data_struct import _rmfield
@@ -174,8 +173,8 @@ class TestStructFunctions:
         from matpy.builtins.data_struct import _isstruct
 
         s = Struct({"a": 1})
-        assert _isstruct(s) == True
-        assert _isstruct(Mat(np.array([1]))) == False
+        assert _isstruct(s)
+        assert not _isstruct(Mat(np.array([1])))
 
     def test_struct_numel(self):
         from matpy.builtins.data_struct import _numel
@@ -215,34 +214,29 @@ class TestMapFunctions:
     """Test containers.Map functions."""
 
     def test_map_create(self):
-        from matpy.runtime.types import Map
 
         m = Map(Mat(np.array(["a", "b", "c"])), Mat(np.array([1, 2, 3])))
         assert isinstance(m, Map)
 
     def test_map_iskey(self):
-        from matpy.runtime.types import Map
 
         m = Map(Mat(np.array(["a", "b"])), Mat(np.array([1, 2])))
-        assert m.isKey("a") == True
-        assert m.isKey("c") == False
+        assert m.isKey("a")
+        assert not m.isKey("c")
 
     def test_map_keys(self):
-        from matpy.runtime.types import Map
 
         m = Map(Mat(np.array(["a", "b"])), Mat(np.array([1, 2])))
         result = m.keys()
         assert isinstance(result, list)
 
     def test_map_values(self):
-        from matpy.runtime.types import Map
 
         m = Map(Mat(np.array(["a", "b"])), Mat(np.array([1, 2])))
         result = m.values()
         assert isinstance(result, list)
 
     def test_map_remove(self):
-        from matpy.runtime.types import Map
 
         m = Map(Mat(np.array(["a", "b"])), Mat(np.array([1, 2])))
         m.remove("a")
@@ -293,7 +287,7 @@ class TestDataStructIntegration:
         from matpy.builtins.data_struct import _isfield
 
         s = Struct({"a": 1})
-        assert _isfield(s, "a") == True
+        assert _isfield(s, "a")
 
     def test_rmfield_interpreter(self):
         from matpy.builtins.data_struct import _rmfield
