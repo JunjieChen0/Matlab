@@ -36,7 +36,6 @@ from matpy.builtins import advanced_math as _advanced_math
 from matpy.builtins import sparse as _sparse
 from matpy.builtins import string_array as _string_array
 from matpy.builtins import common as _common
-from matpy.builtins import extra as _extra
 from matpy.builtins import control as _control
 from matpy.builtins import signal as _signal
 from matpy.builtins import optimization as _optimization

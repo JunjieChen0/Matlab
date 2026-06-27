@@ -50,6 +50,8 @@ class Environment:
         env = self
         while env.parent is not None:
             env = env.parent
+        if name not in env._vars:
+            raise NameError(f"Undefined global variable '{name}'")
         return env._vars[name]
 
     def _set_global(self, name: str, value: Any):

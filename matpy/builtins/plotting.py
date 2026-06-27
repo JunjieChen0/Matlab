@@ -392,10 +392,170 @@ def _drawnow():
     plt.draw()
 
 
-@register("pause")
-def _pause(seconds=None):
-    import time
-    if seconds is not None:
-        time.sleep(float(seconds))
+# ── Additional Plotting Functions ──────────────────────────────
+
+def _plot3(x, y, z, *args):
+    """3-D line plot."""
+    plt = _get_plt()
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.gcf()
+    ax = fig.add_subplot(111, projection='3d')
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    fmt = str(args[0]) if args else '-'
+    ax.plot(xd.flatten(), yd.flatten(), zd.flatten(), fmt)
+
+
+def _surf(x, y, z):
+    """3-D surface plot."""
+    plt = _get_plt()
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.gcf()
+    ax = fig.add_subplot(111, projection='3d')
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    ax.plot_surface(xd, yd, zd)
+
+
+def _mesh(x, y, z):
+    """3-D mesh plot."""
+    plt = _get_plt()
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.gcf()
+    ax = fig.add_subplot(111, projection='3d')
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    ax.plot_wireframe(xd, yd, zd)
+
+
+def _contour(x, y, z, levels=None):
+    """Contour plot."""
+    plt = _get_plt()
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    if levels is not None:
+        plt.contour(xd, yd, zd, levels=int(levels))
     else:
-        time.sleep(0.01)
+        plt.contour(xd, yd, zd)
+
+
+def _contourf(x, y, z, levels=None):
+    """Filled contour plot."""
+    plt = _get_plt()
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    if levels is not None:
+        plt.contourf(xd, yd, zd, levels=int(levels))
+    else:
+        plt.contourf(xd, yd, zd)
+
+
+@register("quiver")
+def _quiver(x, y, u, v):
+    """Quiver plot."""
+    plt = _get_plt()
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    ud = u.data if isinstance(u, Mat) else np.array(u)
+    vd = v.data if isinstance(v, Mat) else np.array(v)
+    plt.quiver(xd, yd, ud, vd)
+
+
+@register("scatter3")
+def _scatter3(x, y, z, s=None, c=None):
+    """3-D scatter plot."""
+    plt = _get_plt()
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.gcf()
+    ax = fig.add_subplot(111, projection='3d')
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    ax.scatter(xd.flatten(), yd.flatten(), zd.flatten())
+
+
+@register("bar3")
+def _bar3(x):
+    """3-D bar plot."""
+    plt = _get_plt()
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.gcf()
+    ax = fig.add_subplot(111, projection='3d')
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    ax.bar(range(len(data.flatten())), data.flatten())
+
+
+@register("stem3")
+def _stem3(x, y, z):
+    """3-D stem plot."""
+    plt = _get_plt()
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.gcf()
+    ax = fig.add_subplot(111, projection='3d')
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    ax.stem(xd.flatten(), yd.flatten(), zd.flatten())
+
+
+@register("waterfall")
+def _waterfall(x, y, z):
+    """Waterfall plot."""
+    plt = _get_plt()
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.gcf()
+    ax = fig.add_subplot(111, projection='3d')
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    ax.plot_wireframe(xd, yd, zd, rstride=1, cstride=0)
+
+
+def _saveas(filename, fmt=None):
+    """Save figure to file."""
+    plt = _get_plt()
+    filename = str(filename)
+    if fmt is not None:
+        plt.savefig(filename, format=str(fmt))
+    else:
+        plt.savefig(filename)
+
+
+@register("print")
+def _print(filename, fmt=None):
+    """Print figure to file."""
+    _saveas(filename, fmt)
+
+
+@register("gca")
+def _gca():
+    """Get current axes."""
+    plt = _get_plt()
+    return plt.gca()
+
+
+def _gcf():
+    """Get current figure."""
+    plt = _get_plt()
+    return plt.gcf()
+
+
+@register("axes")
+def _axes(*args):
+    """Create axes."""
+    plt = _get_plt()
+    if args:
+        plt.axes(args[0])
+    else:
+        plt.axes()
+
+
+def _subplot(m, n, p):
+    """Create subplot."""
+    plt = _get_plt()
+    plt.subplot(int(m), int(n), int(p))

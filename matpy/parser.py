@@ -1,5 +1,6 @@
 """Recursive descent parser for MatPy."""
 
+from typing import Any
 from matpy.tokens import Token, TokenType
 from matpy.ast_nodes import (
     Program, NumberLiteral, StringLiteral, Identifier, BinaryOp, UnaryOp,
@@ -26,9 +27,13 @@ class Parser:
     # ── helpers ──────────────────────────────────────────────────
 
     def _peek(self) -> Token:
+        if self.pos >= len(self.tokens):
+            return Token(TokenType.EOF, None, 0, 0)
         return self.tokens[self.pos]
 
     def _advance(self) -> Token:
+        if self.pos >= len(self.tokens):
+            return Token(TokenType.EOF, None, 0, 0)
         tok = self.tokens[self.pos]
         self.pos += 1
         return tok
@@ -133,10 +138,15 @@ class Parser:
         self._expect(TokenType.RPAREN)
         self._consume_stmt_end()
 
+        # Parse optional arguments block
+        arg_specs: dict[str, dict[str, Any]] = {}
+        if self._check(TokenType.ARGUMENTS):
+            arg_specs = self._parse_arguments_block()
+
         body = self._parse_block_until_end()
         self._expect(TokenType.END)
         self._consume_stmt_end()
-        return FuncDef(name=name, params=params, returns=returns, body=body)
+        return FuncDef(name=name, params=params, returns=returns, body=body, arg_specs=arg_specs)
 
     def _parse_if(self) -> IfStmt:
         self._expect(TokenType.IF)
@@ -250,8 +260,12 @@ class Parser:
         return PersistentStmt(names=names)
 
     def _parse_classdef(self) -> ClassDef:
-        """Parse: classdef ClassName < SuperClass ... end"""
+        """Parse: classdef (Attrs) ClassName < SuperClass ... end"""
         self._expect(TokenType.CLASSDEF)
+
+        # Optional class attributes: (Abstract, Sealed, Access=private)
+        class_attrs = self._parse_attr_list()
+
         name = self._expect(TokenType.IDENTIFIER).value
 
         # Optional superclass
@@ -271,12 +285,14 @@ class Parser:
         while not self._check(TokenType.END) and not self._check(TokenType.EOF):
             if self._check(TokenType.PROPERTIES):
                 self._advance()
+                block_attrs = self._parse_attr_list()
                 self._consume_stmt_end()
-                self._parse_properties_block(properties, property_attrs)
+                self._parse_properties_block(properties, property_attrs, block_attrs)
             elif self._check(TokenType.METHODS):
                 self._advance()
+                block_attrs = self._parse_attr_list()
                 self._consume_stmt_end()
-                self._parse_methods_block(methods, method_attrs)
+                self._parse_methods_block(methods, method_attrs, block_attrs)
             elif self._check(TokenType.FUNCTION):
                 # Top-level function in classdef
                 func = self._parse_func_def()
@@ -287,12 +303,104 @@ class Parser:
         self._expect(TokenType.END)
         self._consume_stmt_end()
         return ClassDef(
-            name=name, superclass=superclass,
+            name=name, superclass=superclass, class_attrs=class_attrs,
             properties=properties, property_attrs=property_attrs,
             methods=methods, method_attrs=method_attrs,
         )
 
-    def _parse_properties_block(self, props: dict, attrs: dict):
+    def _parse_attr_list(self) -> dict[str, Any]:
+        """Parse optional attribute list: (Key1, Key2=val, ...).
+        Returns dict of attributes. Empty dict if no parenthesized list."""
+        attrs: dict[str, Any] = {}
+        if not self._check(TokenType.LPAREN):
+            return attrs
+        self._advance()  # consume '('
+        while not self._check(TokenType.RPAREN) and not self._check(TokenType.EOF):
+            if self._check(TokenType.IDENTIFIER):
+                key = self._advance().value
+                if self._match(TokenType.ASSIGN):
+                    # Parse value: could be identifier, string, or number
+                    if self._check(TokenType.IDENTIFIER):
+                        val = self._advance().value
+                    elif self._check(TokenType.STRING):
+                        val = self._advance().value
+                    elif self._check(TokenType.NUMBER):
+                        val = self._advance().value
+                    else:
+                        val = self._advance().value
+                    attrs[key] = val
+                else:
+                    attrs[key] = True
+                self._match(TokenType.COMMA)  # optional comma separator
+            else:
+                self._advance()
+        self._expect(TokenType.RPAREN)
+        return attrs
+
+    def _parse_arguments_block(self) -> dict[str, dict[str, Any]]:
+        """Parse arguments block:
+            arguments
+                x double {mustBeNumeric}
+                y (1,1) double = 0
+                opts.Method char = 'default'
+            end
+        Returns dict of param_name -> {type, size, validation, default}.
+        """
+        specs: dict[str, dict[str, Any]] = {}
+        self._expect(TokenType.ARGUMENTS)
+        self._consume_stmt_end()
+        self._skip_newlines()
+
+        while not self._check(TokenType.END) and not self._check(TokenType.EOF):
+            if self._check(TokenType.IDENTIFIER):
+                param_name = self._advance().value
+                spec: dict[str, Any] = {}
+
+                # Optional size spec: (1,1), (:,1), etc.
+                if self._check(TokenType.LPAREN):
+                    self._advance()  # consume '('
+                    size_parts = []
+                    while not self._check(TokenType.RPAREN) and not self._check(TokenType.EOF):
+                        size_parts.append(self._advance().value)
+                        self._match(TokenType.COMMA)
+                    self._expect(TokenType.RPAREN)
+                    spec['size'] = size_parts
+
+                # Optional type annotation
+                if self._check(TokenType.IDENTIFIER):
+                    spec['type'] = self._advance().value
+
+                # Optional validation: {mustBeNumeric, mustBePositive}
+                if self._check(TokenType.LBRACE):
+                    self._advance()  # consume '{'
+                    validators = []
+                    while not self._check(TokenType.RBRACE) and not self._check(TokenType.EOF):
+                        validators.append(self._advance().value)
+                        self._match(TokenType.COMMA)
+                    self._expect(TokenType.RBRACE)
+                    spec['validation'] = validators
+
+                # Optional default value
+                if self._match(TokenType.ASSIGN):
+                    if self._check(TokenType.NUMBER):
+                        spec['default'] = self._advance().value
+                    elif self._check(TokenType.STRING):
+                        spec['default'] = self._advance().value
+                    elif self._check(TokenType.IDENTIFIER):
+                        spec['default'] = self._advance().value
+                    else:
+                        spec['default'] = None
+
+                self._consume_stmt_end()
+                specs[param_name] = spec
+            else:
+                self._advance()
+
+        self._expect(TokenType.END)
+        self._consume_stmt_end()
+        return specs
+
+    def _parse_properties_block(self, props: dict, attrs: dict, block_attrs: dict | None = None):
         """Parse properties block."""
         self._skip_newlines()
         while not self._check(TokenType.END) and not self._check(TokenType.EOF):
@@ -303,20 +411,24 @@ class Parser:
                     default_val = self._parse_expr()
                 self._consume_stmt_end()
                 props[prop_name] = default_val
-                attrs[prop_name] = {}
+                # Merge block-level attrs with per-property attrs
+                prop_attr = dict(block_attrs) if block_attrs else {}
+                attrs[prop_name] = prop_attr
             else:
                 self._advance()
         self._expect(TokenType.END)
         self._consume_stmt_end()
 
-    def _parse_methods_block(self, meths: dict, attrs: dict):
+    def _parse_methods_block(self, meths: dict, attrs: dict, block_attrs: dict | None = None):
         """Parse methods block."""
         self._skip_newlines()
         while not self._check(TokenType.END) and not self._check(TokenType.EOF):
             if self._check(TokenType.FUNCTION):
                 func = self._parse_func_def()
                 meths[func.name] = func
-                attrs[func.name] = {}
+                # Merge block-level attrs with per-method attrs
+                meth_attr = dict(block_attrs) if block_attrs else {}
+                attrs[func.name] = meth_attr
             else:
                 self._advance()
         self._expect(TokenType.END)
@@ -381,18 +493,49 @@ class Parser:
             self._consume_stmt_end()
             return [Assignment(targets=[target], value=value)]
 
-        # Check for command-style syntax: grid on, hold on, etc.
+        # Check for command-style syntax: func arg1 arg2
+        # In MATLAB, ANY function can use command syntax: `func arg1 arg2` ≡ `func('arg1', 'arg2')`
+        # Triggered when an identifier is followed by another identifier/number/string/keyword
+        # (but NOT by '=' or '(' which indicate assignment or function call)
+        _CMD_TRIGGER_TYPES = {
+            TokenType.IDENTIFIER, TokenType.STRING, TokenType.NUMBER,
+            TokenType.FUNCTION, TokenType.END, TokenType.IF, TokenType.ELSEIF,
+            TokenType.ELSE, TokenType.FOR, TokenType.WHILE, TokenType.SWITCH,
+            TokenType.CASE, TokenType.OTHERWISE, TokenType.TRY, TokenType.CATCH,
+            TokenType.RETURN, TokenType.BREAK, TokenType.CONTINUE,
+            TokenType.TRUE, TokenType.FALSE, TokenType.GLOBAL, TokenType.PERSISTENT,
+        } if hasattr(TokenType, 'TRUE') else {
+            TokenType.IDENTIFIER, TokenType.STRING, TokenType.NUMBER,
+            TokenType.FUNCTION, TokenType.END, TokenType.IF, TokenType.ELSEIF,
+            TokenType.ELSE, TokenType.FOR, TokenType.WHILE, TokenType.SWITCH,
+            TokenType.CASE, TokenType.OTHERWISE, TokenType.TRY, TokenType.CATCH,
+            TokenType.RETURN, TokenType.BREAK, TokenType.CONTINUE,
+            TokenType.GLOBAL, TokenType.PERSISTENT,
+        }
         if (self._check(TokenType.IDENTIFIER)
                 and self.pos + 1 < len(self.tokens)
-                and self.tokens[self.pos + 1].type == TokenType.IDENTIFIER):
-            # Known command-style functions
-            cmd_funcs = {"grid", "hold", "box", "shading", "colormap"}
+                and self.tokens[self.pos + 1].type in _CMD_TRIGGER_TYPES):
             name = self._peek().value
-            if name in cmd_funcs:
-                self._advance()  # consume function name
-                arg = self._advance().value  # consume argument
-                self._consume_stmt_end()
-                return [ExprStmt(expr=FuncCallExpr(name=name, args=[StringLiteral(value=arg)]))]
+            self._advance()  # consume function name
+            args = []
+            # Collect all arguments until end of line
+            # In MATLAB command syntax, everything after the function name is treated as string arguments
+            while not self._check(TokenType.NEWLINE) and not self._check(TokenType.EOF):
+                if self._check(TokenType.SEMICOLON):
+                    self._advance()
+                    break
+                # Collect tokens for this argument - collect ALL non-delimiter tokens
+                arg_parts = []
+                while (not self._check(TokenType.NEWLINE)
+                       and not self._check(TokenType.EOF)
+                       and not self._check(TokenType.SEMICOLON)
+                       and not self._check(TokenType.COMMA)):
+                    tok = self._advance()
+                    arg_parts.append(str(tok.value))
+                if arg_parts:
+                    args.append(StringLiteral(value=" ".join(arg_parts)))
+            self._skip_newlines()
+            return [ExprStmt(expr=FuncCallExpr(name=name, args=args))]
 
         # Parse as expression first, then check for assignment
         save = self.pos
@@ -507,9 +650,18 @@ class Parser:
                 self._advance()
                 args: list[Expr] = []
                 if not self._check(TokenType.RPAREN):
-                    args.append(self._parse_expr())
-                    while self._match(TokenType.COMMA):
+                    # Handle ':' as "all" in indexing context
+                    if self._check(TokenType.COLON):
+                        args.append(StringLiteral(value=":"))
+                        self._advance()
+                    else:
                         args.append(self._parse_expr())
+                    while self._match(TokenType.COMMA):
+                        if self._check(TokenType.COLON):
+                            args.append(StringLiteral(value=":"))
+                            self._advance()
+                        else:
+                            args.append(self._parse_expr())
                 self._expect(TokenType.RPAREN)
                 if isinstance(expr, Identifier):
                     expr = FuncCallExpr(name=expr.name, args=args)

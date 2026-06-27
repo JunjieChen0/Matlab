@@ -46,7 +46,12 @@ Thumbs.db
 *.pdf
 .matpy_history
 
+# Crash dumps
+*.stackdump
+
 # Test artifacts
 .pytest_cache/
 .coverage
 htmlcov/
+test.bin
+test.txt

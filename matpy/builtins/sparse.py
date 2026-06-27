@@ -127,3 +127,181 @@ def _svds(A, k=6):
     else:
         u, s, vt = scipy_svds(data, k=int(k))
     return Mat(u), Mat(s), Mat(vt)
+
+
+# ── Additional Sparse Functions ────────────────────────────────
+
+def _issparse(x):
+    """Check if matrix is sparse."""
+    if isinstance(x, Mat):
+        return sp.issparse(x.data)
+    return False
+
+
+def _nnz(x):
+    """Number of nonzero elements."""
+    if isinstance(x, Mat):
+        data = x.data
+        if sp.issparse(data):
+            return data.nnz
+        return np.count_nonzero(data)
+    return np.count_nonzero(np.array(x))
+
+
+def _nonzeros(x):
+    """Nonzero elements."""
+    if isinstance(x, Mat):
+        data = x.data
+        if sp.issparse(data):
+            return Mat(data.data)
+        return Mat(data[data != 0])
+    return Mat(np.array([]))
+
+
+@register("nzmax")
+def _nzmax(x):
+    """Amount of storage allocated for nonzero elements."""
+    if isinstance(x, Mat):
+        data = x.data
+        if sp.issparse(data):
+            return data.nnz
+        return np.count_nonzero(data)
+    return 0
+
+
+@register("spfun")
+def _spfun(func, x):
+    """Apply function to nonzero elements."""
+    if isinstance(x, Mat):
+        data = x.data
+        if sp.issparse(data):
+            result = data.copy()
+            result.data = func(data.data)
+            return Mat(result)
+    return Mat(func(x.data if isinstance(x, Mat) else np.array(x)))
+
+
+@register("spy")
+def _spy(x, markersize=None):
+    """Spy plot of sparse matrix."""
+    import matplotlib.pyplot as plt
+    if isinstance(x, Mat):
+        data = x.data
+        if sp.issparse(data):
+            plt.spy(data, markersize=markersize)
+        else:
+            plt.spy(data, markersize=markersize)
+    plt.show()
+
+
+def _spconvert(x):
+    """Convert from triplet format to sparse."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    if data.shape[1] >= 3:
+        i = data[:, 0].astype(int) - 1
+        j = data[:, 1].astype(int) - 1
+        v = data[:, 2]
+        if data.shape[1] >= 4:
+            m = int(data[-1, 0])
+            n = int(data[-1, 1])
+            return Mat(sp.csr_matrix((v, (i, j)), shape=(m, n)))
+        return Mat(sp.csr_matrix((v, (i, j))))
+    return Mat(sp.csr_matrix((1, 1)))
+
+
+@register("bicg")
+def _bicg(A, b, tol=1e-6, maxiter=None):
+    """Biconjugate gradient method."""
+    from scipy.sparse.linalg import bicg
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    b_data = b.data if isinstance(b, Mat) else np.array(b)
+    x, info = bicg(A_data, b_data.flatten(), tol=float(tol), maxiter=maxiter)
+    return Mat(x), info
+
+
+@register("bicgstab")
+def _bicgstab(A, b, tol=1e-6, maxiter=None):
+    """Biconjugate gradient stabilized method."""
+    from scipy.sparse.linalg import bicgstab
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    b_data = b.data if isinstance(b, Mat) else np.array(b)
+    x, info = bicgstab(A_data, b_data.flatten(), tol=float(tol), maxiter=maxiter)
+    return Mat(x), info
+
+
+@register("cgs")
+def _cgs(A, b, tol=1e-6, maxiter=None):
+    """Conjugate gradient squared method."""
+    from scipy.sparse.linalg import cgs
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    b_data = b.data if isinstance(b, Mat) else np.array(b)
+    x, info = cgs(A_data, b_data.flatten(), tol=float(tol), maxiter=maxiter)
+    return Mat(x), info
+
+
+@register("gmres")
+def _gmres(A, b, tol=1e-6, maxiter=None):
+    """Generalized minimal residual method."""
+    from scipy.sparse.linalg import gmres
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    b_data = b.data if isinstance(b, Mat) else np.array(b)
+    x, info = gmres(A_data, b_data.flatten(), tol=float(tol), maxiter=maxiter)
+    return Mat(x), info
+
+
+@register("qmr")
+def _qmr(A, b, tol=1e-6, maxiter=None):
+    """Quasi-minimal residual method."""
+    from scipy.sparse.linalg import qmr
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    b_data = b.data if isinstance(b, Mat) else np.array(b)
+    x, info = qmr(A_data, b_data.flatten(), tol=float(tol), maxiter=maxiter)
+    return Mat(x), info
+
+
+@register("pcg")
+def _pcg(A, b, tol=1e-6, maxiter=None):
+    """Preconditioned conjugate gradient method."""
+    from scipy.sparse.linalg import cg
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    b_data = b.data if isinstance(b, Mat) else np.array(b)
+    x, info = cg(A_data, b_data.flatten(), tol=float(tol), maxiter=maxiter)
+    return Mat(x), info
+
+
+@register("minres")
+def _minres(A, b, tol=1e-6, maxiter=None):
+    """Minimum residual method."""
+    from scipy.sparse.linalg import minres
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    b_data = b.data if isinstance(b, Mat) else np.array(b)
+    x, info = minres(A_data, b_data.flatten(), tol=float(tol), maxiter=maxiter)
+    return Mat(x), info
+
+
+@register("lsqr")
+def _lsqr(A, b, tol=1e-6, maxiter=None):
+    """Least squares solver."""
+    from scipy.sparse.linalg import lsqr
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    b_data = b.data if isinstance(b, Mat) else np.array(b)
+    result = lsqr(A_data, b_data.flatten(), atol=float(tol), btol=float(tol), iter_lim=maxiter)
+    return Mat(result[0]), result[1]
+
+
+@register("luinc")
+def _luinc(A, droptol):
+    """Incomplete LU factorization."""
+    from scipy.sparse.linalg import spilu
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    ilu = spilu(A_data, drop_tol=float(droptol))
+    return Mat(ilu.L), Mat(ilu.U)
+
+
+@register("ichol")
+def _ichol(A):
+    """Incomplete Cholesky factorization."""
+    from scipy.sparse.linalg import spilu
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    ichol = spilu(A_data)
+    return Mat(ichol.L)

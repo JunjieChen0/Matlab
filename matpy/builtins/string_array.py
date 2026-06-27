@@ -27,11 +27,6 @@ def _string(*args):
         return StringArray([str(a) for a in args])
 
 
-@register("isstring")
-def _isstring(x):
-    return isinstance(x, StringArray)
-
-
 @register("char")
 def _char(x):
     if isinstance(x, StringArray):

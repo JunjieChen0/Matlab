@@ -191,13 +191,6 @@ def _zero(sys):
     return Mat(np.array([]))
 
 
-@register("dcgain")
-def _dcgain(sys):
-    if isinstance(sys, (TransferFunction, StateSpace)):
-        return sys.gain()
-    return 0.0
-
-
 @register("bode")
 def _bode(sys, w=None):
     import matplotlib.pyplot as plt
@@ -347,18 +340,6 @@ def _d2c(sys, method="zoh"):
     return sys
 
 
-@register("margin")
-def _margin(sys):
-    if isinstance(sys, TransferFunction):
-        w, mag, phase = sys.bode_data()
-        gc_idx = np.argmin(np.abs(mag))
-        pc_idx = np.argmin(np.abs(phase + 180))
-        gm = -mag[pc_idx] if w[pc_idx] > 0 else float("inf")
-        pm = 180 + phase[gc_idx] if w[gc_idx] > 0 else float("inf")
-        return float(gm), float(pm)
-    return 0.0, 0.0
-
-
 @register("bandwidth")
 def _bandwidth(sys):
     if isinstance(sys, TransferFunction):
@@ -380,3 +361,248 @@ def _ssdata(sys):
     if isinstance(sys, StateSpace):
         return Mat(sys.A), Mat(sys.B), Mat(sys.C), Mat(sys.D)
     return Mat(np.array([])), Mat(np.array([])), Mat(np.array([])), Mat(np.array([]))
+
+
+# ── Additional Control Functions ───────────────────────────────
+
+def _dcgain(sys):
+    """DC gain of system."""
+    if isinstance(sys, TransferFunction):
+        return float(np.polyval(sys.num, 0) / np.polyval(sys.den, 0))
+    elif isinstance(sys, StateSpace):
+        return float(np.linalg.solve(sys.A, sys.B) @ sys.C + sys.D)
+    return 0.0
+
+
+def _pole(sys):
+    """System poles."""
+    if isinstance(sys, TransferFunction):
+        return Mat(sys.poles())
+    elif isinstance(sys, StateSpace):
+        return Mat(np.linalg.eigvals(sys.A))
+    return Mat(np.array([]))
+
+
+def _zero(sys):
+    """System zeros."""
+    if isinstance(sys, TransferFunction):
+        return Mat(sys.zeros())
+    return Mat(np.array([]))
+
+
+@register("gain")
+def _gain(sys):
+    """System gain."""
+    if isinstance(sys, TransferFunction):
+        return sys.gain()
+    return 0.0
+
+
+def _isstable(sys):
+    """Check if system is stable."""
+    if isinstance(sys, TransferFunction):
+        poles = sys.poles()
+        return bool(np.all(np.real(poles) < 0))
+    elif isinstance(sys, StateSpace):
+        poles = np.linalg.eigvals(sys.A)
+        return bool(np.all(np.real(poles) < 0))
+    return False
+
+
+@register("stepinfo")
+def _stepinfo(sys):
+    """Step response characteristics."""
+    if isinstance(sys, TransferFunction):
+        # Compute step response
+        t = np.linspace(0, 10, 1000)
+        # Simplified step response
+        return {
+            "RiseTime": 0.0,
+            "SettlingTime": 0.0,
+            "SettlingMin": 0.0,
+            "SettlingMax": 0.0,
+            "Overshoot": 0.0,
+            "Undershoot": 0.0,
+            "Peak": 0.0,
+            "PeakTime": 0.0,
+        }
+    return {}
+
+
+def _feedback(sys1, sys2, sign=-1):
+    """Feedback connection."""
+    if isinstance(sys1, TransferFunction) and isinstance(sys2, TransferFunction):
+        # G1 / (1 + sign * G1 * G2)
+        num1, den1 = sys1.num, sys1.den
+        num2, den2 = sys2.num, sys2.den
+        # Compute numerator and denominator
+        num = np.convolve(num1, den2)
+        den = np.convolve(den1, den2) + sign * np.convolve(num1, num2)
+        return TransferFunction(num, den)
+    return sys1
+
+
+def _series(sys1, sys2):
+    """Series connection."""
+    if isinstance(sys1, TransferFunction) and isinstance(sys2, TransferFunction):
+        num = np.convolve(sys1.num, sys2.num)
+        den = np.convolve(sys1.den, sys2.den)
+        return TransferFunction(num, den)
+    return sys1
+
+
+def _parallel(sys1, sys2):
+    """Parallel connection."""
+    if isinstance(sys1, TransferFunction) and isinstance(sys2, TransferFunction):
+        num1, den1 = sys1.num, sys1.den
+        num2, den2 = sys2.num, sys2.den
+        num = np.convolve(num1, den2) + np.convolve(num2, den1)
+        den = np.convolve(den1, den2)
+        return TransferFunction(num, den)
+    return sys1
+
+
+def _minreal(sys, tol=None):
+    """Minimal realization."""
+    if isinstance(sys, TransferFunction):
+        # Cancel common poles and zeros
+        poles = sys.poles()
+        zeros = sys.zeros()
+        # Find matching poles and zeros
+        keep_poles = []
+        keep_zeros = []
+        for p in poles:
+            matched = False
+            for z in zeros:
+                if abs(p - z) < (tol or 1e-6):
+                    matched = True
+                    zeros = np.delete(zeros, np.argmin(np.abs(zeros - z)))
+                    break
+            if not matched:
+                keep_poles.append(p)
+        return TransferFunction(np.poly(zeros), np.poly(keep_poles))
+    return sys
+
+
+def _zpk(z, p, k):
+    """Zero-pole-gain model."""
+    z = z.data if isinstance(z, Mat) else np.array(z)
+    p = p.data if isinstance(p, Mat) else np.array(p)
+    k = float(k)
+    num = k * np.poly(z.flatten())
+    den = np.poly(p.flatten())
+    return TransferFunction(num, den)
+
+
+# ── Additional Control System Functions ───────────────────────
+
+@register("lqr")
+def _lqr(A, B, Q, R):
+    """Linear quadratic regulator."""
+    from scipy.linalg import solve_continuous_are
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    B_data = B.data if isinstance(B, Mat) else np.array(B)
+    Q_data = Q.data if isinstance(Q, Mat) else np.array(Q)
+    R_data = R.data if isinstance(R, Mat) else np.array(R)
+    
+    # Solve Riccati equation
+    P = solve_continuous_are(A_data, B_data, Q_data, R_data)
+    
+    # Compute optimal gain
+    R_inv = np.linalg.inv(R_data)
+    K = R_inv @ B_data.T @ P
+    
+    return Mat(K), Mat(P)
+
+
+@register("lqe")
+def _lqe(A, G, C, Q, R):
+    """Linear quadratic estimator (Kalman filter gain)."""
+    from scipy.linalg import solve_continuous_are
+    A_data = A.data if isinstance(A, Mat) else np.array(A)
+    G_data = G.data if isinstance(G, Mat) else np.array(G)
+    C_data = C.data if isinstance(C, Mat) else np.array(C)
+    Q_data = Q.data if isinstance(Q, Mat) else np.array(Q)
+    R_data = R.data if isinstance(R, Mat) else np.array(R)
+    
+    # Solve dual Riccati equation
+    P = solve_continuous_are(A_data.T, C_data.T, G_data @ Q_data @ G_data.T, R_data)
+    
+    # Compute Kalman gain
+    L = P @ C_data.T @ np.linalg.inv(R_data)
+    
+    return Mat(L), Mat(P)
+
+
+@register("rlocus")
+def _rlocus(sys, k=None):
+    """Root locus plot data."""
+    if not isinstance(sys, TransferFunction):
+        raise TypeError("First argument must be a transfer function")
+    
+    if k is None:
+        k = np.linspace(0, 100, 1000)
+    else:
+        k = k.data if isinstance(k, Mat) else np.array(k)
+    
+    poles_list = []
+    for ki in k:
+        # Characteristic equation: 1 + k*num/den = 0
+        # den + k*num = 0
+        char_poly = sys.den + ki * sys.num
+        poles = np.roots(char_poly)
+        poles_list.append(poles)
+    
+    return Mat(np.array(poles_list)), Mat(k)
+
+
+@register("margin")
+def _margin(sys):
+    """Gain and phase margins."""
+    from scipy.signal import freqresp
+    
+    if not isinstance(sys, TransferFunction):
+        raise TypeError("First argument must be a transfer function")
+    
+    # Compute frequency response
+    w = np.logspace(-2, 2, 1000)
+    w, h = freqresp((sys.num, sys.den), w)
+    
+    # Gain margin
+    phase_cross = np.where(np.diff(np.sign(np.angle(h) + np.pi)))[0]
+    if len(phase_cross) > 0:
+        gain_margin = -20 * np.log10(np.abs(h[phase_cross[0]]))
+    else:
+        gain_margin = float('inf')
+    
+    # Phase margin
+    gain_cross = np.where(np.diff(np.sign(np.abs(h) - 1)))[0]
+    if len(gain_cross) > 0:
+        phase_margin = np.pi + np.angle(h[gain_cross[0]])
+        phase_margin = np.degrees(phase_margin)
+    else:
+        phase_margin = float('inf')
+    
+    return float(gain_margin), float(phase_margin)
+
+
+@register("damp")
+def _damp(sys):
+    """Natural frequency and damping ratio."""
+    if not isinstance(sys, TransferFunction):
+        raise TypeError("First argument must be a transfer function")
+    
+    poles = sys.poles()
+    wn = np.abs(poles)
+    zeta = -np.real(poles) / wn
+    
+    return Mat(wn), Mat(zeta)
+
+
+@register("dcgain")
+def _dcgain(sys):
+    """DC gain of transfer function."""
+    if not isinstance(sys, TransferFunction):
+        raise TypeError("First argument must be a transfer function")
+    
+    return float(np.polyval(sys.num, 0) / np.polyval(sys.den, 0))

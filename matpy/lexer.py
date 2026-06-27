@@ -235,7 +235,9 @@ class Lexer:
             elif ch == "\\":
                 self._advance()
                 esc = self._peek()
-                if esc == "n":
+                if esc is None:
+                    raise LexError("Unterminated escape sequence at end of string", line, col)
+                elif esc == "n":
                     chars.append("\n")
                     self._advance()
                 elif esc == "t":

@@ -299,3 +299,161 @@ def _integral2(func, a, b, c, d, *args):
     d_val = float(d.data.flat[0]) if isinstance(d, Mat) else float(d)
     result, _ = integrate.dblquad(func, a, b, c_val, d_val, args=args)
     return float(result)
+
+
+@register("integral3")
+def _integral3(func, a, b, c, d, e, f, *args):
+    """Triple integral."""
+    from scipy import integrate
+    a = float(a.data.flat[0]) if isinstance(a, Mat) else float(a)
+    b = float(b.data.flat[0]) if isinstance(b, Mat) else float(b)
+    c_val = float(c.data.flat[0]) if isinstance(c, Mat) else float(c)
+    d_val = float(d.data.flat[0]) if isinstance(d, Mat) else float(d)
+    e_val = float(e.data.flat[0]) if isinstance(e, Mat) else float(e)
+    f_val = float(f.data.flat[0]) if isinstance(f, Mat) else float(f)
+    result, _ = integrate.tplquad(func, a, b, c_val, d_val, e_val, f_val, args=args)
+    return float(result)
+
+
+@register("ode23")
+def _ode23(func, tspan, y0, *args):
+    """ODE solver (2nd/3rd order)."""
+    from scipy.integrate import solve_ivp
+    tspan_data = tspan.data if isinstance(tspan, Mat) else np.array(tspan)
+    y0_data = y0.data if isinstance(y0, Mat) else np.array(y0)
+    result = solve_ivp(func, [tspan_data[0], tspan_data[-1]], y0_data.flatten(), method='RK23', args=args)
+    return Mat(result.t), Mat(result.y)
+
+
+@register("ode45")
+def _ode45(func, tspan, y0, *args):
+    """ODE solver (4th/5th order)."""
+    from scipy.integrate import solve_ivp
+    tspan_data = tspan.data if isinstance(tspan, Mat) else np.array(tspan)
+    y0_data = y0.data if isinstance(y0, Mat) else np.array(y0)
+    result = solve_ivp(func, [tspan_data[0], tspan_data[-1]], y0_data.flatten(), method='RK45', args=args)
+    return Mat(result.t), Mat(result.y)
+
+
+@register("ode15s")
+def _ode15s(func, tspan, y0, *args):
+    """Stiff ODE solver."""
+    from scipy.integrate import solve_ivp
+    tspan_data = tspan.data if isinstance(tspan, Mat) else np.array(tspan)
+    y0_data = y0.data if isinstance(y0, Mat) else np.array(y0)
+    result = solve_ivp(func, [tspan_data[0], tspan_data[-1]], y0_data.flatten(), method='BDF', args=args)
+    return Mat(result.t), Mat(result.y)
+
+
+@register("ode23s")
+def _ode23s(func, tspan, y0, *args):
+    """Stiff ODE solver (low order)."""
+    from scipy.integrate import solve_ivp
+    tspan_data = tspan.data if isinstance(tspan, Mat) else np.array(tspan)
+    y0_data = y0.data if isinstance(y0, Mat) else np.array(y0)
+    result = solve_ivp(func, [tspan_data[0], tspan_data[-1]], y0_data.flatten(), method='Radau', args=args)
+    return Mat(result.t), Mat(result.y)
+
+
+@register("bvp4c")
+def _bvp4c(odefun, bcfun, solinit, *args):
+    """Boundary value problem solver."""
+    from scipy.integrate import solve_bvp
+    x = solinit.get("x", np.linspace(0, 1, 10))
+    y = solinit.get("y", np.zeros((2, len(x))))
+    result = solve_bvp(odefun, bcfun, x, y, args=args)
+    return Mat(result.x), Mat(result.y)
+
+
+@register("bvp5c")
+def _bvp5c(odefun, bcfun, solinit, *args):
+    """Boundary value problem solver (5th order)."""
+    from scipy.integrate import solve_bvp
+    x = solinit.get("x", np.linspace(0, 1, 10))
+    y = solinit.get("y", np.zeros((2, len(x))))
+    result = solve_bvp(odefun, bcfun, x, y, args=args)
+    return Mat(result.x), Mat(result.y)
+
+
+@register("interp1")
+def _interp1(x, y, xq, method="linear"):
+    """1-D interpolation."""
+    from scipy.interpolate import interp1d
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    xqd = xq.data if isinstance(xq, Mat) else np.array(xq)
+    f = interp1d(xd.flatten(), yd.flatten(), kind=str(method))
+    return Mat(f(xqd.flatten()))
+
+
+@register("interp2")
+def _interp2(x, y, v, xq, yq, method="linear"):
+    """2-D interpolation."""
+    from scipy.interpolate import RegularGridInterpolator
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    vd = v.data if isinstance(v, Mat) else np.array(v)
+    xqd = xq.data if isinstance(xq, Mat) else np.array(xq)
+    yqd = yq.data if isinstance(yq, Mat) else np.array(yq)
+    interp = RegularGridInterpolator((xd.flatten(), yd.flatten()), vd, method=str(method))
+    points = np.column_stack([xqd.flatten(), yqd.flatten()])
+    result = interp(points)
+    return Mat(result.reshape(xqd.shape))
+
+
+@register("interp3")
+def _interp3(x, y, z, v, xq, yq, zq, method="linear"):
+    """3-D interpolation."""
+    from scipy.interpolate import RegularGridInterpolator
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    vd = v.data if isinstance(v, Mat) else np.array(v)
+    xqd = xq.data if isinstance(xq, Mat) else np.array(xq)
+    yqd = yq.data if isinstance(yq, Mat) else np.array(yq)
+    zqd = zq.data if isinstance(zq, Mat) else np.array(zq)
+    interp = RegularGridInterpolator((xd.flatten(), yd.flatten(), zd.flatten()), vd, method=str(method))
+    points = np.column_stack([xqd.flatten(), yqd.flatten(), zqd.flatten()])
+    result = interp(points)
+    return Mat(result.reshape(xqd.shape))
+
+
+@register("spline")
+def _spline(x, y, xq):
+    """Cubic spline interpolation."""
+    from scipy.interpolate import CubicSpline
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    xqd = xq.data if isinstance(xq, Mat) else np.array(xq)
+    cs = CubicSpline(xd.flatten(), yd.flatten())
+    return Mat(cs(xqd.flatten()))
+
+
+@register("ppval")
+def _ppval(pp, x):
+    """Evaluate piecewise polynomial."""
+    from scipy.interpolate import PPoly
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    # pp should be a dict with 'breaks' and 'coefs'
+    if isinstance(pp, dict):
+        breaks = pp.get('breaks', [])
+        coefs = pp.get('coefs', [])
+        poly = PPoly(coefs, breaks)
+        return Mat(poly(xd.flatten()))
+    return Mat(np.zeros_like(xd.flatten()))
+
+
+@register("mkpp")
+def _mkpp(breaks, coefs):
+    """Make piecewise polynomial."""
+    bd = breaks.data if isinstance(breaks, Mat) else np.array(breaks)
+    cd = coefs.data if isinstance(coefs, Mat) else np.array(coefs)
+    return {"breaks": bd.flatten(), "coefs": cd}
+
+
+@register("unmkpp")
+def _unmkpp(pp):
+    """Extract piecewise polynomial."""
+    if isinstance(pp, dict):
+        return pp.get('breaks', []), pp.get('coefs', []), [], []
+    return [], [], [], []

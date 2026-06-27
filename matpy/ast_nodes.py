@@ -177,6 +177,7 @@ class FuncDef(Stmt):
     params: list[str] = field(default_factory=list)
     returns: list[str] = field(default_factory=list)
     body: list[Stmt] = field(default_factory=list)
+    arg_specs: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass
@@ -193,6 +194,7 @@ class PersistentStmt(Stmt):
 class ClassDef(Stmt):
     name: str
     superclass: str | None = None
+    class_attrs: dict[str, Any] = field(default_factory=dict)
     properties: dict[str, Expr | None] = field(default_factory=dict)
     property_attrs: dict[str, dict[str, Any]] = field(default_factory=dict)
     methods: dict[str, FuncDef] = field(default_factory=dict)

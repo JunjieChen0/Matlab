@@ -3,10 +3,38 @@
 import os
 import numpy as np
 from matpy.builtins import register
-from matpy.runtime.types import Mat
+from matpy.runtime.types import Mat, Struct, CellArray
 
 _file_handles: dict[int, object] = {}
 _next_handle = 1
+
+
+def _scipy_to_matpy(val):
+    """Convert scipy loaded data to MatPy types."""
+    from scipy.io.matlab import mat_struct
+    
+    if isinstance(val, mat_struct):
+        # Convert MATLAB struct to MatPy Struct
+        fields = {}
+        for field_name in val._fieldnames:
+            fields[field_name] = _scipy_to_matpy(getattr(val, field_name))
+        return Struct(fields)
+    elif isinstance(val, np.ndarray):
+        if val.dtype.kind in ('U', 'S', 'O'):
+            # String or object array
+            if val.size == 1:
+                return str(val.flat[0])
+            return val.tolist()
+        elif val.dtype == bool:
+            return Mat(val.astype(bool))
+        else:
+            return Mat(val)
+    elif isinstance(val, (int, float, complex, np.integer, np.floating, np.complexfloating)):
+        return val
+    elif isinstance(val, str):
+        return val
+    else:
+        return val
 
 
 @register("fopen")
@@ -78,15 +106,28 @@ def _csvwrite(filename, data):
 
 @register("load")
 def _load(filename, *args):
+    """Load variables from .mat file.
+    
+    Usage:
+        load(filename) - Load all variables
+        load(filename, 'var1', 'var2') - Load specific variables
+    """
     filename = str(filename)
     if filename.endswith(".mat"):
         try:
             from scipy.io import loadmat
-            data = loadmat(filename)
+            data = loadmat(filename, squeeze_me=True, struct_as_record=False)
             result = {}
             for key, val in data.items():
                 if not key.startswith("__"):
-                    result[key] = Mat(val)
+                    # Convert to MatPy types
+                    result[key] = _scipy_to_matpy(val)
+            
+            # If specific variables requested, filter
+            if args:
+                vars_to_load = [str(a) for a in args]
+                result = {k: v for k, v in result.items() if k in vars_to_load}
+            
             return result
         except ImportError:
             print("scipy required for .mat files")
@@ -119,17 +160,46 @@ def _load(filename, *args):
 
 @register("save")
 def _save(filename, *args):
+    """Save variables to .mat file.
+    
+    Usage:
+        save(filename, var1, var2, ...) - Save variables
+        save(filename, '-struct', s) - Save struct fields
+    """
     filename = str(filename)
     try:
         if filename.endswith(".mat"):
             try:
                 from scipy.io import savemat
                 data = {}
-                for i, arg in enumerate(args):
-                    if isinstance(arg, Mat):
-                        data[f"var{i}"] = arg.data
-                    else:
-                        data[f"var{i}"] = np.array(arg)
+                
+                # Handle -struct option
+                if len(args) >= 2 and str(args[0]) == '-struct':
+                    s = args[1]
+                    if isinstance(s, Struct):
+                        for field in s.field_names():
+                            val = s.get_field(field)
+                            if isinstance(val, Mat):
+                                data[field] = val.data
+                            else:
+                                data[field] = np.array(val)
+                else:
+                    for i, arg in enumerate(args):
+                        if isinstance(arg, Mat):
+                            data[f"var{i}"] = arg.data
+                        elif isinstance(arg, Struct):
+                            # Save struct as nested dict
+                            struct_data = {}
+                            for field in arg.field_names():
+                                val = arg.get_field(field)
+                                if isinstance(val, Mat):
+                                    struct_data[field] = val.data
+                                else:
+                                    struct_data[field] = np.array(val)
+                            data[f"var{i}"] = struct_data
+                        else:
+                            data[f"var{i}"] = np.array(arg)
+                
                 savemat(filename, data)
                 return 0
             except ImportError:
@@ -297,13 +367,22 @@ def _writetable(T, filename):
 
 
 @register("exist")
-def _exist(name, kind="var"):
+def _exist(name, kind="any"):
+    """Check if variable, function, or file exists."""
     name = str(name)
+    kind = str(kind).lower()
     if kind == "file":
         return os.path.exists(name)
     elif kind == "dir":
         return os.path.isdir(name)
-    return False
+    elif kind == "var":
+        # Check in caller's scope - simplified
+        return False
+    elif kind in ("func", "builtin"):
+        # Check if function exists
+        from matpy.builtins import get_builtin
+        return get_builtin(name) is not None
+    return os.path.exists(name)
 
 
 @register("dir")
@@ -350,6 +429,162 @@ def _mkdir(path):
 def _delete(filename):
     try:
         os.remove(str(filename))
+        return 0
+    except Exception as e:
+        print(f"Error: {e}")
+        return -1
+
+
+# ── Additional File I/O Functions ──────────────────────────────
+
+@register("isfile")
+def _isfile(path):
+    """Check if path is a file."""
+    return os.path.isfile(str(path))
+
+
+@register("isfolder")
+def _isfolder(path):
+    """Check if path is a folder."""
+    return os.path.isdir(str(path))
+
+
+@register("filesep")
+def _filesep():
+    """File separator for current platform."""
+    return os.sep
+
+
+@register("pathsep")
+def _pathsep():
+    """Path separator for current platform."""
+    return os.pathsep
+
+
+@register("fullfile")
+def _fullfile(*args):
+    """Build full file path."""
+    return os.path.join(*[str(a) for a in args])
+
+
+@register("fileparts")
+def _fileparts(filepath):
+    """Decompose file path."""
+    filepath = str(filepath)
+    directory = os.path.dirname(filepath)
+    name = os.path.basename(filepath)
+    base, ext = os.path.splitext(name)
+    return directory, base, ext
+
+
+@register("fileattrib")
+def _fileattrib(filepath):
+    """Get file attributes."""
+    filepath = str(filepath)
+    if not os.path.exists(filepath):
+        return None
+    stat = os.stat(filepath)
+    return {
+        "Name": filepath,
+        "datenum": stat.st_mtime,
+        "bytes": stat.st_size,
+        "isdir": os.path.isdir(filepath),
+        "isfile": os.path.isfile(filepath),
+    }
+
+
+@register("tempname")
+def _tempname():
+    """Generate temporary file name."""
+    import tempfile
+    # Use NamedTemporaryFile instead of insecure mktemp()
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        return f.name
+
+
+@register("tempdir")
+def _tempdir():
+    """Get temporary directory."""
+    import tempfile
+    return tempfile.gettempdir()
+
+
+@register("addpath")
+def _addpath(*args):
+    """Add directory to MATLAB path."""
+    import sys
+    for arg in args:
+        path = str(arg)
+        if path not in sys.path:
+            sys.path.insert(0, path)
+    return sys.path
+
+
+@register("rmpath")
+def _rmpath(*args):
+    """Remove directory from MATLAB path."""
+    import sys
+    for arg in args:
+        path = str(arg)
+        if path in sys.path:
+            sys.path.remove(path)
+    return sys.path
+
+
+@register("path")
+def _path(*args):
+    """Get or set MATLAB path."""
+    import sys
+    if args:
+        # Prepend new paths to existing path (MATLAB-compatible behavior)
+        new_paths = [str(a) for a in args]
+        # Remove duplicates while preserving order
+        existing = [p for p in sys.path if p not in new_paths]
+        sys.path = new_paths + existing
+    return os.pathsep.join(sys.path)
+
+
+@register("genpath")
+def _genpath(root):
+    """Generate path string."""
+    root = str(root)
+    paths = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        paths.append(dirpath)
+    return os.pathsep.join(paths)
+
+
+@register("fileread")
+def _fileread(filename):
+    """Read entire file as string."""
+    filename = str(filename)
+    try:
+        with open(filename, 'r') as f:
+            return f.read()
+    except Exception as e:
+        print(f"Error: {e}")
+        return ""
+
+
+@register("readlines")
+def _readlines(filename):
+    """Read file as list of lines."""
+    filename = str(filename)
+    try:
+        with open(filename, 'r') as f:
+            return f.readlines()
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+
+
+@register("writelines")
+def _writelines(filename, lines):
+    """Write list of lines to file."""
+    filename = str(filename)
+    try:
+        with open(filename, 'w') as f:
+            f.writelines(lines)
         return 0
     except Exception as e:
         print(f"Error: {e}")

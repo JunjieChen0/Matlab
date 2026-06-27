@@ -9,28 +9,24 @@ from matpy.runtime.types import Mat
 
 # ── Optimization ──────────────────────────────────────────────
 
-@register("fzero")
 def _fzero(func, x0, *args):
     if callable(func):
         result = optimize.fsolve(func, float(x0), args=args)
         return float(result[0])
     raise RuntimeError("fzero: first argument must be a function")
 
-@register("fminsearch")
 def _fminsearch(func, x0, *args):
     if callable(func):
         result = optimize.minimize(func, float(x0), method='Nelder-Mead', args=args)
         return float(result.x[0])
     raise RuntimeError("fminsearch: first argument must be a function")
 
-@register("fminbnd")
 def _fminbnd(func, a, b, *args):
     if callable(func):
         result = optimize.minimize_scalar(func, bounds=(float(a), float(b)), method='bounded', args=args)
         return float(result.x)
     raise RuntimeError("fminbnd: first argument must be a function")
 
-@register("fmincon")
 def _fmincon(func, x0, A=None, b=None, Aeq=None, beq=None, lb=None, ub=None, *args):
     if callable(func):
         x0 = np.array(x0, dtype=float).flatten()
@@ -52,7 +48,6 @@ def _fmincon(func, x0, A=None, b=None, Aeq=None, beq=None, lb=None, ub=None, *ar
         return Mat(result.x)
     raise RuntimeError("fmincon: first argument must be a function")
 
-@register("linprog")
 def _linprog(c, A=None, b=None, Aeq=None, beq=None, lb=None, ub=None):
     c = np.array(c, dtype=float).flatten()
     A_ub = np.array(A, dtype=float) if A is not None else None
@@ -70,7 +65,6 @@ def _linprog(c, A=None, b=None, Aeq=None, beq=None, lb=None, ub=None):
 
 # ── ODE Solvers ───────────────────────────────────────────────
 
-@register("ode45")
 def _ode45(func, tspan, y0, *args):
     from scipy.integrate import solve_ivp
     tspan = np.array(tspan, dtype=float)
@@ -79,7 +73,6 @@ def _ode45(func, tspan, y0, *args):
     result = solve_ivp(func, tspan, y0, t_eval=t_eval, args=args, method='RK45')
     return Mat(result.t), Mat(result.y)
 
-@register("ode23")
 def _ode23(func, tspan, y0, *args):
     from scipy.integrate import solve_ivp
     tspan = np.array(tspan, dtype=float)
@@ -88,7 +81,6 @@ def _ode23(func, tspan, y0, *args):
     result = solve_ivp(func, tspan, y0, t_eval=t_eval, args=args, method='RK23')
     return Mat(result.t), Mat(result.y)
 
-@register("ode15s")
 def _ode15s(func, tspan, y0, *args):
     from scipy.integrate import solve_ivp
     tspan = np.array(tspan, dtype=float)
@@ -100,14 +92,12 @@ def _ode15s(func, tspan, y0, *args):
 
 # ── Integration ───────────────────────────────────────────────
 
-@register("integral")
 def _integral(func, a, b, *args):
     if callable(func):
         result, _ = integrate.quad(func, float(a), float(b), args=args)
         return float(result)
     raise RuntimeError("integral: first argument must be a function")
 
-@register("integral2")
 def _integral2(func, a, b, c, d, *args):
     if callable(func):
         result, _ = integrate.dblquad(func, float(a), float(b), float(c), float(d), args=args)
@@ -121,7 +111,6 @@ def _quad(func, a, b, *args):
 
 # ── Interpolation ─────────────────────────────────────────────
 
-@register("spline")
 def _spline(x, y, xq):
     from scipy.interpolate import CubicSpline
     xd = x.data if isinstance(x, Mat) else np.array(x).flatten()
@@ -139,13 +128,11 @@ def _pchip(x, y, xq):
     f = PchipInterpolator(xd, yd)
     return Mat(f(xqd))
 
-@register("mkpp")
 def _mkpp(breaks, coefs):
     b = breaks.data if isinstance(breaks, Mat) else np.array(breaks).flatten()
     c = coefs.data if isinstance(coefs, Mat) else np.array(coefs)
     return (b, c)
 
-@register("ppval")
 def _ppval(pp, x):
     from scipy.interpolate import PPoly
     breaks, coefs = pp
@@ -229,7 +216,6 @@ def _corrcoef(x, y=None):
         return Mat(np.corrcoef(xd.flatten(), yd.flatten()))
     return Mat(np.corrcoef(xd))
 
-@register("mode")
 def _mode(x, dim=None):
     data = x.data if isinstance(x, Mat) else np.array(x)
     from scipy import stats as sp_stats
@@ -240,13 +226,11 @@ def _mode(x, dim=None):
     result = sp_stats.mode(data.flatten(), keepdims=True)
     return float(result.mode[0])
 
-@register("prctile")
 def _prctile(x, p):
     data = x.data if isinstance(x, Mat) else np.array(x).flatten()
     p_val = p.data if isinstance(p, Mat) else np.array(p)
     return Mat(np.percentile(data, p_val))
 
-@register("quantile")
 def _quantile(x, q):
     data = x.data if isinstance(x, Mat) else np.array(x).flatten()
     q_val = q.data if isinstance(q, Mat) else np.array(q)
@@ -262,20 +246,17 @@ def _regress(y, X):
     coeffs = np.linalg.lstsq(Xd, yd, rcond=None)[0]
     return Mat(coeffs)
 
-@register("ttest")
 def _ttest(x, mu=0):
     data = x.data if isinstance(x, Mat) else np.array(x).flatten()
     t_stat, p_value = stats.ttest_1samp(data, float(mu))
     return float(t_stat), float(p_value)
 
-@register("ttest2")
 def _ttest2(x, y):
     xd = x.data if isinstance(x, Mat) else np.array(x).flatten()
     yd = y.data if isinstance(y, Mat) else np.array(y).flatten()
     t_stat, p_value = stats.ttest_ind(xd, yd)
     return float(t_stat), float(p_value)
 
-@register("anova1")
 def _anova1(*args):
     groups = []
     for arg in args:
@@ -284,7 +265,6 @@ def _anova1(*args):
     f_stat, p_value = stats.f_oneway(*groups)
     return float(f_stat), float(p_value)
 
-@register("chi2gof")
 def _chi2gof(x, nbins=10):
     data = x.data if isinstance(x, Mat) else np.array(x).flatten()
     observed, bins = np.histogram(data, bins=int(nbins))
@@ -329,6 +309,7 @@ def _sqrtm(x):
 
 @register("kron")
 def _kron(a, b):
+    """Kronecker tensor product."""
     da = a.data if isinstance(a, Mat) else np.array(a)
     db = b.data if isinstance(b, Mat) else np.array(b)
     return Mat(np.kron(da, db))
@@ -379,3 +360,242 @@ def _orth(x):
     tol = max(data.shape) * np.max(s) * np.finfo(float).eps
     rank = np.sum(s > tol)
     return Mat(u[:, :rank])
+
+
+# ── Additional Advanced Math Functions ─────────────────────────
+
+@register("schur")
+def _schur(x):
+    """Schur decomposition."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    T, Z = scipy_linalg.schur(data)
+    return Mat(T), Mat(Z)
+
+
+@register("hess")
+def _hess(x):
+    """Hessenberg decomposition."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    H, P = scipy_linalg.hessenberg(data, calc_q=True)
+    return Mat(H), Mat(P)
+
+
+@register("qz")
+def _qz(a, b):
+    """QZ decomposition."""
+    da = a.data if isinstance(a, Mat) else np.array(a)
+    db = b.data if isinstance(b, Mat) else np.array(b)
+    AA, BB, Q, Z = scipy_linalg.qz(da, db)
+    return Mat(AA), Mat(BB), Mat(Q), Mat(Z)
+
+
+@register("cdf2rdf")
+def _cdf2rdf(v, d):
+    """Convert complex diagonal form to real block diagonal form."""
+    vd = v.data if isinstance(v, Mat) else np.array(v)
+    dd = d.data if isinstance(d, Mat) else np.array(d)
+    return Mat(scipy_linalg.cdf2rdf(vd, dd)[0]), Mat(scipy_linalg.cdf2rdf(vd, dd)[1])
+
+
+@register("rsf2csf")
+def _rsf2csf(t, z):
+    """Convert real Schur form to complex Schur form."""
+    td = t.data if isinstance(t, Mat) else np.array(t)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    return Mat(scipy_linalg.rsf2csf(td, zd)[0]), Mat(scipy_linalg.rsf2csf(td, zd)[1])
+
+
+@register("funm")
+def _funm(x, func):
+    """Matrix function."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_linalg.funm(data, func))
+
+
+@register("signm")
+def _signm(x):
+    """Matrix sign function."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_linalg.signm(data))
+
+
+@register("cosm")
+def _cosm(x):
+    """Matrix cosine."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_linalg.cosm(data))
+
+
+@register("sinm")
+def _sinm(x):
+    """Matrix sine."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_linalg.sinm(data))
+
+
+@register("tanm")
+def _tanm(x):
+    """Matrix tangent."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_linalg.tanm(data))
+
+
+@register("coshm")
+def _coshm(x):
+    """Matrix hyperbolic cosine."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_linalg.coshm(data))
+
+
+@register("sinhm")
+def _sinhm(x):
+    """Matrix hyperbolic sine."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_linalg.sinhm(data))
+
+
+@register("tanhm")
+def _tanhm(x):
+    """Matrix hyperbolic tangent."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_linalg.tanhm(data))
+
+
+def _cond(x, p=None):
+    """Condition number."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    if p is not None:
+        return np.linalg.cond(data, p)
+    return np.linalg.cond(data)
+
+
+@register("rcond")
+def _rcond(x):
+    """Reciprocal condition number."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return 1.0 / np.linalg.cond(data)
+
+
+@register("condest")
+def _condest(x):
+    """1-norm condition number estimate."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return np.linalg.cond(data, 1)
+
+
+@register("normest")
+def _normest(x, tol=None):
+    """2-norm estimate."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return np.linalg.norm(data, 2)
+
+
+@register("rank")
+def _rank(x, tol=None):
+    """Matrix rank."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    if tol is not None:
+        return np.linalg.matrix_rank(data, tol=float(tol))
+    return np.linalg.matrix_rank(data)
+
+
+@register("det")
+def _det(x):
+    """Matrix determinant."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return np.linalg.det(data)
+
+
+@register("inv")
+def _inv(x):
+    """Matrix inverse."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(np.linalg.inv(data))
+
+
+@register("pinv")
+def _pinv(x, tol=None):
+    """Pseudo-inverse."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    if tol is not None:
+        return Mat(np.linalg.pinv(data, rcond=float(tol)))
+    return Mat(np.linalg.pinv(data))
+
+
+@register("trace")
+def _trace(x):
+    """Matrix trace."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return np.trace(data)
+
+
+@register("norm")
+def _norm(x, p=None):
+    """Vector or matrix norm."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    if p is not None:
+        return np.linalg.norm(data, int(p))
+    return np.linalg.norm(data)
+
+
+@register("cross")
+def _cross(a, b):
+    """Cross product."""
+    da = a.data if isinstance(a, Mat) else np.array(a)
+    db = b.data if isinstance(b, Mat) else np.array(b)
+    return Mat(np.cross(da.flatten(), db.flatten()))
+
+
+@register("dot")
+def _dot(a, b):
+    """Dot product."""
+    da = a.data if isinstance(a, Mat) else np.array(a)
+    db = b.data if isinstance(b, Mat) else np.array(b)
+    return np.dot(da.flatten(), db.flatten())
+
+
+def _kron(a, b):
+    """Kronecker tensor product."""
+    da = a.data if isinstance(a, Mat) else np.array(a)
+    db = b.data if isinstance(b, Mat) else np.array(b)
+    return Mat(np.kron(da, db))
+
+
+def _interp1(x, y, xq, method="linear"):
+    """1-D interpolation."""
+    from scipy.interpolate import interp1d
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    xqd = xq.data if isinstance(xq, Mat) else np.array(xq)
+    f = interp1d(xd.flatten(), yd.flatten(), kind=str(method))
+    return Mat(f(xqd.flatten()))
+
+
+def _interp2(x, y, v, xq, yq, method="linear"):
+    """2-D interpolation."""
+    from scipy.interpolate import RegularGridInterpolator
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    vd = v.data if isinstance(v, Mat) else np.array(v)
+    xqd = xq.data if isinstance(xq, Mat) else np.array(xq)
+    yqd = yq.data if isinstance(yq, Mat) else np.array(yq)
+    interp = RegularGridInterpolator((xd.flatten(), yd.flatten()), vd, method=str(method))
+    points = np.column_stack([xqd.flatten(), yqd.flatten()])
+    result = interp(points)
+    return Mat(result.reshape(xqd.shape))
+
+
+def _interp3(x, y, z, v, xq, yq, zq, method="linear"):
+    """3-D interpolation."""
+    from scipy.interpolate import RegularGridInterpolator
+    xd = x.data if isinstance(x, Mat) else np.array(x)
+    yd = y.data if isinstance(y, Mat) else np.array(y)
+    zd = z.data if isinstance(z, Mat) else np.array(z)
+    vd = v.data if isinstance(v, Mat) else np.array(v)
+    xqd = xq.data if isinstance(xq, Mat) else np.array(xq)
+    yqd = yq.data if isinstance(yq, Mat) else np.array(yq)
+    zqd = zq.data if isinstance(zq, Mat) else np.array(zq)
+    interp = RegularGridInterpolator((xd.flatten(), yd.flatten(), zd.flatten()), vd, method=str(method))
+    points = np.column_stack([xqd.flatten(), yqd.flatten(), zqd.flatten()])
+    result = interp(points)
+    return Mat(result.reshape(xqd.shape))

@@ -272,3 +272,198 @@ def _imnoise(img, noise_type="gaussian", *args):
         noise = np.random.randn(*data.shape) * np.sqrt(var)
         return Mat(data + data * noise)
     return Mat(data)
+
+
+# ── Additional Image Processing Functions ──────────────────────
+
+def _imhist(img, nbins=256):
+    """Display histogram of image data."""
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    nbins = int(nbins)
+    hist, bin_edges = np.histogram(data.flatten(), bins=nbins)
+    return Mat(hist), Mat(bin_edges)
+
+
+def _histeq(img, nbins=256):
+    """Enhance contrast using histogram equalization."""
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    nbins = int(nbins)
+    # Normalize to 0-1
+    if data.max() > 1:
+        data = data / 255.0
+    # Compute histogram
+    hist, bin_edges = np.histogram(data.flatten(), bins=nbins, range=(0, 1))
+    # Compute CDF
+    cdf = hist.cumsum()
+    cdf = cdf / cdf[-1]
+    # Equalize
+    equalized = np.interp(data.flatten(), bin_edges[:-1], cdf)
+    return Mat(equalized.reshape(data.shape))
+
+
+def _imadjust(img, low_in=0, high_in=1, low_out=0, high_out=1, gamma=1):
+    """Adjust image intensity values."""
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    low_in = float(low_in)
+    high_in = float(high_in)
+    low_out = float(low_out)
+    high_out = float(high_out)
+    gamma = float(gamma)
+    # Normalize
+    data = (data - low_in) / (high_in - low_in)
+    data = np.clip(data, 0, 1)
+    # Apply gamma
+    data = np.power(data, gamma)
+    # Scale to output range
+    data = data * (high_out - low_out) + low_out
+    return Mat(data)
+
+
+def _imbinarize(img, level=None):
+    """Binarize image."""
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    if level is None:
+        # Use Otsu's method
+        from skimage.filters import threshold_otsu
+        level = threshold_otsu(data)
+    else:
+        level = float(level)
+    return Mat((data > level).astype(np.uint8))
+
+
+def _edge(img, method="sobel"):
+    """Detect edges in image."""
+    from scipy.ndimage import sobel, prewitt, laplace
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    method = str(method).lower()
+    if method == "sobel":
+        sx = sobel(data, axis=0)
+        sy = sobel(data, axis=1)
+        return Mat(np.hypot(sx, sy))
+    elif method == "prewitt":
+        sx = prewitt(data, axis=0)
+        sy = prewitt(data, axis=1)
+        return Mat(np.hypot(sx, sy))
+    elif method == "laplacian":
+        return Mat(np.abs(laplace(data)))
+    return Mat(data)
+
+
+def _imcrop(img, rect=None):
+    """Crop image."""
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    if rect is not None:
+        rect_data = rect.data if isinstance(rect, Mat) else np.array(rect)
+        x, y, w, h = [int(v) for v in rect_data.flat]
+        return Mat(data[y:y+h, x:x+w])
+    return img
+
+
+def _imresize(img, scale):
+    """Resize image."""
+    from scipy.ndimage import zoom
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    if isinstance(scale, Mat):
+        scale = scale.data
+    if isinstance(scale, np.ndarray):
+        if scale.size == 1:
+            scale = float(scale.flat[0])
+            return Mat(zoom(data, (scale, scale)))
+        else:
+            return Mat(zoom(data, tuple(scale.flat)))
+    scale = float(scale)
+    return Mat(zoom(data, (scale, scale)))
+
+
+def _imrotate(img, angle, method="bilinear"):
+    """Rotate image."""
+    from scipy.ndimage import rotate
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    angle = float(angle)
+    if method == "nearest":
+        order = 0
+    elif method == "bilinear":
+        order = 1
+    else:
+        order = 3
+    return Mat(rotate(data, angle, reshape=False, order=order))
+
+
+def _imfilter(img, h):
+    """Filter image with filter kernel."""
+    from scipy.ndimage import convolve
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    h_data = h.data if isinstance(h, Mat) else np.array(h)
+    return Mat(convolve(data, h_data))
+
+
+def _imopen(img, se):
+    """Morphological opening."""
+    from scipy.ndimage import binary_opening, grey_opening
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    se_data = se.data if isinstance(se, Mat) else np.array(se)
+    if data.dtype == bool:
+        return Mat(binary_opening(data, structure=se_data))
+    return Mat(grey_opening(data, footprint=se_data))
+
+
+def _imclose(img, se):
+    """Morphological closing."""
+    from scipy.ndimage import binary_closing, grey_closing
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    se_data = se.data if isinstance(se, Mat) else np.array(se)
+    if data.dtype == bool:
+        return Mat(binary_closing(data, structure=se_data))
+    return Mat(grey_closing(data, footprint=se_data))
+
+
+def _imdilate(img, se):
+    """Morphological dilation."""
+    from scipy.ndimage import binary_dilation, grey_dilation
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    se_data = se.data if isinstance(se, Mat) else np.array(se)
+    if data.dtype == bool:
+        return Mat(binary_dilation(data, structure=se_data))
+    return Mat(grey_dilation(data, footprint=se_data))
+
+
+def _imerode(img, se):
+    """Morphological erosion."""
+    from scipy.ndimage import binary_erosion, grey_erosion
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    se_data = se.data if isinstance(se, Mat) else np.array(se)
+    if data.dtype == bool:
+        return Mat(binary_erosion(data, structure=se_data))
+    return Mat(grey_erosion(data, footprint=se_data))
+
+
+@register("bwlabel")
+def _bwlabel(img, connectivity=8):
+    """Label connected components in binary image."""
+    from scipy.ndimage import label
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    if connectivity == 8:
+        structure = np.ones((3, 3))
+    else:
+        structure = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
+    labeled, num_features = label(data, structure=structure)
+    return Mat(labeled), num_features
+
+
+@register("regionprops")
+def _regionprops(img):
+    """Measure properties of image regions."""
+    from scipy.ndimage import find_objects, center_of_mass
+    data = img.data if isinstance(img, Mat) else np.array(img)
+    labels = np.unique(data)
+    labels = labels[labels > 0]
+    props = []
+    for label_val in labels:
+        mask = data == label_val
+        com = center_of_mass(mask)
+        props.append({
+            "label": int(label_val),
+            "centroid": com,
+            "area": int(mask.sum()),
+        })
+    return props

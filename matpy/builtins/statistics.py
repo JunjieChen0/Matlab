@@ -302,30 +302,6 @@ def _mle(data, name="normal"):
     return Mat(np.array([]))
 
 
-@register("zscore")
-def _zscore(x):
-    data = x.data if isinstance(x, Mat) else np.array(x).flatten()
-    return Mat(scipy_stats.zscore(data))
-
-
-@register("tiedrank")
-def _tiedrank(x):
-    data = x.data if isinstance(x, Mat) else np.array(x).flatten()
-    return Mat(scipy_stats.rankdata(data))
-
-
-@register("geomean")
-def _geomean(x):
-    data = x.data.flatten() if isinstance(x, Mat) else np.array(x).flatten()
-    return float(scipy_stats.gmean(data))
-
-
-@register("harmmean")
-def _harmmean(x):
-    data = x.data.flatten() if isinstance(x, Mat) else np.array(x).flatten()
-    return float(scipy_stats.hmean(data))
-
-
 @register("trimmean")
 def _trimmean(x, percent):
     data = x.data.flatten() if isinstance(x, Mat) else np.array(x).flatten()
@@ -337,18 +313,6 @@ def _trimmean(x, percent):
 def _iqr(x):
     data = x.data.flatten() if isinstance(x, Mat) else np.array(x).flatten()
     return float(scipy_stats.iqr(data))
-
-
-@register("kurtosis")
-def _kurtosis(x):
-    data = x.data.flatten() if isinstance(x, Mat) else np.array(x).flatten()
-    return float(scipy_stats.kurtosis(data))
-
-
-@register("skewness")
-def _skewness(x):
-    data = x.data.flatten() if isinstance(x, Mat) else np.array(x).flatten()
-    return float(scipy_stats.skew(data))
 
 
 @register("mode")
@@ -654,3 +618,142 @@ def _random(name, *args):
         shape = tuple(int(a) for a in args[2:]) if len(args) > 2 else (1,)
         return Mat(scipy_stats.uniform.rvs(loc=float(a), scale=float(b) - float(a), size=shape))
     return Mat(np.random.rand(1))
+
+
+# ── Additional Statistics Functions ────────────────────────────
+
+@register("geomean")
+def _geomean(x):
+    """Geometric mean."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return float(scipy_stats.gmean(data.flatten()))
+
+
+@register("harmmean")
+def _harmmean(x):
+    """Harmonic mean."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return float(scipy_stats.hmean(data.flatten()))
+
+
+def _iqr(x):
+    """Interquartile range."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return scipy_stats.iqr(data.flatten())
+
+
+@register("kurtosis")
+def _kurtosis(x):
+    """Kurtosis."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return float(scipy_stats.kurtosis(data.flatten()))
+
+
+@register("skewness")
+def _skewness(x):
+    """Skewness."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return float(scipy_stats.skew(data.flatten()))
+
+
+@register("tiedrank")
+def _tiedrank(x):
+    """Tied rank."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_stats.rankdata(data.flatten()))
+
+
+@register("prctile")
+def _prctile(x, p):
+    """Percentile."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    p_val = float(p.data.flat[0]) if isinstance(p, Mat) else float(p)
+    return float(np.percentile(data.flatten(), p_val))
+
+
+@register("moment")
+def _moment(x, order):
+    """Moment."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return scipy_stats.moment(data.flatten(), int(order))
+
+
+@register("zscore")
+def _zscore(x):
+    """Z-score normalization."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return Mat(scipy_stats.zscore(data.flatten()))
+
+
+@register("quantile")
+def _quantile(x, q):
+    """Quantile."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    q = float(q)
+    return np.quantile(data.flatten(), q)
+
+
+def _tabulate(x):
+    """Frequency table."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    values, counts = np.unique(data.flatten(), return_counts=True)
+    return Mat(np.column_stack([values, counts, counts / counts.sum() * 100]))
+
+
+def _bootstrp(n, func, x):
+    """Bootstrap sampling."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    n = int(n)
+    results = []
+    for _ in range(n):
+        sample = np.random.choice(data.flatten(), size=len(data.flatten()), replace=True)
+        results.append(func(Mat(sample)))
+    return Mat(np.array(results))
+
+
+def _jackknife(func, x):
+    """Jackknife resampling."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    n = len(data.flatten())
+    results = []
+    for i in range(n):
+        sample = np.delete(data.flatten(), i)
+        results.append(func(Mat(sample)))
+    return Mat(np.array(results))
+
+
+# ── Additional Statistics Functions ───────────────────────────
+
+@register("median")
+def _median(x, dim=None):
+    """Median value."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    if dim is not None:
+        return float(np.median(data, axis=int(dim) - 1))
+    return float(np.median(data))
+
+
+@register("normalize")
+def _normalize(x):
+    """Normalize to [0, 1] range."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    min_val = np.min(data)
+    max_val = np.max(data)
+    if max_val == min_val:
+        return Mat(np.zeros_like(data))
+    return Mat((data - min_val) / (max_val - min_val))
+
+
+@register("rms")
+def _rms(x):
+    """Root mean square."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    return float(np.sqrt(np.mean(data.flatten() ** 2)))
+
+
+@register("mad")
+def _mad(x):
+    """Median absolute deviation."""
+    data = x.data if isinstance(x, Mat) else np.array(x)
+    median = np.median(data)
+    return float(np.median(np.abs(data - median)))
