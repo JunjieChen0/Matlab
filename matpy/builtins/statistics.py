@@ -60,8 +60,8 @@ def _anova1(*args):
     for arg in args:
         data = arg.data if isinstance(arg, Mat) else np.array(arg).flatten()
         groups.append(data)
-    f_stat, p_value = scipy_stats.f_oneway(*groups)
-    return float(f_stat), float(p_value)
+    result = scipy_stats.f_oneway(*groups)
+    return float(np.squeeze(result.statistic)), float(np.squeeze(result.pvalue))
 
 
 @register("anova2")
@@ -70,8 +70,8 @@ def _anova2(*args):
     for arg in args:
         data = arg.data if isinstance(arg, Mat) else np.array(arg).flatten()
         groups.append(data)
-    f_stat, p_value = scipy_stats.f_oneway(*groups)
-    return float(f_stat), float(p_value)
+    result = scipy_stats.f_oneway(*groups)
+    return float(np.squeeze(result.statistic)), float(np.squeeze(result.pvalue))
 
 
 @register("anovan")
