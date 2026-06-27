@@ -52,7 +52,9 @@ class TestParser:
         assert len(program.statements) == 1
 
     def test_multi_return(self):
-        source = "function [q, r] = mydiv(a, b)\n  q = floor(a / b);\n  r = a - q * b;\nend"
+        source = (
+            "function [q, r] = mydiv(a, b)\n  q = floor(a / b);\n  r = a - q * b;\nend"
+        )
         tokens = Lexer(source).tokenize()
         program = Parser(tokens).parse()
         assert len(program.statements) == 1

@@ -17,7 +17,9 @@ def _butter(order, Wn, btype="low", analog=False):
 def _cheby1(order, rp, Wn, btype="low", analog=False):
     Wn = float(Wn.data.flat[0]) if isinstance(Wn, Mat) else float(Wn)
     rp = float(rp.data.flat[0]) if isinstance(rp, Mat) else float(rp)
-    b, a = scipy_signal.cheby1(int(order), rp, Wn, btype=str(btype), analog=bool(analog))
+    b, a = scipy_signal.cheby1(
+        int(order), rp, Wn, btype=str(btype), analog=bool(analog)
+    )
     return Mat(b), Mat(a)
 
 
@@ -25,7 +27,9 @@ def _cheby1(order, rp, Wn, btype="low", analog=False):
 def _cheby2(order, rs, Wn, btype="low", analog=False):
     Wn = float(Wn.data.flat[0]) if isinstance(Wn, Mat) else float(Wn)
     rs = float(rs.data.flat[0]) if isinstance(rs, Mat) else float(rs)
-    b, a = scipy_signal.cheby2(int(order), rs, Wn, btype=str(btype), analog=bool(analog))
+    b, a = scipy_signal.cheby2(
+        int(order), rs, Wn, btype=str(btype), analog=bool(analog)
+    )
     return Mat(b), Mat(a)
 
 
@@ -34,7 +38,9 @@ def _ellip(order, rp, rs, Wn, btype="low", analog=False):
     Wn = float(Wn.data.flat[0]) if isinstance(Wn, Mat) else float(Wn)
     rp = float(rp.data.flat[0]) if isinstance(rp, Mat) else float(rp)
     rs = float(rs.data.flat[0]) if isinstance(rs, Mat) else float(rs)
-    b, a = scipy_signal.ellip(int(order), rp, rs, Wn, btype=str(btype), analog=bool(analog))
+    b, a = scipy_signal.ellip(
+        int(order), rp, rs, Wn, btype=str(btype), analog=bool(analog)
+    )
     return Mat(b), Mat(a)
 
 
@@ -56,7 +62,9 @@ def _fir1(order, Wn, window="hamming"):
 def _fir2(order, f, m, window="hamming"):
     f_data = f.data if isinstance(f, Mat) else np.array(f)
     m_data = m.data if isinstance(m, Mat) else np.array(m)
-    b = scipy_signal.firwin2(int(order) + 1, f_data.flatten(), m_data.flatten(), window=str(window))
+    b = scipy_signal.firwin2(
+        int(order) + 1, f_data.flatten(), m_data.flatten(), window=str(window)
+    )
     return Mat(b)
 
 
@@ -71,8 +79,19 @@ def _firls(order, f, a):
 @register("freqz")
 def _freqz(b, a=1, worN=512, whole=False):
     b_data = b.data if isinstance(b, Mat) else np.array(b)
-    a_data = a.data if isinstance(a, Mat) else np.array(a) if not isinstance(a, (int, float)) else a
-    w, h = scipy_signal.freqz(b_data.flatten(), a_data if isinstance(a, (int, float)) else a_data.flatten(), worN=int(worN), whole=bool(whole))
+    a_data = (
+        a.data
+        if isinstance(a, Mat)
+        else np.array(a)
+        if not isinstance(a, (int, float))
+        else a
+    )
+    w, h = scipy_signal.freqz(
+        b_data.flatten(),
+        a_data if isinstance(a, (int, float)) else a_data.flatten(),
+        worN=int(worN),
+        whole=bool(whole),
+    )
     return Mat(w), Mat(h)
 
 
@@ -87,20 +106,38 @@ def _freqs(b, a, worN=200):
 @register("impz")
 def _impz(b, a=1, n=None):
     b_data = b.data if isinstance(b, Mat) else np.array(b)
-    a_data = a.data if isinstance(a, Mat) else np.array(a) if not isinstance(a, (int, float)) else a
+    a_data = (
+        a.data
+        if isinstance(a, Mat)
+        else np.array(a)
+        if not isinstance(a, (int, float))
+        else a
+    )
     if n is None:
         n = 50
-    h = scipy_signal.impulse((b_data.flatten(), a_data if isinstance(a, (int, float)) else a_data.flatten()), N=int(n))
+    h = scipy_signal.impulse(
+        (b_data.flatten(), a_data if isinstance(a, (int, float)) else a_data.flatten()),
+        N=int(n),
+    )
     return Mat(h[0]), Mat(h[1])
 
 
 @register("stepz")
 def _stepz(b, a=1, n=None):
     b_data = b.data if isinstance(b, Mat) else np.array(b)
-    a_data = a.data if isinstance(a, Mat) else np.array(a) if not isinstance(a, (int, float)) else a
+    a_data = (
+        a.data
+        if isinstance(a, Mat)
+        else np.array(a)
+        if not isinstance(a, (int, float))
+        else a
+    )
     if n is None:
         n = 50
-    h = scipy_signal.step((b_data.flatten(), a_data if isinstance(a, (int, float)) else a_data.flatten()), N=int(n))
+    h = scipy_signal.step(
+        (b_data.flatten(), a_data if isinstance(a, (int, float)) else a_data.flatten()),
+        N=int(n),
+    )
     return Mat(h[0]), Mat(h[1])
 
 
@@ -115,7 +152,9 @@ def _resample(x, up, down):
 def _decimate(x, q, n=None, ftype="iir"):
     data = x.data if isinstance(x, Mat) else np.array(x)
     if n is not None:
-        result = scipy_signal.decimate(data.flatten(), int(q), n=int(n), ftype=str(ftype))
+        result = scipy_signal.decimate(
+            data.flatten(), int(q), n=int(n), ftype=str(ftype)
+        )
     else:
         result = scipy_signal.decimate(data.flatten(), int(q), ftype=str(ftype))
     return Mat(result)
@@ -199,7 +238,9 @@ def _lfilter(b, a, x, zi=None):
     x_data = x.data if isinstance(x, Mat) else np.array(x)
     if zi is not None:
         zi_data = zi.data if isinstance(zi, Mat) else np.array(zi)
-        y, zf = scipy_signal.lfilter(b_data.flatten(), a_data.flatten(), x_data.flatten(), zi=zi_data.flatten())
+        y, zf = scipy_signal.lfilter(
+            b_data.flatten(), a_data.flatten(), x_data.flatten(), zi=zi_data.flatten()
+        )
         return Mat(y), Mat(zf)
     y = scipy_signal.lfilter(b_data.flatten(), a_data.flatten(), x_data.flatten())
     return Mat(y)
@@ -275,7 +316,9 @@ def _welch(x, fs=1.0, nperseg=256):
 @register("spectrogram")
 def _spectrogram(x, fs=1.0, nperseg=256):
     data = x.data if isinstance(x, Mat) else np.array(x)
-    f, t, Sxx = scipy_signal.spectrogram(data.flatten(), fs=float(fs), nperseg=int(nperseg))
+    f, t, Sxx = scipy_signal.spectrogram(
+        data.flatten(), fs=float(fs), nperseg=int(nperseg)
+    )
     return Mat(f), Mat(t), Mat(Sxx)
 
 
@@ -321,6 +364,6 @@ def _xcorr(x, y=None, maxlags=None):
     if maxlags is not None:
         center = len(result) // 2
         ml = int(maxlags)
-        result = result[center - ml:center + ml + 1]
-        lags = lags[center - ml:center + ml + 1]
+        result = result[center - ml : center + ml + 1]
+        lags = lags[center - ml : center + ml + 1]
     return Mat(result), Mat(lags)

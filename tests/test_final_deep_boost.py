@@ -177,7 +177,9 @@ class TestFinalDeepBoost:
         assert get_val(x) == 9
 
     def test_switch_case(self):
-        interp = run_matlab("x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end")
+        interp = run_matlab(
+            "x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end"
+        )
         y = interp.global_env.get("y")
         assert y == "two"
 
@@ -187,12 +189,16 @@ class TestFinalDeepBoost:
         assert get_val(x) == -1
 
     def test_break(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 6
 
     def test_continue(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 5
 
@@ -636,7 +642,7 @@ class TestFinalDeepBoost:
         assert str(s).strip() == "hello"
 
     def test_num2str(self):
-        interp = run_matlab('s = num2str(42);')
+        interp = run_matlab("s = num2str(42);")
         s = interp.global_env.get("s")
         assert s is not None
 
@@ -750,52 +756,60 @@ class TestFinalDeepBoost:
     def test_integral(self):
         interp = run_matlab("f = @(x) x^2;\nresult = integral(f, 0, 1);")
         result = interp.global_env.get("result")
-        assert abs(get_val(result) - 1/3) < 0.01
+        assert abs(get_val(result) - 1 / 3) < 0.01
 
     def test_fzero(self):
         from matpy.builtins.optimization import _fzero
+
         result = _fzero(lambda x: x**2 - 4, 1.0)
         assert abs(result - 2.0) < 0.01
 
     def test_fminbnd(self):
         from matpy.builtins.optimization import _fminbnd
-        x, fval = _fminbnd(lambda x: (x-2)**2, 0, 4)
+
+        x, fval = _fminbnd(lambda x: (x - 2) ** 2, 0, 4)
         assert abs(x - 2.0) < 0.1
 
     def test_fsolve(self):
         from matpy.builtins.optimization import _fsolve
-        result = _fsolve(lambda x: [x[0]**2 - 4], Mat(np.array([1.0])))
+
+        result = _fsolve(lambda x: [x[0] ** 2 - 4], Mat(np.array([1.0])))
         assert isinstance(result, Mat)
 
     def test_linprog(self):
         from matpy.builtins.optimization import _linprog
+
         result, fval = _linprog(
             Mat(np.array([-1, -1])),
             A=Mat(np.array([[1, 1], [-1, 2]])),
-            b=Mat(np.array([2, 2]))
+            b=Mat(np.array([2, 2])),
         )
         assert isinstance(result, Mat)
 
     def test_butter(self):
         from matpy.builtins.signal import _butter
+
         b, a = _butter(2, 0.5)
         assert isinstance(b, Mat)
         assert isinstance(a, Mat)
 
     def test_fft_func(self):
         from matpy.builtins.signal import _fft
+
         x = Mat(np.array([1, 2, 3, 4]))
         result = _fft(x)
         assert isinstance(result, Mat)
 
     def test_ifft_func(self):
         from matpy.builtins.signal import _ifft
+
         X = Mat(np.array([1, 2, 3, 4]))
         result = _ifft(X)
         assert isinstance(result, Mat)
 
     def test_freqz(self):
         from matpy.builtins.signal import _freqz
+
         b = Mat(np.array([1, 1]))
         a = Mat(np.array([1, -0.5]))
         w, h = _freqz(b, a)

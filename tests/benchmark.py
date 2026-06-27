@@ -25,14 +25,12 @@ BENCHMARKS = {
         end
         result = fib(100);
     """,
-
     "loop_sum": """
         s = 0;
         for i = 1:1000
             s = s + i;
         end
     """,
-
     "matrix_ops": """
         A = [1 2; 3 4];
         B = [5 6; 7 8];
@@ -41,7 +39,6 @@ BENCHMARKS = {
             D = A + B;
         end
     """,
-
     "nested_loop": """
         s = 0;
         for i = 1:100
@@ -98,7 +95,7 @@ def main():
     for name, source in BENCHMARKS.items():
         tree_time = benchmark_tree(source) * 1000
         bytecode_time = benchmark_bytecode(source) * 1000
-        speedup = tree_time / bytecode_time if bytecode_time > 0 else float('inf')
+        speedup = tree_time / bytecode_time if bytecode_time > 0 else float("inf")
         print(f"{name:<20} {tree_time:<12.2f} {bytecode_time:<14.2f} {speedup:<10.2f}x")
 
     print("=" * 60)

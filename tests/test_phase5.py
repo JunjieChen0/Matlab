@@ -1,4 +1,5 @@
 """Phase 5 tests: Engineering quality - comprehensive test coverage."""
+
 import numpy as np
 import pytest
 from tests.conftest import run_matlab, get_val
@@ -280,6 +281,7 @@ class TestSortingFunctions:
         from matpy.builtins.common import _sort
         from matpy.runtime.types import Mat
         import numpy as np
+
         A = Mat(np.array([3, 1, 4, 1, 5, 9]))
         B = _sort(A, mode="descend")
         np.testing.assert_array_equal(B.data.flatten(), np.array([9, 5, 4, 3, 1, 1]))

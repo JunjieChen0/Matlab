@@ -10,6 +10,7 @@ def register(name: str, func: Callable | None = None):
     def decorator(f):
         _BUILTINS[name] = f
         return f
+
     if func is not None:
         _BUILTINS[name] = func
         return func

@@ -80,7 +80,7 @@ def _celldisp(c):
     if isinstance(c, CellArray):
         for i, row in enumerate(c._data):
             for j, val in enumerate(row):
-                print(f"{{{i+1},{j+1}}}:")
+                print(f"{{{i + 1},{j + 1}}}:")
                 if isinstance(val, Mat):
                     print(f"  {val.data}")
                 else:
@@ -112,12 +112,13 @@ def _table(*args, **kwargs):
     Usage: table(col1, col2, ..., 'VariableNames', {'name1', 'name2', ...})
     """
     from matpy.runtime.types import Table, CellArray
+
     data = {}
 
     # Extract VariableNames if provided
     var_names = None
-    if 'VariableNames' in kwargs:
-        vn = kwargs.pop('VariableNames')
+    if "VariableNames" in kwargs:
+        vn = kwargs.pop("VariableNames")
         if isinstance(vn, CellArray):
             flat = [item for row in vn._data for item in row]
             var_names = [str(v) for v in flat]
@@ -130,7 +131,11 @@ def _table(*args, **kwargs):
     clean_args = []
     i = 0
     while i < len(args):
-        if isinstance(args[i], str) and args[i] == 'VariableNames' and i + 1 < len(args):
+        if (
+            isinstance(args[i], str)
+            and args[i] == "VariableNames"
+            and i + 1 < len(args)
+        ):
             vn = args[i + 1]
             if isinstance(vn, CellArray):
                 flat = [item for row in vn._data for item in row]
@@ -144,7 +149,7 @@ def _table(*args, **kwargs):
 
     # Create table from positional args (data columns)
     for idx, val in enumerate(clean_args):
-        name = var_names[idx] if var_names and idx < len(var_names) else f"Var{idx+1}"
+        name = var_names[idx] if var_names and idx < len(var_names) else f"Var{idx + 1}"
         if isinstance(val, Mat):
             data[name] = val.data
         elif isinstance(val, CellArray):
@@ -160,16 +165,17 @@ def _table(*args, **kwargs):
 def _array2table(A, *args, **kwargs):
     """Convert array to table."""
     from matpy.runtime.types import Table
+
     data = A.data if isinstance(A, Mat) else np.array(A)
     if data.ndim == 1:
         data = data.reshape(-1, 1)
     # Generate column names
-    if 'VariableNames' in kwargs:
-        names = kwargs['VariableNames']
+    if "VariableNames" in kwargs:
+        names = kwargs["VariableNames"]
     elif args:
         names = [str(a) for a in args]
     else:
-        names = [f"Var{i+1}" for i in range(data.shape[1])]
+        names = [f"Var{i + 1}" for i in range(data.shape[1])]
     table_data = {names[i]: data[:, i] for i in range(min(len(names), data.shape[1]))}
     return Table(table_data)
 
@@ -178,6 +184,7 @@ def _array2table(A, *args, **kwargs):
 def _table2array(T):
     """Convert table to array."""
     from matpy.runtime.types import Table
+
     if isinstance(T, Table):
         arrays = list(T._data.values())
         if arrays:
@@ -189,6 +196,7 @@ def _table2array(T):
 def _containers_map(*args, **kwargs):
     """Create a containers.Map object."""
     from matpy.runtime.types import Map
+
     if len(args) >= 2:
         return Map(args[0], args[1])
     return Map(**kwargs)
@@ -220,6 +228,7 @@ def _values(m):
 
 # ── Additional Data Structure Functions ────────────────────────
 
+
 def _cell2mat(c):
     """Convert cell array to matrix."""
     if isinstance(c, CellArray):
@@ -245,7 +254,7 @@ def _mat2cell(x, *args):
     elif len(args) == 1:
         # Split into rows
         n = int(args[0])
-        cells = [data[i:i+n, :].tolist() for i in range(0, data.shape[0], n)]
+        cells = [data[i : i + n, :].tolist() for i in range(0, data.shape[0], n)]
         return CellArray(cells)
     return CellArray()
 
@@ -304,6 +313,7 @@ def _cell2struct(c, names):
 def _table(*args, **kwargs):
     """Create a table."""
     from matpy.runtime.types import Table
+
     if kwargs:
         return Table(kwargs)
     elif len(args) >= 2:
@@ -315,7 +325,9 @@ def _table(*args, **kwargs):
         if isinstance(names, (list, Mat)):
             if isinstance(names, Mat):
                 names = names.data.flatten().tolist()
-            table_data = {str(names[i]): data[:, i] for i in range(min(len(names), data.shape[1]))}
+            table_data = {
+                str(names[i]): data[:, i] for i in range(min(len(names), data.shape[1]))
+            }
             return Table(table_data)
     return Table({})
 
@@ -323,17 +335,21 @@ def _table(*args, **kwargs):
 def _array2table(x, **kwargs):
     """Convert array to table."""
     from matpy.runtime.types import Table
+
     data = x.data if isinstance(x, Mat) else np.array(x)
-    names = kwargs.get('VariableNames', [f"Var{i+1}" for i in range(data.shape[1])])
+    names = kwargs.get("VariableNames", [f"Var{i + 1}" for i in range(data.shape[1])])
     if isinstance(names, Mat):
         names = names.data.flatten().tolist()
-    table_data = {str(names[i]): data[:, i] for i in range(min(len(names), data.shape[1]))}
+    table_data = {
+        str(names[i]): data[:, i] for i in range(min(len(names), data.shape[1]))
+    }
     return Table(table_data)
 
 
 def _table2array(T):
     """Convert table to array."""
     from matpy.runtime.types import Table
+
     if isinstance(T, Table):
         arrays = list(T._data.values())
         if arrays:
@@ -344,6 +360,7 @@ def _table2array(T):
 def _containers_map(*args, **kwargs):
     """Create a containers.Map object."""
     from matpy.runtime.types import Map
+
     if len(args) >= 2:
         return Map(args[0], args[1])
     return Map(**kwargs)

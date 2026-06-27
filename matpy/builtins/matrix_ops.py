@@ -22,6 +22,7 @@ def _zeros(*args):
         shape = tuple(int(a) for a in args)
         return Mat(np.zeros(shape))
 
+
 @register("ones")
 def _ones(*args):
     """ONES Ones array.
@@ -38,6 +39,7 @@ def _ones(*args):
         shape = tuple(int(a) for a in args)
         return Mat(np.ones(shape))
 
+
 @register("eye")
 def _eye(*args):
     if len(args) == 1:
@@ -48,13 +50,16 @@ def _eye(*args):
     else:
         return Mat(np.eye(1))
 
+
 @register("linspace")
 def _linspace(start, stop, n=100):
     return Mat(np.linspace(float(start), float(stop), int(n)))
 
+
 @register("logspace")
 def _logspace(start, stop, n=50):
     return Mat(np.logspace(float(start), float(stop), int(n)))
+
 
 @register("size")
 def _size(x, dim=None):
@@ -66,6 +71,7 @@ def _size(x, dim=None):
         return 1
     return Mat(np.array(data.shape))
 
+
 @register("length")
 def _length(x):
     if isinstance(x, CellArray):
@@ -75,6 +81,7 @@ def _length(x):
         return 1
     return max(data.shape)
 
+
 @register("numel")
 def _numel(x):
     if isinstance(x, CellArray):
@@ -82,10 +89,12 @@ def _numel(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return data.size
 
+
 @register("ndims")
 def _ndims(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return max(data.ndim, 2)
+
 
 @register("reshape")
 def _reshape(x, *args):
@@ -93,15 +102,18 @@ def _reshape(x, *args):
     shape = tuple(int(a) for a in args)
     return Mat(data.reshape(shape))
 
+
 @register("transpose")
 def _transpose(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(data.T)
 
+
 @register("ctranspose")
 def _ctranspose(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(data.conj().T)
+
 
 @register("diag")
 def _diag(x, k=0):
@@ -115,59 +127,71 @@ def _diag(x, k=0):
         # Matrix input: extract diagonal
         return Mat(np.diag(data, k))
 
+
 @register("triu")
 def _triu(x, k=0):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(np.triu(data, k=int(k)))
+
 
 @register("tril")
 def _tril(x, k=0):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(np.tril(data, k=int(k)))
 
+
 @register("flipud")
 def _flipud(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(np.flipud(data))
+
 
 @register("fliplr")
 def _fliplr(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(np.fliplr(data))
 
+
 def _sort(x, dim=1, direction="ascend"):
     data = x.data if isinstance(x, Mat) else np.array(x)
     axis = int(dim) - 1
     return Mat(np.sort(data, axis=axis))
 
+
 def _unique(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(np.unique(data))
+
 
 def _find(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     indices = np.nonzero(data)[0]
     return Mat(indices + 1)
 
+
 @register("repmat")
 def _repmat(x, m, n=1):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(np.tile(data, (int(m), int(n))))
+
 
 @register("cat")
 def _cat(dim, *args):
     arrays = [a.data if isinstance(a, Mat) else np.array(a) for a in args]
     return Mat(np.concatenate(arrays, axis=int(dim) - 1))
 
+
 @register("horzcat")
 def _horzcat(*args):
     arrays = [a.data if isinstance(a, Mat) else np.array(a) for a in args]
     return Mat(np.concatenate(arrays, axis=1))
 
+
 @register("vertcat")
 def _vertcat(*args):
     arrays = [a.data if isinstance(a, Mat) else np.array(a) for a in args]
     return Mat(np.concatenate(arrays, axis=0))
+
 
 @register("rand")
 def _rand(*args):
@@ -182,6 +206,7 @@ def _rand(*args):
         shape = tuple(int(a) for a in args)
         return Mat(np.random.rand(*shape))
 
+
 @register("randn")
 def _randn(*args):
     if len(args) == 0:
@@ -194,6 +219,7 @@ def _randn(*args):
     else:
         shape = tuple(int(a) for a in args)
         return Mat(np.random.randn(*shape))
+
 
 @register("randi")
 def _randi(imax, *args):
@@ -208,17 +234,21 @@ def _randi(imax, *args):
         shape = tuple(int(a) for a in args)
         return Mat(np.random.randint(1, int(imax) + 1, shape))
 
+
 def _norm(x, p=2):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return np.linalg.norm(data, ord=int(p))
+
 
 def _inv(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(np.linalg.inv(data))
 
+
 def _det(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return np.linalg.det(data)
+
 
 @register("eig")
 def _eig(x):
@@ -226,11 +256,13 @@ def _eig(x):
     vals, vecs = np.linalg.eig(data)
     return Mat(vals), Mat(vecs)
 
+
 @register("svd")
 def _svd(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     u, s, vh = np.linalg.svd(data)
     return Mat(u), Mat(s), Mat(vh)
+
 
 def _pinv(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
@@ -239,6 +271,7 @@ def _pinv(x):
 
 def _schur(x):
     from scipy.linalg import schur as scipy_schur
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     T, Z = scipy_schur(data)
     return Mat(T), Mat(Z)
@@ -246,6 +279,7 @@ def _schur(x):
 
 def _hess(x):
     from scipy.linalg import hessenberg
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     H, Q = hessenberg(data, calc_q=True)
     return Mat(H), Mat(Q)
@@ -255,32 +289,39 @@ def _rank(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return np.linalg.matrix_rank(data)
 
+
 def _cross(a, b):
     da = a.data if isinstance(a, Mat) else np.array(a)
     db = b.data if isinstance(b, Mat) else np.array(b)
     return Mat(np.cross(da, db))
+
 
 def _dot(a, b):
     da = a.data if isinstance(a, Mat) else np.array(a)
     db = b.data if isinstance(b, Mat) else np.array(b)
     return np.dot(da, db)
 
+
 def _isequal(a, b):
     da = a.data if isinstance(a, Mat) else np.array(a)
     db = b.data if isinstance(b, Mat) else np.array(b)
     return np.array_equal(da, db)
 
+
 def _isempty(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return data.size == 0
+
 
 def _isnumeric(x):
     if isinstance(x, Mat):
         return np.issubdtype(x.dtype, np.number)
     return isinstance(x, (int, float, complex))
 
+
 def _ischar(x):
     return isinstance(x, str)
+
 
 def _islogical(x):
     if isinstance(x, Mat):
@@ -433,6 +474,7 @@ def _accumarray(subs, val, func=None):
 
 # ── N-D Array Operations ──────────────────────────────────────
 
+
 @register("permute")
 def _permute(x, order):
     """Permute array dimensions."""
@@ -563,7 +605,7 @@ def _rot90(x, k=1):
 
 
 @register("padarray")
-def _padarray(x, pad_size, val=0, direction='both'):
+def _padarray(x, pad_size, val=0, direction="both"):
     """Pad array."""
     data = x.data if isinstance(x, Mat) else np.array(x)
     if isinstance(pad_size, Mat):
@@ -571,9 +613,9 @@ def _padarray(x, pad_size, val=0, direction='both'):
     pad = [int(p) for p in np.array(pad_size).flat]
     while len(pad) < data.ndim:
         pad.append(0)
-    if direction == 'pre':
+    if direction == "pre":
         pad_width = [(p, 0) for p in pad]
-    elif direction == 'post':
+    elif direction == "post":
         pad_width = [(0, p) for p in pad]
     else:
         pad_width = [(p, p) for p in pad]
@@ -595,7 +637,9 @@ def _sub2ind(size, *args):
     """Subscript to linear index."""
     size_data = size.data if isinstance(size, Mat) else np.array(size)
     shape = tuple(int(s) for s in size_data.flat)
-    subs = tuple((a.data if isinstance(a, Mat) else np.array(a)).astype(int) - 1 for a in args)
+    subs = tuple(
+        (a.data if isinstance(a, Mat) else np.array(a)).astype(int) - 1 for a in args
+    )
     return Mat(np.ravel_multi_index(subs, shape) + 1)
 
 
@@ -605,20 +649,21 @@ def _gallery(name, *args):
     name = str(name).lower()
     if name == "hadamard":
         from scipy.linalg import hadamard
+
         return Mat(hadamard(int(args[0])))
     elif name == "hilb":
         n = int(args[0])
-        return Mat(np.array([[1/(i+j+1) for j in range(n)] for i in range(n)]))
+        return Mat(np.array([[1 / (i + j + 1) for j in range(n)] for i in range(n)]))
     elif name == "invhilb":
         n = int(args[0])
-        hilb = np.array([[1/(i+j+1) for j in range(n)] for i in range(n)])
+        hilb = np.array([[1 / (i + j + 1) for j in range(n)] for i in range(n)])
         return Mat(np.linalg.inv(hilb))
     elif name == "magic":
         n = int(args[0])
         if n % 2 == 1:
-            p = np.arange(1, n+1)
-            M = (p[:, None] + p[None, :] - (n+3)//2) % n
-            M = M * n + ((p[:, None] + 2*p[None, :] - 2) % n) + 1
+            p = np.arange(1, n + 1)
+            M = (p[:, None] + p[None, :] - (n + 3) // 2) % n
+            M = M * n + ((p[:, None] + 2 * p[None, :] - 2) % n) + 1
             return Mat(M)
         return Mat(np.eye(n))
     elif name == "pascal":
@@ -629,34 +674,42 @@ def _gallery(name, *args):
             M[0, i] = 1
         for i in range(1, n):
             for j in range(1, n):
-                M[i, j] = M[i-1, j] + M[i, j-1]
+                M[i, j] = M[i - 1, j] + M[i, j - 1]
         return Mat(M)
     elif name == "rosser":
-        return Mat(np.array([
-            [611, 196, -192, 407, -8, -52, -49, 29],
-            [196, 899, 113, -192, -71, -43, -8, -44],
-            [-192, 113, 899, 196, 61, 49, 8, 52],
-            [407, -192, 196, 611, 8, 44, 59, -23],
-            [-8, -71, 61, 8, 411, -599, 208, 208],
-            [-52, -43, 49, 44, -599, 411, 208, 208],
-            [-49, -8, 8, 59, 208, 208, 99, -911],
-            [29, -44, 52, -23, 208, 208, -911, 99]
-        ]))
+        return Mat(
+            np.array(
+                [
+                    [611, 196, -192, 407, -8, -52, -49, 29],
+                    [196, 899, 113, -192, -71, -43, -8, -44],
+                    [-192, 113, 899, 196, 61, 49, 8, 52],
+                    [407, -192, 196, 611, 8, 44, 59, -23],
+                    [-8, -71, 61, 8, 411, -599, 208, 208],
+                    [-52, -43, 49, 44, -599, 411, 208, 208],
+                    [-49, -8, 8, 59, 208, 208, 99, -911],
+                    [29, -44, 52, -23, 208, 208, -911, 99],
+                ]
+            )
+        )
     elif name == "wilkinson":
         n = int(args[0])
-        M = np.diag(np.arange(n)) + np.diag(np.ones(n-1), 1) + np.diag(np.ones(n-1), -1)
+        M = (
+            np.diag(np.arange(n))
+            + np.diag(np.ones(n - 1), 1)
+            + np.diag(np.ones(n - 1), -1)
+        )
         return Mat(M)
     elif name == "cauchy":
         n = int(args[0])
-        x = np.arange(1, n+1)
+        x = np.arange(1, n + 1)
         return Mat(1.0 / (x[:, None] + x[None, :]))
     elif name == "fiedler":
         n = int(args[0])
-        x = np.arange(1, n+1)
+        x = np.arange(1, n + 1)
         return Mat(np.abs(x[:, None] - x[None, :]))
     elif name == "minij":
         n = int(args[0])
-        x = np.arange(1, n+1)
+        x = np.arange(1, n + 1)
         return Mat(np.minimum(x[:, None], x[None, :]))
     elif name == "moler":
         n = int(args[0])
@@ -684,8 +737,8 @@ def _compan(p):
         return Mat(np.array([]))
     M = np.zeros((n, n))
     M[0, :] = -pd[1:] / pd[0]
-    for i in range(n-1):
-        M[i+1, i] = 1
+    for i in range(n - 1):
+        M[i + 1, i] = 1
     return Mat(M)
 
 
@@ -732,7 +785,7 @@ def _ndgrid(*args):
     elif len(args) == 2:
         x = args[0].data if isinstance(args[0], Mat) else np.array(args[0])
         y = args[1].data if isinstance(args[1], Mat) else np.array(args[1])
-        X, Y = np.meshgrid(x.flatten(), y.flatten(), indexing='ij')
+        X, Y = np.meshgrid(x.flatten(), y.flatten(), indexing="ij")
         return Mat(X), Mat(Y)
     else:
         arrays = []
@@ -741,7 +794,7 @@ def _ndgrid(*args):
                 arrays.append(a.data.flatten())
             else:
                 arrays.append(np.array(a).flatten())
-        grids = np.meshgrid(*arrays, indexing='ij')
+        grids = np.meshgrid(*arrays, indexing="ij")
         return tuple(Mat(g) for g in grids)
 
 
@@ -828,6 +881,7 @@ def _blkdiag(*args):
         else:
             matrices.append(np.array(a))
     from scipy.linalg import block_diag
+
     return Mat(block_diag(*matrices))
 
 
@@ -871,10 +925,12 @@ def _toeplitz(c, r=None):
 
 # ── Additional Linear Algebra Functions ───────────────────────
 
+
 @register("gsvd")
 def _gsvd(A, B):
     """Generalized singular value decomposition."""
     from scipy.linalg import gsvd
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     B_data = B.data if isinstance(B, Mat) else np.array(B)
     U, V, C, S, Q, X = gsvd(A_data, B_data)
@@ -885,6 +941,7 @@ def _gsvd(A, B):
 def _balance(A):
     """Diagonal scaling to improve eigenvalue accuracy."""
     from scipy.linalg import balance
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     T, B = balance(A_data)
     return Mat(T), Mat(B)
@@ -894,6 +951,7 @@ def _balance(A):
 def _schur(A):
     """Schur decomposition."""
     from scipy.linalg import schur
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     T, Z = schur(A_data)
     return Mat(T), Mat(Z)
@@ -903,6 +961,7 @@ def _schur(A):
 def _hess(A):
     """Hessenberg decomposition."""
     from scipy.linalg import hessenberg
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     H, Q = hessenberg(A_data, calc_q=True)
     return Mat(H), Mat(Q)
@@ -912,6 +971,7 @@ def _hess(A):
 def _expm(A):
     """Matrix exponential."""
     from scipy.linalg import expm as scipy_expm
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     return Mat(scipy_expm(A_data))
 
@@ -920,6 +980,7 @@ def _expm(A):
 def _logm(A):
     """Matrix logarithm."""
     from scipy.linalg import logm as scipy_logm
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     return Mat(scipy_logm(A_data))
 
@@ -928,6 +989,7 @@ def _logm(A):
 def _sqrtm(A):
     """Matrix square root."""
     from scipy.linalg import sqrtm as scipy_sqrtm
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     return Mat(scipy_sqrtm(A_data))
 
@@ -999,5 +1061,6 @@ def _condest(A):
 def _funm(A, func):
     """Evaluate general matrix function."""
     from scipy.linalg import funm as scipy_funm
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     return Mat(scipy_funm(A_data, func))

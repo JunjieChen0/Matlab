@@ -11,11 +11,13 @@ class TestBytecodeBoost:
 
     def test_bytecode_compiler_create(self):
         from matpy.bytecode import BytecodeCompiler
+
         compiler = BytecodeCompiler()
         assert compiler is not None
 
     def test_bytecode_vm_create(self):
         from matpy.bytecode import BytecodeVM
+
         vm = BytecodeVM()
         assert vm is not None
 
@@ -23,6 +25,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2;")
         tokens = lexer.tokenize()
@@ -35,6 +38,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 42;")
         tokens = lexer.tokenize()
@@ -47,6 +51,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2 * 3;")
         tokens = lexer.tokenize()
@@ -59,6 +64,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("if x > 0; y = 1; else; y = 0; end")
         tokens = lexer.tokenize()
@@ -71,6 +77,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("for i = 1:10; x = i; end")
         tokens = lexer.tokenize()
@@ -83,6 +90,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("while x > 0; x = x - 1; end")
         tokens = lexer.tokenize()
@@ -95,6 +103,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("function y = f(x); y = x^2; end")
         tokens = lexer.tokenize()
@@ -107,6 +116,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2;")
         tokens = lexer.tokenize()
@@ -121,6 +131,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 42;")
         tokens = lexer.tokenize()
@@ -135,6 +146,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2 * 3;")
         tokens = lexer.tokenize()
@@ -149,6 +161,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1;\nif x > 0; y = 1; else; y = 0; end")
         tokens = lexer.tokenize()
@@ -163,6 +176,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("total = 0;\nfor i = 1:5; total = total + i; end")
         tokens = lexer.tokenize()
@@ -177,6 +191,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 5;\nwhile x > 0; x = x - 1; end")
         tokens = lexer.tokenize()
@@ -191,6 +206,7 @@ class TestBytecodeBoost:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("function y = f(x); y = x^2; end\nresult = f(3);")
         tokens = lexer.tokenize()
@@ -376,7 +392,9 @@ class TestInterpreterBoost:
         assert get_val(x) == 9
 
     def test_switch_case(self):
-        interp = run_matlab("x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end")
+        interp = run_matlab(
+            "x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end"
+        )
         y = interp.global_env.get("y")
         assert y == "two"
 
@@ -386,12 +404,16 @@ class TestInterpreterBoost:
         assert get_val(x) == -1
 
     def test_break(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 6
 
     def test_continue(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 5
 

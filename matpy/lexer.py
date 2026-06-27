@@ -46,7 +46,9 @@ class Lexer:
             self.col += 1
         return ch
 
-    def _add(self, ttype: TokenType, value, line: int | None = None, col: int | None = None):
+    def _add(
+        self, ttype: TokenType, value, line: int | None = None, col: int | None = None
+    ):
         tok = Token(ttype, value, line or self.line, col or self.col)
         self.tokens.append(tok)
         self._prev_token = tok
@@ -169,7 +171,7 @@ class Lexer:
         if not self._is_at_end() and self._peek() and self._peek() in "ij":
             self._advance()
 
-        text = self.source[start:self.pos]
+        text = self.source[start : self.pos]
         try:
             if "i" in text or "j" in text:
                 num_text = text.replace("i", "").replace("j", "")
@@ -189,8 +191,12 @@ class Lexer:
         line, col = self.line, self.col
 
         if self._prev_token and self._prev_token.type in (
-            TokenType.NUMBER, TokenType.STRING, TokenType.IDENTIFIER,
-            TokenType.RPAREN, TokenType.RBRACKET, TokenType.RBRACE,
+            TokenType.NUMBER,
+            TokenType.STRING,
+            TokenType.IDENTIFIER,
+            TokenType.RPAREN,
+            TokenType.RBRACKET,
+            TokenType.RBRACE,
             TokenType.END,
         ):
             self._advance()
@@ -236,7 +242,9 @@ class Lexer:
                 self._advance()
                 esc = self._peek()
                 if esc is None:
-                    raise LexError("Unterminated escape sequence at end of string", line, col)
+                    raise LexError(
+                        "Unterminated escape sequence at end of string", line, col
+                    )
                 elif esc == "n":
                     chars.append("\n")
                     self._advance()
@@ -261,9 +269,13 @@ class Lexer:
     def _scan_identifier(self):
         line, col = self.line, self.col
         start = self.pos
-        while not self._is_at_end() and self._peek() and (self._peek().isalnum() or self._peek() == "_"):
+        while (
+            not self._is_at_end()
+            and self._peek()
+            and (self._peek().isalnum() or self._peek() == "_")
+        ):
             self._advance()
-        text = self.source[start:self.pos]
+        text = self.source[start : self.pos]
         ttype = KEYWORDS.get(text, TokenType.IDENTIFIER)
         self._add(ttype, text, line, col)
 

@@ -8,7 +8,13 @@ from matpy.parser import Parser, ParseError
 from matpy.interpreter import Interpreter, InterpreterError, MatPyError
 
 
-def run_source(source: str, filename: str = "<stdin>", interpreter: Interpreter | None = None, exit_on_error: bool = True, engine: str = "tree") -> Interpreter:
+def run_source(
+    source: str,
+    filename: str = "<stdin>",
+    interpreter: Interpreter | None = None,
+    exit_on_error: bool = True,
+    engine: str = "tree",
+) -> Interpreter:
     if interpreter is None:
         interpreter = Interpreter()
 
@@ -20,6 +26,7 @@ def run_source(source: str, filename: str = "<stdin>", interpreter: Interpreter 
 
         if engine == "bytecode":
             from matpy.bytecode import BytecodeCompiler, BytecodeVM
+
             compiler = BytecodeCompiler()
             instructions = compiler.compile(program)
             vm = BytecodeVM()
@@ -65,7 +72,7 @@ def _show_source_context(source: str, line: int, col: int, context: int = 2):
     print(f"\n  Context:", file=sys.stderr)
     for i in range(start, end):
         marker = ">>>" if i == line - 1 else "   "
-        print(f"  {marker} {i+1:4d} | {lines[i]}", file=sys.stderr)
+        print(f"  {marker} {i + 1:4d} | {lines[i]}", file=sys.stderr)
         if i == line - 1 and col > 0:
             print(f"       | {' ' * (col - 1)}^", file=sys.stderr)
     print(file=sys.stderr)
@@ -91,6 +98,7 @@ def repl():
     # Try to enable readline for history and tab completion
     try:
         import readline
+
         histfile = os.path.expanduser("~/.matpy_history")
         try:
             readline.read_history_file(histfile)
@@ -105,23 +113,53 @@ def repl():
             # Add variable names
             try:
                 vars_dict = interpreter.global_env.all_vars()
-                options.extend([n for n in vars_dict if n.startswith(text) and not n.startswith("_")])
+                options.extend(
+                    [
+                        n
+                        for n in vars_dict
+                        if n.startswith(text) and not n.startswith("_")
+                    ]
+                )
             except Exception:
                 pass
             # Add built-in function names
             try:
                 from matpy.builtins import all_builtins
+
                 builtins_dict = all_builtins()
                 options.extend([n for n in builtins_dict if n.startswith(text)])
             except Exception:
                 pass
             # Add keywords
             keywords = [
-                "function", "end", "if", "else", "elseif", "for", "while",
-                "switch", "case", "otherwise", "try", "catch", "return",
-                "break", "continue", "global", "persistent", "classdef",
-                "properties", "methods", "events", "arguments",
-                "true", "false", "pi", "inf", "nan", "eps",
+                "function",
+                "end",
+                "if",
+                "else",
+                "elseif",
+                "for",
+                "while",
+                "switch",
+                "case",
+                "otherwise",
+                "try",
+                "catch",
+                "return",
+                "break",
+                "continue",
+                "global",
+                "persistent",
+                "classdef",
+                "properties",
+                "methods",
+                "events",
+                "arguments",
+                "true",
+                "false",
+                "pi",
+                "inf",
+                "nan",
+                "eps",
             ]
             options.extend([k for k in keywords if k.startswith(text)])
             # Deduplicate while preserving order
@@ -141,7 +179,7 @@ def repl():
     interpreter = Interpreter()
     block_buffer = []  # For multi-line input
     in_block = False
-    
+
     # Debugging state
     breakpoints = {}  # {filename: set(line_numbers)}
     debug_mode = False
@@ -174,6 +212,7 @@ def repl():
             elif stripped.startswith("%time "):
                 code = stripped[6:]
                 import time
+
                 start = time.perf_counter()
                 try:
                     lexer = Lexer(code, "<repl>")
@@ -205,6 +244,7 @@ def repl():
                     if name.startswith("_"):
                         continue
                     from matpy.runtime.types import Mat, Struct, CellArray
+
                     if isinstance(val, Mat):
                         sz = "x".join(str(d) for d in val.shape)
                         cls = "double"
@@ -224,13 +264,16 @@ def repl():
                 continue
             # %clear magic command
             elif stripped == "%clear":
-                interpreter.global_env = __import__('matpy.environment', fromlist=['Environment']).Environment(name="global")
+                interpreter.global_env = __import__(
+                    "matpy.environment", fromlist=["Environment"]
+                ).Environment(name="global")
                 print("Workspace cleared.")
                 continue
             # %doc magic command — show function documentation
             elif stripped.startswith("%doc "):
                 func_name = stripped[5:].strip()
                 from matpy.builtins import get_builtin
+
                 builtin = get_builtin(func_name)
                 if builtin:
                     if builtin.__doc__:
@@ -243,7 +286,11 @@ def repl():
                         fdef = interpreter.functions[func_name]
                         params = ", ".join(fdef.params)
                         rets = ", ".join(fdef.returns) if fdef.returns else ""
-                        sig = f"function {rets} = {func_name}({params})" if rets else f"function {func_name}({params})"
+                        sig = (
+                            f"function {rets} = {func_name}({params})"
+                            if rets
+                            else f"function {func_name}({params})"
+                        )
                         print(sig)
                         print(f"  Defined at line {fdef.line}")
                     else:
@@ -253,6 +300,7 @@ def repl():
             elif stripped.startswith("%lookfor "):
                 keyword = stripped[9:].strip().lower()
                 from matpy.builtins import all_builtins
+
                 matches = []
                 for name, func in all_builtins().items():
                     doc = func.__doc__ or ""
@@ -273,6 +321,7 @@ def repl():
                     # Help for a specific function
                     func_name = parts[1]
                     from matpy.builtins import get_builtin
+
                     builtin = get_builtin(func_name)
                     if builtin and builtin.__doc__:
                         print(builtin.__doc__)
@@ -334,6 +383,7 @@ def repl():
                     if name.startswith("_"):
                         continue
                     from matpy.runtime.types import Mat, Struct, CellArray
+
                     if isinstance(val, Mat):
                         sz = "x".join(str(d) for d in val.shape)
                         cls = "double"
@@ -352,11 +402,13 @@ def repl():
                     print(f"  {name:15s} {sz:15s} {cls:10s}")
                 continue
             elif stripped == "clear":
-                interpreter.global_env = __import__('matpy.environment', fromlist=['Environment']).Environment(name="global")
+                interpreter.global_env = __import__(
+                    "matpy.environment", fromlist=["Environment"]
+                ).Environment(name="global")
                 print("Workspace cleared.")
                 continue
             elif stripped == "clc":
-                os.system('cls' if os.name == 'nt' else 'clear')
+                os.system("cls" if os.name == "nt" else "clear")
                 continue
             # Debugging commands
             elif stripped.startswith("dbstop "):
@@ -430,7 +482,15 @@ disp('Demo plot saved to demo_sine.png');
         # Multi-line block detection
         if not in_block:
             # Check if this starts a block
-            block_starters = ["function", "if", "for", "while", "switch", "try", "classdef"]
+            block_starters = [
+                "function",
+                "if",
+                "for",
+                "while",
+                "switch",
+                "try",
+                "classdef",
+            ]
             first_word = stripped.split()[0] if stripped.split() else ""
             if first_word in block_starters:
                 in_block = True

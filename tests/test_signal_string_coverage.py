@@ -11,41 +11,48 @@ class TestSignalFunctions:
 
     def test_butter(self):
         from matpy.builtins.signal import _butter
+
         b, a = _butter(2, 0.5)
         assert isinstance(b, Mat)
         assert isinstance(a, Mat)
 
     def test_cheby1(self):
         from matpy.builtins.signal import _cheby1
+
         b, a = _cheby1(2, 1, 0.5)
         assert isinstance(b, Mat)
         assert isinstance(a, Mat)
 
     def test_cheby2(self):
         from matpy.builtins.signal import _cheby2
+
         b, a = _cheby2(2, 20, 0.5)
         assert isinstance(b, Mat)
         assert isinstance(a, Mat)
 
     def test_ellip(self):
         from matpy.builtins.signal import _ellip
+
         b, a = _ellip(2, 1, 20, 0.5)
         assert isinstance(b, Mat)
         assert isinstance(a, Mat)
 
     def test_bessel(self):
         from matpy.builtins.signal import _bessel
+
         b, a = _bessel(2, 0.5)
         assert isinstance(b, Mat)
         assert isinstance(a, Mat)
 
     def test_fir1(self):
         from matpy.builtins.signal import _fir1
+
         b = _fir1(10, 0.5)
         assert isinstance(b, Mat)
 
     def test_fir2(self):
         from matpy.builtins.signal import _fir2
+
         f = Mat(np.array([0, 0.5, 1]))
         m = Mat(np.array([1, 1, 0]))
         b = _fir2(10, f, m)
@@ -53,6 +60,7 @@ class TestSignalFunctions:
 
     def test_firls(self):
         from matpy.builtins.signal import _firls
+
         f = Mat(np.array([0, 0.5, 0.5, 1]))
         a = Mat(np.array([1, 1, 0, 0]))
         b = _firls(10, f, a)
@@ -60,6 +68,7 @@ class TestSignalFunctions:
 
     def test_freqz(self):
         from matpy.builtins.signal import _freqz
+
         b = Mat(np.array([1, 1]))
         a = Mat(np.array([1, -0.5]))
         w, h = _freqz(b, a)
@@ -68,6 +77,7 @@ class TestSignalFunctions:
 
     def test_freqs(self):
         from matpy.builtins.signal import _freqs
+
         b = Mat(np.array([1, 1]))
         a = Mat(np.array([1, 1]))
         w, h = _freqs(b, a)
@@ -76,36 +86,42 @@ class TestSignalFunctions:
 
     def test_fft(self):
         from matpy.builtins.signal import _fft
+
         x = Mat(np.array([1, 2, 3, 4]))
         result = _fft(x)
         assert isinstance(result, Mat)
 
     def test_ifft(self):
         from matpy.builtins.signal import _ifft
+
         X = Mat(np.array([1, 2, 3, 4]))
         result = _ifft(X)
         assert isinstance(result, Mat)
 
     def test_fft2(self):
         from matpy.builtins.signal import _fft2
+
         x = Mat(np.array([[1, 2], [3, 4]]))
         result = _fft2(x)
         assert isinstance(result, Mat)
 
     def test_fftn(self):
         from numpy.fft import fftn
+
         x = np.zeros((2, 2, 2))
         result = fftn(x)
         assert isinstance(result, np.ndarray)
 
     def test_hilbert(self):
         from matpy.builtins.signal import _hilbert
+
         x = Mat(np.array([1, 2, 3, 4]))
         result = _hilbert(x)
         assert isinstance(result, Mat)
 
     def test_cconv(self):
         from numpy.fft import fft, ifft
+
         a = np.array([1, 2, 3, 0])
         b = np.array([1, 1, 0, 0])
         result = np.real(ifft(fft(a) * fft(b)))
@@ -113,30 +129,35 @@ class TestSignalFunctions:
 
     def test_resample(self):
         from matpy.builtins.signal import _resample
+
         x = Mat(np.array([1, 2, 3, 4, 5]))
         result = _resample(x, 2, 1)
         assert isinstance(result, Mat)
 
     def test_downsample(self):
         from scipy.signal import resample
+
         x = np.array([1, 2, 3, 4, 5, 6])
         result = resample(x, 3)
         assert isinstance(result, np.ndarray)
 
     def test_upsample(self):
         from scipy.signal import resample
+
         x = np.array([1, 2, 3])
         result = resample(x, 6)
         assert isinstance(result, np.ndarray)
 
     def test_interp(self):
         from scipy.signal import resample
+
         x = np.array([1, 2, 3, 4, 5])
         result = resample(x, 10)
         assert isinstance(result, np.ndarray)
 
     def test_decimate(self):
         from scipy.signal import resample
+
         x = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] * 10)
         result = resample(x, len(x) // 2)
         assert isinstance(result, np.ndarray)
@@ -147,36 +168,42 @@ class TestStringFunctions:
 
     def test_strcmp(self):
         from matpy.builtins.string import _strcmp
+
         result = _strcmp("hello", "hello")
         assert result == True
 
     def test_strcmp_false(self):
         from matpy.builtins.string import _strcmp
+
         result = _strcmp("hello", "world")
         assert result == False
 
     def test_strcat(self):
         from matpy.builtins.string import _strcat
+
         result = _strcat("hello", " world")
         assert result == "hello world"
 
     def test_upper(self):
         from matpy.builtins.string import _upper
+
         result = _upper("hello")
         assert result == "HELLO"
 
     def test_lower(self):
         from matpy.builtins.string import _lower
+
         result = _lower("HELLO")
         assert result == "hello"
 
     def test_strtrim(self):
         from matpy.builtins.string import _strtrim
+
         result = _strtrim("  hello  ")
         assert result == "hello"
 
     def test_num2str(self):
-        interp = run_matlab('s = num2str(42);')
+        interp = run_matlab("s = num2str(42);")
         s = interp.global_env.get("s")
         assert s is not None
 
@@ -187,36 +214,43 @@ class TestStringFunctions:
 
     def test_strfind(self):
         from matpy.builtins.string import _strfind
+
         result = _strfind("hello world", "world")
         assert result is not None
 
     def test_strrep(self):
         from matpy.builtins.string import _strrep
+
         result = _strrep("hello world", "world", "matlab")
         assert result == "hello matlab"
 
     def test_strsplit(self):
         from matpy.builtins.string import _strsplit
+
         result = _strsplit("hello world", " ")
         assert isinstance(result, list)
 
     def test_strjoin(self):
         from matpy.builtins.string import _strjoin
+
         result = _strjoin(["hello", "world"], " ")
         assert result == "hello world"
 
     def test_startsWith(self):
         from matpy.builtins.string import _startsWith
+
         result = _startsWith("hello", "hel")
         assert result == True
 
     def test_endsWith(self):
         from matpy.builtins.string import _endsWith
+
         result = _endsWith("hello", "llo")
         assert result == True
 
     def test_contains(self):
         from matpy.builtins.string import _contains
+
         result = _contains("hello world", "world")
         assert result == True
 
@@ -233,12 +267,14 @@ class TestStringFunctions:
 
     def test_isletter(self):
         from matpy.builtins.string import _isletter
+
         result = _isletter("hello")
         # May return Mat array
         assert result is not None
 
     def test_isstrprop(self):
         from matpy.builtins.string import _isstrprop
+
         result = _isstrprop("hello", "alpha")
         # May return Mat array
         assert result is not None
@@ -301,7 +337,7 @@ class TestStringIntegration:
         assert str(s).strip() == "hello"
 
     def test_num2str_interpreter(self):
-        interp = run_matlab('s = num2str(42);')
+        interp = run_matlab("s = num2str(42);")
         s = interp.global_env.get("s")
         assert s is not None
 

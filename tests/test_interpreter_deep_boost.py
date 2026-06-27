@@ -177,7 +177,9 @@ class TestInterpreterDeepBoost:
         assert get_val(x) == 9
 
     def test_switch_case(self):
-        interp = run_matlab("x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end")
+        interp = run_matlab(
+            "x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end"
+        )
         y = interp.global_env.get("y")
         assert y == "two"
 
@@ -187,12 +189,16 @@ class TestInterpreterDeepBoost:
         assert get_val(x) == -1
 
     def test_break(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 6
 
     def test_continue(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 5
 

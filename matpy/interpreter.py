@@ -5,15 +5,50 @@ from typing import Any
 import numpy as np
 
 from matpy.ast_nodes import (
-    Program, NumberLiteral, StringLiteral, Identifier, BinaryOp, UnaryOp,
-    RangeExpr, MatrixLiteral, CellLiteral, IndexExpr, FieldAccess,
-    DynamicFieldAccess, FuncCallExpr, ParenExpr, FuncHandle, AnonFuncExpr,
-    ExprStmt, Assignment, IfStmt, ForStmt, WhileStmt, SwitchStmt,
-    TryCatchStmt, ReturnStmt, BreakStmt, ContinueStmt, FuncDef,
-    GlobalStmt, PersistentStmt, ClassDef, Expr, Stmt, NodeVisitor,
+    Program,
+    NumberLiteral,
+    StringLiteral,
+    Identifier,
+    BinaryOp,
+    UnaryOp,
+    RangeExpr,
+    MatrixLiteral,
+    CellLiteral,
+    IndexExpr,
+    FieldAccess,
+    DynamicFieldAccess,
+    FuncCallExpr,
+    ParenExpr,
+    FuncHandle,
+    AnonFuncExpr,
+    ExprStmt,
+    Assignment,
+    IfStmt,
+    ForStmt,
+    WhileStmt,
+    SwitchStmt,
+    TryCatchStmt,
+    ReturnStmt,
+    BreakStmt,
+    ContinueStmt,
+    FuncDef,
+    GlobalStmt,
+    PersistentStmt,
+    ClassDef,
+    Expr,
+    Stmt,
+    NodeVisitor,
 )
 from matpy.environment import Environment
-from matpy.runtime.types import Mat, CellArray, Struct, FuncHandle as RTFuncHandle, ClassInstance, MException, Table
+from matpy.runtime.types import (
+    Mat,
+    CellArray,
+    Struct,
+    FuncHandle as RTFuncHandle,
+    ClassInstance,
+    MException,
+    Table,
+)
 from matpy.runtime.matrix import to_mat, from_mat, mat_str
 from matpy.builtins import get_builtin
 
@@ -22,8 +57,10 @@ class ReturnSignal(Exception):
     def __init__(self, value=None):
         self.value = value
 
+
 class BreakSignal(Exception):
     pass
+
 
 class ContinueSignal(Exception):
     pass
@@ -31,7 +68,15 @@ class ContinueSignal(Exception):
 
 class MatPyError(Exception):
     """Base exception for MatPy errors."""
-    def __init__(self, message: str, line: int = 0, col: int = 0, filename: str = "<unknown>", identifier: str = ""):
+
+    def __init__(
+        self,
+        message: str,
+        line: int = 0,
+        col: int = 0,
+        filename: str = "<unknown>",
+        identifier: str = "",
+    ):
         self.line = line
         self.col = col
         self.filename = filename
@@ -44,51 +89,61 @@ class MatPyError(Exception):
 
 class MatPySyntaxError(MatPyError):
     """Syntax error in MatPy."""
+
     pass
 
 
 class MatPyTypeError(MatPyError):
     """Type error in MatPy."""
+
     pass
 
 
 class MatPyIndexError(MatPyError):
     """Index error in MatPy."""
+
     pass
 
 
 class MatPyNameError(MatPyError):
     """Name error in MatPy."""
+
     pass
 
 
 class MatPyValueError(MatPyError):
     """Value error in MatPy."""
+
     pass
 
 
 class MatPyDimensionError(MatPyError):
     """Dimension mismatch error in MatPy."""
+
     pass
 
 
 class MatPyMemoryError(MatPyError):
     """Memory error in MatPy."""
+
     pass
 
 
 class MatPyNotImplementedError(MatPyError):
     """Feature not implemented in MatPy."""
+
     pass
 
 
 class MatPyFileNotFoundError(MatPyError):
     """File not found error in MatPy."""
+
     pass
 
 
 class InterpreterError(MatPyError):
     """Runtime error in MatPy interpreter."""
+
     def __init__(self, message: str, node=None, line: int = 0, col: int = 0):
         self.node = node
         super().__init__(message, line, col)
@@ -230,7 +285,10 @@ class Interpreter(NodeVisitor):
                     else:
                         converted.append(idx)
                 if len(converted) == 1:
-                    if isinstance(converted[0], np.ndarray) and converted[0].dtype == bool:
+                    if (
+                        isinstance(converted[0], np.ndarray)
+                        and converted[0].dtype == bool
+                    ):
                         data[converted[0]] = value
                     else:
                         data.flat[converted[0]] = value
@@ -336,17 +394,22 @@ class Interpreter(NodeVisitor):
                 raise
             # Set lasterror
             import matpy.builtins.io as io_module
+
             if isinstance(e, MException):
                 io_module._last_error = e
             else:
-                io_module._last_error = MException(message=str(e), identifier=type(e).__name__, original=e)
-            
+                io_module._last_error = MException(
+                    message=str(e), identifier=type(e).__name__, original=e
+                )
+
             if stmt.catch_var:
                 # Create MException object with message and identifier
                 if isinstance(e, MException):
                     exc = e
                 else:
-                    exc = MException(message=str(e), identifier=type(e).__name__, original=e)
+                    exc = MException(
+                        message=str(e), identifier=type(e).__name__, original=e
+                    )
                 env.set(stmt.catch_var, exc)
             self._exec_block(stmt.catch_body, env)
 
@@ -361,17 +424,23 @@ class Interpreter(NodeVisitor):
             super_cls = self.classes[stmt.superclass]
             # Prevent subclassing sealed classes
             if super_cls.is_sealed:
-                raise InterpreterError(f"Cannot subclass sealed class '{stmt.superclass}'")
+                raise InterpreterError(
+                    f"Cannot subclass sealed class '{stmt.superclass}'"
+                )
             # Inherit properties
             for prop_name, default_val in super_cls.properties.items():
                 if prop_name not in stmt.properties:
                     class_runtime.properties[prop_name] = default_val
-                    class_runtime.property_attrs[prop_name] = super_cls.property_attrs.get(prop_name, {})
+                    class_runtime.property_attrs[prop_name] = (
+                        super_cls.property_attrs.get(prop_name, {})
+                    )
             # Inherit methods
             for meth_name, meth_def in super_cls.methods.items():
                 if meth_name not in stmt.methods:
                     class_runtime.methods[meth_name] = meth_def
-                    class_runtime.method_attrs[meth_name] = super_cls.method_attrs.get(meth_name, {})
+                    class_runtime.method_attrs[meth_name] = super_cls.method_attrs.get(
+                        meth_name, {}
+                    )
 
         # Evaluate property defaults
         for prop_name, default_expr in stmt.properties.items():
@@ -382,8 +451,10 @@ class Interpreter(NodeVisitor):
                 class_runtime.properties[prop_name] = None
             class_runtime.property_attrs[prop_name] = prop_attr
             # Store Constant properties in the class runtime for class-level access
-            if prop_attr.get('Constant'):
-                class_runtime.properties[prop_name] = self._eval(default_expr, env) if default_expr is not None else None
+            if prop_attr.get("Constant"):
+                class_runtime.properties[prop_name] = (
+                    self._eval(default_expr, env) if default_expr is not None else None
+                )
 
         # Register methods
         for meth_name, meth_def in stmt.methods.items():
@@ -393,23 +464,31 @@ class Interpreter(NodeVisitor):
         # Register Static methods as standalone builtin functions
         for meth_name, meth_def in stmt.methods.items():
             meth_attr = stmt.method_attrs.get(meth_name, {})
-            if meth_attr.get('Static'):
+            if meth_attr.get("Static"):
+
                 def make_static_call(md):
                     def static_call(*args):
                         return self._call_user_func(md, list(args), env)
+
                     return static_call
+
                 from matpy.builtins import register
+
                 register(f"{stmt.name}.{meth_name}", make_static_call(meth_def))
 
         # Register the class name as a constructor function
         def constructor(*args):
             # Prevent instantiation of abstract classes
             if class_runtime.is_abstract:
-                raise InterpreterError(f"Cannot instantiate abstract class '{stmt.name}'")
+                raise InterpreterError(
+                    f"Cannot instantiate abstract class '{stmt.name}'"
+                )
             instance = ClassInstance(class_runtime)
             # Call constructor method if it exists
             if stmt.name in class_runtime.methods:
-                result = self._call_user_func(class_runtime.methods[stmt.name], list(args), env)
+                result = self._call_user_func(
+                    class_runtime.methods[stmt.name], list(args), env
+                )
                 if result is not None and isinstance(result, ClassInstance):
                     return result
             return instance
@@ -420,6 +499,7 @@ class Interpreter(NodeVisitor):
         # Register constructor as a built-in function
         constructor.__name__ = stmt.name
         from matpy.builtins import register
+
         register(stmt.name, constructor)
 
     def _eval(self, expr: Expr, env: Environment) -> Any:
@@ -456,7 +536,9 @@ class Interpreter(NodeVisitor):
             case AnonFuncExpr(params=params, body=body):
                 return self._eval_anon_func(params, body, env)
             case _:
-                raise InterpreterError(f"Unknown expression type: {type(expr).__name__}")
+                raise InterpreterError(
+                    f"Unknown expression type: {type(expr).__name__}"
+                )
 
     def _eval_identifier(self, name: str, env: Environment) -> Any:
         if name == "end":
@@ -527,17 +609,21 @@ class Interpreter(NodeVisitor):
             case "^":
                 if isinstance(l, np.ndarray):
                     # Check if exponent is effectively an integer
-                    if isinstance(r, (int, np.integer)) or (isinstance(r, float) and r == int(r)):
+                    if isinstance(r, (int, np.integer)) or (
+                        isinstance(r, float) and r == int(r)
+                    ):
                         result = np.linalg.matrix_power(l, int(r))
                     elif l.shape[0] == l.shape[1]:
                         # Fractional matrix power via eigendecomposition for square matrices
                         eigvals, eigvecs = np.linalg.eig(l)
-                        result = eigvecs @ np.diag(eigvals ** r) @ np.linalg.inv(eigvecs)
+                        result = eigvecs @ np.diag(eigvals**r) @ np.linalg.inv(eigvecs)
                         result = np.real(result)
                     else:
-                        raise InterpreterError("Matrix power with non-integer exponent requires a square matrix")
+                        raise InterpreterError(
+                            "Matrix power with non-integer exponent requires a square matrix"
+                        )
                 else:
-                    result = l ** r
+                    result = l**r
             case ".*":
                 result = l * r
             case "./":
@@ -545,7 +631,7 @@ class Interpreter(NodeVisitor):
             case ".\\":
                 result = r / l
             case ".^":
-                result = l ** r
+                result = l**r
             case "==":
                 result = l == r
             case "~=":
@@ -559,9 +645,17 @@ class Interpreter(NodeVisitor):
             case ">=":
                 result = l >= r
             case "&":
-                result = np.logical_and(l, r) if isinstance(l, np.ndarray) else bool(bool(l) and bool(r))
+                result = (
+                    np.logical_and(l, r)
+                    if isinstance(l, np.ndarray)
+                    else bool(bool(l) and bool(r))
+                )
             case "|":
-                result = np.logical_or(l, r) if isinstance(l, np.ndarray) else bool(bool(l) or bool(r))
+                result = (
+                    np.logical_or(l, r)
+                    if isinstance(l, np.ndarray)
+                    else bool(bool(l) or bool(r))
+                )
             case _:
                 raise InterpreterError(f"Unknown operator: {op}")
 
@@ -587,7 +681,9 @@ class Interpreter(NodeVisitor):
             elif op == "~":
                 return not val
             else:
-                raise InterpreterError(f"Unary operator '{op}' not supported for {type(val).__name__}")
+                raise InterpreterError(
+                    f"Unary operator '{op}' not supported for {type(val).__name__}"
+                )
 
     def _eval_range(self, expr: RangeExpr, env: Environment) -> Any:
         start = self._eval(expr.start, env)
@@ -723,9 +819,11 @@ class Interpreter(NodeVisitor):
                 return obj.get_property(field)
             if obj.has_method(field):
                 return obj.get_method(field)
-            raise AttributeError(f"'{obj._class_def.name}' has no property or method '{field}'")
+            raise AttributeError(
+                f"'{obj._class_def.name}' has no property or method '{field}'"
+            )
         # Support Datetime, Duration, CalendarDuration, Categorical field access
-        if hasattr(obj, 'get_field'):
+        if hasattr(obj, "get_field"):
             try:
                 return obj.get_field(field)
             except AttributeError:
@@ -771,7 +869,9 @@ class Interpreter(NodeVisitor):
                 if first_arg.has_method(name):
                     method = first_arg.get_method(name)
                     if isinstance(method, FuncDef):
-                        return self._call_user_func(method, [first_arg] + evaled_args[1:], env)
+                        return self._call_user_func(
+                            method, [first_arg] + evaled_args[1:], env
+                        )
                 if first_arg.has_property(name):
                     return first_arg.get_property(name)
 
@@ -817,20 +917,33 @@ class Interpreter(NodeVisitor):
             return builtin(*evaled_args)
 
         # Priority 6: Check Python module functions (MEX interface)
-        if '.' in name:
-            parts = name.split('.')
+        if "." in name:
+            parts = name.split(".")
             if len(parts) == 2:
                 module_name, func_name = parts
                 # Whitelist of allowed modules for MEX interface
                 _ALLOWED_MEX_MODULES = {
-                    'numpy', 'np', 'scipy', 'matplotlib', 'math',
-                    'random', 'statistics', 'itertools', 'functools',
-                    'collections', 're', 'json', 'csv', 'datetime',
-                    'os.path', 'pathlib',
+                    "numpy",
+                    "np",
+                    "scipy",
+                    "matplotlib",
+                    "math",
+                    "random",
+                    "statistics",
+                    "itertools",
+                    "functools",
+                    "collections",
+                    "re",
+                    "json",
+                    "csv",
+                    "datetime",
+                    "os.path",
+                    "pathlib",
                 }
                 if module_name in _ALLOWED_MEX_MODULES:
                     try:
                         import importlib
+
                         module = importlib.import_module(module_name)
                         func = getattr(module, func_name)
                         if callable(func):
@@ -919,7 +1032,7 @@ class Interpreter(NodeVisitor):
         from matpy.runtime.types import CellArray
 
         # Support nested functions with closure environment
-        if hasattr(func_def, '_closure_env') and func_def._closure_env is not None:
+        if hasattr(func_def, "_closure_env") and func_def._closure_env is not None:
             # Nested function: use closure environment as parent
             func_env = func_def._closure_env.child(f"func:{func_def.name}")
         else:
@@ -941,7 +1054,7 @@ class Interpreter(NodeVisitor):
                     func_env.set(param, args[i])
                 else:
                     func_env.set(param, None)
-            varargin_args = args[len(regular_params):]
+            varargin_args = args[len(regular_params) :]
             varargin_cell = CellArray([[arg] for arg in varargin_args])
             func_env.set("varargin", varargin_cell)
         else:
@@ -966,6 +1079,7 @@ class Interpreter(NodeVisitor):
                 class_name = func_def.name
                 if class_name in self.classes:
                     from matpy.runtime.types import ClassInstance
+
                     func_env.set(ret_name, ClassInstance(self.classes[class_name]))
 
         try:
@@ -990,7 +1104,9 @@ class Interpreter(NodeVisitor):
                                     results.append(val)
                     except NameError:
                         pass
-                    return results if len(results) > 1 else results[0] if results else None
+                    return (
+                        results if len(results) > 1 else results[0] if results else None
+                    )
                 elif len(func_def.returns) == 1:
                     return func_env.get(func_def.returns[0])
                 else:
@@ -1004,8 +1120,10 @@ class Interpreter(NodeVisitor):
             return RTFuncHandle(lambda: None)
         if name in self.functions:
             func_def = self.functions[name]
+
             def caller(*args):
                 return self._call_user_func(func_def, list(args), env)
+
             return RTFuncHandle(caller, name)
         builtin = get_builtin(name)
         if builtin is not None:
@@ -1014,11 +1132,13 @@ class Interpreter(NodeVisitor):
 
     def _eval_anon_func(self, params: list[str], body: Expr, env: Environment) -> Any:
         closure_env = env
+
         def caller(*args):
             child = closure_env.child("anon")
             for i, param in enumerate(params):
                 child.set(param, args[i] if i < len(args) else None)
             return self._eval(body, child)
+
         return RTFuncHandle(caller, "<anonymous>")
 
     def _eval_string(self, code: str, env: Environment) -> Any:
@@ -1026,6 +1146,7 @@ class Interpreter(NodeVisitor):
         try:
             from matpy.lexer import Lexer
             from matpy.parser import Parser
+
             lexer = Lexer(code, "<eval>")
             tokens = lexer.tokenize()
             parser = Parser(tokens, "<eval>")
@@ -1042,19 +1163,21 @@ class Interpreter(NodeVisitor):
     def _load_package(self, package_name: str, env: Environment):
         """Load a MATLAB package from +package directory."""
         import os
+
         package_dir = os.path.join(os.getcwd(), f"+{package_name}")
         if not os.path.isdir(package_dir):
             raise InterpreterError(f"Package '{package_name}' not found")
 
         # Load all .m files in the package directory
         for filename in os.listdir(package_dir):
-            if filename.endswith('.m'):
+            if filename.endswith(".m"):
                 filepath = os.path.join(package_dir, filename)
-                with open(filepath, 'r', encoding='utf-8') as f:
+                with open(filepath, "r", encoding="utf-8") as f:
                     code = f.read()
                 try:
                     from matpy.lexer import Lexer
                     from matpy.parser import Parser
+
                     lexer = Lexer(code, filepath)
                     tokens = lexer.tokenize()
                     parser = Parser(tokens, filepath)
@@ -1145,18 +1268,25 @@ class Interpreter(NodeVisitor):
             return bool(np.all(result))
         return bool(result)
 
-    def _validate_arguments(self, arg_specs: dict[str, dict[str, Any]], env: Environment):
+    def _validate_arguments(
+        self, arg_specs: dict[str, dict[str, Any]], env: Environment
+    ):
         """Validate function arguments against specs from arguments block."""
         BUILT_IN_VALIDATORS = {
-            'mustBeNumeric': lambda v: isinstance(v, (int, float, complex, Mat)) or (isinstance(v, np.ndarray) and np.issubdtype(v.dtype, np.number)),
-            'mustBePositive': lambda v: isinstance(v, (int, float)) and v > 0,
-            'mustBeNonnegative': lambda v: isinstance(v, (int, float)) and v >= 0,
-            'mustBeNonempty': lambda v: v is not None,
-            'mustBeNonNan': lambda v: not (isinstance(v, float) and np.isnan(v)),
-            'mustBeFinite': lambda v: not (isinstance(v, float) and (np.isinf(v) or np.isnan(v))),
-            'mustBeInteger': lambda v: isinstance(v, (int, np.integer)),
-            'mustBeText': lambda v: isinstance(v, str),
-            'mustBeMember': lambda v: True,  # placeholder
+            "mustBeNumeric": lambda v: (
+                isinstance(v, (int, float, complex, Mat))
+                or (isinstance(v, np.ndarray) and np.issubdtype(v.dtype, np.number))
+            ),
+            "mustBePositive": lambda v: isinstance(v, (int, float)) and v > 0,
+            "mustBeNonnegative": lambda v: isinstance(v, (int, float)) and v >= 0,
+            "mustBeNonempty": lambda v: v is not None,
+            "mustBeNonNan": lambda v: not (isinstance(v, float) and np.isnan(v)),
+            "mustBeFinite": lambda v: (
+                not (isinstance(v, float) and (np.isinf(v) or np.isnan(v)))
+            ),
+            "mustBeInteger": lambda v: isinstance(v, (int, np.integer)),
+            "mustBeText": lambda v: isinstance(v, str),
+            "mustBeMember": lambda v: True,  # placeholder
         }
 
         for param_name, spec in arg_specs.items():
@@ -1166,8 +1296,8 @@ class Interpreter(NodeVisitor):
                 val = None
 
             # Apply default if value is None and default exists
-            if val is None and 'default' in spec:
-                default_val = spec['default']
+            if val is None and "default" in spec:
+                default_val = spec["default"]
                 # Convert string/number literals
                 if isinstance(default_val, str):
                     try:
@@ -1177,26 +1307,26 @@ class Interpreter(NodeVisitor):
                 env.set(param_name, default_val)
                 val = default_val
 
-            if val is None and 'default' not in spec:
+            if val is None and "default" not in spec:
                 continue
 
             # Type check
-            if 'type' in spec:
-                expected_type = spec['type']
+            if "type" in spec:
+                expected_type = spec["type"]
                 type_map = {
-                    'double': (int, float, Mat),
-                    'char': str,
-                    'string': str,
-                    'logical': bool,
-                    'int32': int,
-                    'int64': int,
+                    "double": (int, float, Mat),
+                    "char": str,
+                    "string": str,
+                    "logical": bool,
+                    "int32": int,
+                    "int64": int,
                 }
                 if expected_type in type_map:
                     if not isinstance(val, type_map[expected_type]):
                         try:
-                            if expected_type == 'double':
+                            if expected_type == "double":
                                 val = float(val) if not isinstance(val, Mat) else val
-                            elif expected_type == 'char' or expected_type == 'string':
+                            elif expected_type == "char" or expected_type == "string":
                                 val = str(val)
                         except (ValueError, TypeError):
                             raise MatPyTypeError(
@@ -1205,8 +1335,8 @@ class Interpreter(NodeVisitor):
                         env.set(param_name, val)
 
             # Validation functions
-            if 'validation' in spec:
-                for validator_name in spec['validation']:
+            if "validation" in spec:
+                for validator_name in spec["validation"]:
                     if validator_name in BUILT_IN_VALIDATORS:
                         validator = BUILT_IN_VALIDATORS[validator_name]
                         if not validator(val):

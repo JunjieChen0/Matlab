@@ -8,6 +8,7 @@ from matpy.runtime.types import Mat, CellArray, Struct
 
 # ── data_struct.py (22% → target 80%) ──────────────────────────────
 
+
 class TestDataStructFunctions:
     """Test cell, struct, fieldnames, isfield, rmfield functions."""
 
@@ -28,31 +29,35 @@ class TestDataStructFunctions:
 
     def test_fieldnames(self):
         from matpy.builtins.data_struct import _fieldnames
-        s = Struct({'a': 1, 'b': 2})
+
+        s = Struct({"a": 1, "b": 2})
         result = _fieldnames(s)
         assert isinstance(result, list)
-        assert 'a' in result
-        assert 'b' in result
+        assert "a" in result
+        assert "b" in result
 
     def test_isfield_true(self):
         from matpy.builtins.data_struct import _isfield
-        s = Struct({'a': 1})
-        result = _isfield(s, 'a')
+
+        s = Struct({"a": 1})
+        result = _isfield(s, "a")
         assert result == True
 
     def test_isfield_false(self):
         from matpy.builtins.data_struct import _isfield
-        s = Struct({'a': 1})
-        result = _isfield(s, 'b')
+
+        s = Struct({"a": 1})
+        result = _isfield(s, "b")
         assert result == False
 
     def test_rmfield(self):
         from matpy.builtins.data_struct import _rmfield
-        s = Struct({'a': 1, 'b': 2})
-        s2 = _rmfield(s, 'b')
+
+        s = Struct({"a": 1, "b": 2})
+        s2 = _rmfield(s, "b")
         assert isinstance(s2, Struct)
-        assert s2.has_field('a')
-        assert not s2.has_field('b')
+        assert s2.has_field("a")
+        assert not s2.has_field("b")
 
     def test_cell_empty(self):
         interp = run_matlab("c = cell();")
@@ -61,6 +66,7 @@ class TestDataStructFunctions:
 
 
 # ── image.py (21% → target 80%) ────────────────────────────────────
+
 
 class TestImageFunctions:
     """Test image processing functions."""
@@ -100,6 +106,7 @@ class TestImageFunctions:
 
     def test_imcrop(self):
         from matpy.builtins.image import _imcrop
+
         img = Mat(np.zeros((10, 10)))
         rect = Mat(np.array([2, 2, 5, 5]))
         result = _imcrop(img, rect)
@@ -131,7 +138,9 @@ class TestImageFunctions:
         assert isinstance(filtered, Mat)
 
     def test_imfilter(self):
-        interp = run_matlab("img = rand(10, 10);\nh = ones(3)/9;\nfiltered = imfilter(img, h);")
+        interp = run_matlab(
+            "img = rand(10, 10);\nh = ones(3)/9;\nfiltered = imfilter(img, h);"
+        )
         filtered = interp.global_env.get("filtered")
         assert isinstance(filtered, Mat)
 
@@ -147,6 +156,7 @@ class TestImageFunctions:
 
 
 # ── control.py (25% → target 80%) ──────────────────────────────────
+
 
 class TestControlFunctions:
     """Test control system functions."""
@@ -172,12 +182,16 @@ class TestControlFunctions:
         assert z is not None
 
     def test_series_connection(self):
-        interp = run_matlab("sys1 = tf([1], [1 1]);\nsys2 = tf([1], [1 2]);\nsys = series(sys1, sys2);")
+        interp = run_matlab(
+            "sys1 = tf([1], [1 1]);\nsys2 = tf([1], [1 2]);\nsys = series(sys1, sys2);"
+        )
         sys = interp.global_env.get("sys")
         assert sys is not None
 
     def test_parallel_connection(self):
-        interp = run_matlab("sys1 = tf([1], [1 1]);\nsys2 = tf([1], [1 2]);\nsys = parallel(sys1, sys2);")
+        interp = run_matlab(
+            "sys1 = tf([1], [1 1]);\nsys2 = tf([1], [1 2]);\nsys = parallel(sys1, sys2);"
+        )
         sys = interp.global_env.get("sys")
         assert sys is not None
 
@@ -198,6 +212,7 @@ class TestControlFunctions:
 
     def test_bode(self):
         from matpy.builtins.control import TransferFunction
+
         sys = TransferFunction([1], [1, 1])
         w, mag, phase = sys.bode_data()
         assert w is not None
@@ -206,12 +221,14 @@ class TestControlFunctions:
 
     def test_nyquist(self):
         from matpy.builtins.control import TransferFunction, _nyquist
+
         sys = TransferFunction([1], [1, 1])
         result = _nyquist(sys)
         assert result is not None
 
     def test_rlocus(self):
         from matpy.builtins.control import TransferFunction, _rlocus
+
         sys = TransferFunction([1], [1, 2, 1])
         result = _rlocus(sys)
         assert result is not None
@@ -219,12 +236,14 @@ class TestControlFunctions:
 
 # ── optimization.py (25% → target 80%) ─────────────────────────────
 
+
 class TestOptimizationFunctions:
     """Test optimization functions."""
 
     def test_fzero(self):
         from matpy.builtins.optimization import _fzero
         import numpy as np
+
         # fzero finds root of x^2 - 4 = 0 near x=1, should find x=2
         f = lambda x: x**2 - 4
         result = _fzero(f, 1.0)
@@ -232,7 +251,8 @@ class TestOptimizationFunctions:
 
     def test_fminbnd(self):
         from matpy.builtins.optimization import _fminbnd
-        f = lambda x: (x-2)**2
+
+        f = lambda x: (x - 2) ** 2
         result = _fminbnd(f, 0, 4)
         # result may be a tuple (x, fval)
         x = result[0] if isinstance(result, tuple) else result
@@ -240,13 +260,15 @@ class TestOptimizationFunctions:
 
     def test_fminsearch(self):
         from matpy.builtins.optimization import _fminsearch
-        f = lambda x: (x[0]-1)**2 + (x[1]-2)**2
+
+        f = lambda x: (x[0] - 1) ** 2 + (x[1] - 2) ** 2
         result = _fminsearch(f, Mat(np.array([0, 0])))
         # result may be a tuple (x, fval)
         assert result is not None
 
     def test_lsqnonneg(self):
         from matpy.builtins.optimization import _lsqnonneg
+
         C = Mat(np.array([[1, 0], [0, 1]]))
         d = Mat(np.array([1, 1]))
         result = _lsqnonneg(C, d)
@@ -255,6 +277,7 @@ class TestOptimizationFunctions:
 
     def test_linprog(self):
         from matpy.builtins.optimization import _linprog
+
         f = Mat(np.array([-1, -1]))
         A = Mat(np.array([[1, 1], [-1, 2]]))
         b = Mat(np.array([2, 2]))
@@ -264,7 +287,8 @@ class TestOptimizationFunctions:
 
     def test_fsolve(self):
         from matpy.builtins.optimization import _fsolve
-        f = lambda x: [x[0]**2 + x[1]**2 - 1, x[0] - x[1]]
+
+        f = lambda x: [x[0] ** 2 + x[1] ** 2 - 1, x[0] - x[1]]
         result = _fsolve(f, Mat(np.array([0.5, 0.5])))
         assert result is not None
 
@@ -272,6 +296,7 @@ class TestOptimizationFunctions:
 
 
 # ── statistics.py (36% → target 80%) ───────────────────────────────
+
 
 class TestStatisticsFunctions:
     """Test statistics functions."""
@@ -283,12 +308,14 @@ class TestStatisticsFunctions:
 
     def test_ttest(self):
         from matpy.builtins.statistics import _ttest
+
         x = Mat(np.array([1, 2, 3, 4, 5]))
         result = _ttest(x)
         assert result is not None
 
     def test_ttest2(self):
         from matpy.builtins.statistics import _ttest2
+
         x = Mat(np.array([1, 2, 3]))
         y = Mat(np.array([4, 5, 6]))
         result = _ttest2(x, y)
@@ -296,12 +323,14 @@ class TestStatisticsFunctions:
 
     def test_chi2gof(self):
         from matpy.builtins.statistics import _chi2gof
+
         x = Mat(np.array([10, 20, 30, 25, 15]))
         result = _chi2gof(x)
         assert result is not None
 
     def test_kstest(self):
         from matpy.builtins.statistics import _kstest
+
         x = Mat(np.array([0.1, 0.3, 0.5, 0.7, 0.9]))
         result = _kstest(x)
         assert result is not None
@@ -378,26 +407,31 @@ class TestStatisticsFunctions:
 
     def test_gamrnd(self):
         from scipy.stats import gamma
+
         r = gamma.rvs(2, scale=1, size=5)
         assert len(r) == 5
 
     def test_betarnd(self):
         from scipy.stats import beta
+
         r = beta.rvs(2, 3, size=5)
         assert len(r) == 5
 
     def test_poissrnd(self):
         from scipy.stats import poisson
+
         r = poisson.rvs(5, size=5)
         assert len(r) == 5
 
     def test_exprnd(self):
         from scipy.stats import expon
+
         r = expon.rvs(scale=1, size=5)
         assert len(r) == 5
 
 
 # ── signal.py (40% → target 80%) ───────────────────────────────────
+
 
 class TestSignalFunctions:
     """Test signal processing functions."""
@@ -443,6 +477,7 @@ class TestSignalFunctions:
 
     def test_filter(self):
         from scipy.signal import lfilter
+
         b = np.array([1, 1])
         a = np.array([1, -0.5])
         x = np.array([1, 0, 0, 0, 0])
@@ -451,6 +486,7 @@ class TestSignalFunctions:
 
     def test_conv(self):
         from matpy.builtins.signal import _conv
+
         a = Mat(np.array([1, 2, 3]))
         b = Mat(np.array([1, 1]))
         result = _conv(a, b)
@@ -458,6 +494,7 @@ class TestSignalFunctions:
 
     def test_resample(self):
         from matpy.builtins.signal import _resample
+
         x = Mat(np.array([1, 2, 3, 4, 5]))
         result = _resample(x, 2, 1)
         assert isinstance(result, Mat)
@@ -479,18 +516,21 @@ class TestSignalFunctions:
 
     def test_fftn(self):
         from numpy.fft import fftn
+
         x = np.zeros((2, 2, 2))
         result = fftn(x)
         assert isinstance(result, np.ndarray)
 
     def test_hilbert(self):
         from scipy.signal import hilbert
+
         x = np.array([1, 2, 3, 4])
         result = hilbert(x)
         assert isinstance(result, np.ndarray)
 
     def test_cconv(self):
         from numpy.fft import fft, ifft
+
         a = np.array([1, 2, 3, 0])
         b = np.array([1, 1, 0, 0])
         result = np.real(ifft(fft(a) * fft(b)))
@@ -498,6 +538,7 @@ class TestSignalFunctions:
 
 
 # ── sparse.py (37% → target 80%) ───────────────────────────────────
+
 
 class TestSparseFunctions:
     """Test sparse matrix functions."""
@@ -549,12 +590,14 @@ class TestSparseFunctions:
 
     def test_spdiags(self):
         from scipy import sparse as sp
+
         # Test sparse matrix creation directly
         A = sp.diags([1, 2, 3], 0, shape=(3, 3))
         assert A.shape == (3, 3)
 
 
 # ── string_array.py (40% → target 80%) ─────────────────────────────
+
 
 class TestStringArrayFunctions:
     """Test string array functions."""
@@ -602,6 +645,7 @@ class TestStringArrayFunctions:
 
 # ── file_io.py (26% → target 80%) ──────────────────────────────────
 
+
 class TestFileIOFunctions:
     """Test file I/O functions."""
 
@@ -614,35 +658,43 @@ class TestFileIOFunctions:
 
     def test_fprintf(self, tmp_path):
         filepath = tmp_path / "test.txt"
-        interp = run_matlab(f"fid = fopen('{filepath}', 'w');\nfprintf(fid, 'hello');\nfclose(fid);")
+        interp = run_matlab(
+            f"fid = fopen('{filepath}', 'w');\nfprintf(fid, 'hello');\nfclose(fid);"
+        )
         assert filepath.exists()
 
     def test_fgetl(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello\nworld\n")
-        interp = run_matlab(f"fid = fopen('{filepath}');\nline = fgetl(fid);\nfclose(fid);")
+        interp = run_matlab(
+            f"fid = fopen('{filepath}');\nline = fgetl(fid);\nfclose(fid);"
+        )
         line = interp.global_env.get("line")
         assert line is not None
 
     def test_fgets(self, tmp_path):
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello\nworld\n")
-        interp = run_matlab(f"fid = fopen('{filepath}');\nline = fgets(fid);\nfclose(fid);")
+        interp = run_matlab(
+            f"fid = fopen('{filepath}');\nline = fgets(fid);\nfclose(fid);"
+        )
         line = interp.global_env.get("line")
         assert line is not None
 
     def test_fread(self, tmp_path):
         filepath = tmp_path / "test.bin"
-        filepath.write_bytes(b'\x01\x02\x03')
+        filepath.write_bytes(b"\x01\x02\x03")
         from matpy.builtins.file_io import _fopen, _fclose
-        fid = _fopen(str(filepath), 'rb')
+
+        fid = _fopen(str(filepath), "rb")
         assert fid is not None
         _fclose(fid)
 
     def test_fwrite(self, tmp_path):
         filepath = tmp_path / "test.bin"
         from matpy.builtins.file_io import _fopen, _fclose
-        fid = _fopen(str(filepath), 'wb')
+
+        fid = _fopen(str(filepath), "wb")
         assert fid is not None
         _fclose(fid)
         assert filepath.exists()
@@ -703,7 +755,8 @@ class TestFileIOFunctions:
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello world")
         from matpy.builtins.file_io import _fopen, _fclose
-        fid = _fopen(str(filepath), 'r')
+
+        fid = _fopen(str(filepath), "r")
         assert fid is not None
         _fclose(fid)
 
@@ -711,7 +764,8 @@ class TestFileIOFunctions:
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello world")
         from matpy.builtins.file_io import _fopen, _fclose
-        fid = _fopen(str(filepath), 'r')
+
+        fid = _fopen(str(filepath), "r")
         assert fid is not None
         _fclose(fid)
 
@@ -719,7 +773,8 @@ class TestFileIOFunctions:
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
         from matpy.builtins.file_io import _fopen, _fclose
-        fid = _fopen(str(filepath), 'r')
+
+        fid = _fopen(str(filepath), "r")
         assert fid is not None
         _fclose(fid)
 
@@ -727,7 +782,8 @@ class TestFileIOFunctions:
         filepath = tmp_path / "test.txt"
         filepath.write_text("hello")
         from matpy.builtins.file_io import _fopen, _fclose
-        fid = _fopen(str(filepath), 'r')
+
+        fid = _fopen(str(filepath), "r")
         assert fid is not None
         _fclose(fid)
 
@@ -745,12 +801,14 @@ class TestFileIOFunctions:
 
     def test_jsonencode(self):
         import json
-        s = {'a': 1, 'b': 2}
+
+        s = {"a": 1, "b": 2}
         result = json.dumps(s)
         assert result is not None
 
     def test_jsondecode(self):
         import json
+
         result = json.loads('{"a": 1, "b": 2}')
         assert result is not None
 
@@ -758,6 +816,7 @@ class TestFileIOFunctions:
 # ── interpreter.py improvements ────────────────────────────────────
 
 # ── matrix_ops.py (40% → target 80%) ───────────────────────────────
+
 
 class TestMatrixOpsFunctions:
     """Test matrix operation functions."""
@@ -944,13 +1003,14 @@ class TestMatrixOpsFunctions:
 
 # ── advanced_math.py (42% → target 80%) ────────────────────────────
 
+
 class TestAdvancedMathFunctions:
     """Test advanced math functions."""
 
     def test_integral(self):
         interp = run_matlab("f = @(x) x^2;\nresult = integral(f, 0, 1);")
         result = interp.global_env.get("result")
-        assert abs(get_val(result) - 1/3) < 0.01
+        assert abs(get_val(result) - 1 / 3) < 0.01
 
     def test_trapz(self):
         try:
@@ -964,36 +1024,42 @@ class TestAdvancedMathFunctions:
 
     def test_cumsum(self):
         from matpy.builtins.math import _cumsum
+
         A = Mat(np.array([1, 2, 3]))
         result = _cumsum(A)
         assert isinstance(result, Mat)
 
     def test_cumprod(self):
         from matpy.builtins.math import _cumprod
+
         A = Mat(np.array([1, 2, 3]))
         result = _cumprod(A)
         assert isinstance(result, Mat)
 
     def test_diff(self):
         from numpy import diff
+
         A = np.array([1, 3, 6, 10])
         result = diff(A)
         assert isinstance(result, np.ndarray)
 
     def test_gradient(self):
         from numpy import gradient
+
         A = np.array([1, 4, 9, 16])
         result = gradient(A)
         assert result is not None
 
     def test_del2(self):
         from scipy.ndimage import laplace
+
         A = np.array([[1.0, 4.0, 9.0], [16.0, 25.0, 36.0]])
         result = laplace(A)
         assert isinstance(result, np.ndarray)
 
 
 # ── interpreter.py improvements ────────────────────────────────────
+
 
 class TestInterpreterFixes:
     """Test the CRITICAL/HIGH fixes made to the interpreter."""
@@ -1002,6 +1068,7 @@ class TestInterpreterFixes:
         """C-1: try/catch should not swallow return."""
         # Test that return inside try block works correctly
         from matpy.interpreter import Interpreter, ReturnSignal
+
         interp = Interpreter()
         # Create a simple function that returns from try block
         src = """
@@ -1016,6 +1083,7 @@ class TestInterpreterFixes:
         """
         from matpy.lexer import Lexer
         from matpy.parser import Parser
+
         tokens = Lexer(src).tokenize()
         prog = Parser(tokens).parse()
         interp.run(prog)

@@ -17,6 +17,7 @@ def _wrap_math(func):
                 unwrapped.append(a)
         result = func(*unwrapped)
         return to_mat(result)
+
     # Preserve docstring from original function
     wrapper.__doc__ = func.__doc__
     wrapper.__name__ = func.__name__
@@ -53,6 +54,7 @@ register("angle", _wrap_math(np.angle))
 register("sign", _wrap_math(np.sign))
 register("conj", _wrap_math(np.conj))
 
+
 @register("min")
 def _min(*args):
     arrs = [a.data if isinstance(a, Mat) else np.array(a) for a in args]
@@ -61,6 +63,7 @@ def _min(*args):
     elif len(arrs) == 2:
         return to_mat(np.minimum(arrs[0], arrs[1]))
     return to_mat(np.min(arrs))
+
 
 @register("max")
 def _max(*args):
@@ -71,12 +74,14 @@ def _max(*args):
         return to_mat(np.maximum(arrs[0], arrs[1]))
     return to_mat(np.max(arrs))
 
+
 @register("sum")
 def _sum(x, dim=None):
     data = x.data if isinstance(x, Mat) else np.array(x)
     if dim is not None:
         return to_mat(np.sum(data, axis=int(dim) - 1))
     return to_mat(np.sum(data))
+
 
 @register("prod")
 def _prod(x, dim=None):
@@ -85,12 +90,14 @@ def _prod(x, dim=None):
         return to_mat(np.prod(data, axis=int(dim) - 1))
     return to_mat(np.prod(data))
 
+
 @register("cumsum")
 def _cumsum(x, dim=None):
     data = x.data if isinstance(x, Mat) else np.array(x)
     if dim is not None:
         return to_mat(np.cumsum(data, axis=int(dim) - 1))
     return to_mat(np.cumsum(data))
+
 
 @register("cumprod")
 def _cumprod(x, dim=None):
@@ -99,25 +106,31 @@ def _cumprod(x, dim=None):
         return to_mat(np.cumprod(data, axis=int(dim) - 1))
     return to_mat(np.cumprod(data))
 
+
 @register("diff")
 def _diff(x, n=1):
     data = x.data if isinstance(x, Mat) else np.array(x)
     return to_mat(np.diff(data, n=int(n)))
 
+
 register("mod", _wrap_math(np.mod))
 register("rem", _wrap_math(np.remainder))
+
 
 @register("pi")
 def _pi():
     return math.pi
 
+
 @register("inf")
 def _inf():
     return float("inf")
 
+
 @register("nan")
 def _nan():
     return float("nan")
+
 
 # Additional math functions
 register("expm1", _wrap_math(np.expm1))
@@ -176,7 +189,7 @@ def _primes(n):
     sieve[0] = sieve[1] = False
     for i in range(2, int(n**0.5) + 1):
         if sieve[i]:
-            for j in range(i*i, n + 1, i):
+            for j in range(i * i, n + 1, i):
                 sieve[j] = False
     return Mat(np.array([i for i in range(2, n + 1) if sieve[i]]))
 
@@ -186,7 +199,7 @@ def _factorial(n):
     """Factorial function."""
     n = int(n)
     if n < 0:
-        return float('nan')
+        return float("nan")
     result = 1
     for i in range(2, n + 1):
         result *= i
@@ -212,6 +225,7 @@ def _nchoosek(n, k):
 def _perms(x):
     """All permutations."""
     from itertools import permutations
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     items = list(data.flatten())
     perms = list(permutations(items))
@@ -226,7 +240,7 @@ def _permn(n, k):
         return 0
     result = 1
     for i in range(k):
-        result *= (n - i)
+        result *= n - i
     return result
 
 
@@ -271,8 +285,8 @@ def _log2(x):
 def _pow2(x):
     """Power of 2."""
     if isinstance(x, Mat):
-        return Mat(2.0 ** x.data)
-    return 2.0 ** x
+        return Mat(2.0**x.data)
+    return 2.0**x
 
 
 @register("realpow")
@@ -280,7 +294,7 @@ def _realpow(x, y):
     """Real power."""
     x = x.data if isinstance(x, Mat) else np.array(x)
     y = y.data if isinstance(y, Mat) else np.array(y)
-    return Mat(x ** y)
+    return Mat(x**y)
 
 
 @register("hypot")
@@ -293,10 +307,12 @@ def _hypot(x, y):
 
 # ── Special Functions ─────────────────────────────────────────
 
+
 @register("airy")
 def _airy(k, x):
     """Airy functions."""
     from scipy.special import airy as scipy_airy
+
     x_data = x.data if isinstance(x, Mat) else np.array(x)
     k = int(k)
     ai, aip, bi, bip = scipy_airy(x_data)
@@ -315,6 +331,7 @@ def _airy(k, x):
 def _besselj(nu, x):
     """Bessel function of the first kind."""
     from scipy.special import jv
+
     nu = float(nu.data.flat[0]) if isinstance(nu, Mat) else float(nu)
     x_data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(jv(nu, x_data))
@@ -324,6 +341,7 @@ def _besselj(nu, x):
 def _bessely(nu, x):
     """Bessel function of the second kind."""
     from scipy.special import yv
+
     nu = float(nu.data.flat[0]) if isinstance(nu, Mat) else float(nu)
     x_data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(yv(nu, x_data))
@@ -333,6 +351,7 @@ def _bessely(nu, x):
 def _besseli(nu, x):
     """Modified Bessel function of the first kind."""
     from scipy.special import iv
+
     nu = float(nu.data.flat[0]) if isinstance(nu, Mat) else float(nu)
     x_data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(iv(nu, x_data))
@@ -342,6 +361,7 @@ def _besseli(nu, x):
 def _besselk(nu, x):
     """Modified Bessel function of the second kind."""
     from scipy.special import kv
+
     nu = float(nu.data.flat[0]) if isinstance(nu, Mat) else float(nu)
     x_data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(kv(nu, x_data))
@@ -351,6 +371,7 @@ def _besselk(nu, x):
 def _besselh(nu, k, x):
     """Bessel function of the third kind (Hankel function)."""
     from scipy.special import hankel1, hankel2
+
     nu = float(nu.data.flat[0]) if isinstance(nu, Mat) else float(nu)
     x_data = x.data if isinstance(x, Mat) else np.array(x)
     k = int(k)
@@ -364,6 +385,7 @@ def _besselh(nu, k, x):
 def _ellipj(u, m):
     """Jacobi elliptic functions."""
     from scipy.special import ellipj as scipy_ellipj
+
     u_data = u.data if isinstance(u, Mat) else np.array(u)
     m_data = float(m.data.flat[0]) if isinstance(m, Mat) else float(m)
     sn, cn, dn, ph = scipy_ellipj(u_data, m_data)
@@ -374,6 +396,7 @@ def _ellipj(u, m):
 def _ellipke(m):
     """Complete elliptic integrals."""
     from scipy.special import ellipk, ellipe
+
     m_data = float(m.data.flat[0]) if isinstance(m, Mat) else float(m)
     return float(ellipk(m_data)), float(ellipe(m_data))
 
@@ -382,6 +405,7 @@ def _ellipke(m):
 def _ellipticK(m):
     """Complete elliptic integral of the first kind."""
     from scipy.special import ellipk
+
     m_data = float(m.data.flat[0]) if isinstance(m, Mat) else float(m)
     return float(ellipk(m_data))
 
@@ -390,5 +414,6 @@ def _ellipticK(m):
 def _ellipticE(m):
     """Complete elliptic integral of the second kind."""
     from scipy.special import ellipe
+
     m_data = float(m.data.flat[0]) if isinstance(m, Mat) else float(m)
     return float(ellipe(m_data))

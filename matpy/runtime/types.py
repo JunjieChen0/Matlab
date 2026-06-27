@@ -18,7 +18,9 @@ class Mat:
 
     def __init__(self, data):
         if isinstance(data, Mat):
-            self._data = data._data.copy() if sp.issparse(data._data) else data._data.copy()
+            self._data = (
+                data._data.copy() if sp.issparse(data._data) else data._data.copy()
+            )
         elif sp.issparse(data):
             self._data = data
         elif isinstance(data, np.ndarray):
@@ -242,6 +244,7 @@ class StringArray:
 
 class Missing:
     """MATLAB missing value."""
+
     def __repr__(self):
         return "missing"
 
@@ -255,7 +258,9 @@ class Missing:
 class ClassDefRuntime:
     """Runtime representation of a MATLAB classdef."""
 
-    def __init__(self, name: str, superclass: str | None = None, class_attrs: dict | None = None):
+    def __init__(
+        self, name: str, superclass: str | None = None, class_attrs: dict | None = None
+    ):
         self.name = name
         self.superclass = superclass
         self.class_attrs = class_attrs or {}
@@ -266,35 +271,35 @@ class ClassDefRuntime:
 
     @property
     def is_abstract(self) -> bool:
-        return bool(self.class_attrs.get('Abstract', False))
+        return bool(self.class_attrs.get("Abstract", False))
 
     @property
     def is_sealed(self) -> bool:
-        return bool(self.class_attrs.get('Sealed', False))
+        return bool(self.class_attrs.get("Sealed", False))
 
     @property
     def access(self) -> str:
-        return self.class_attrs.get('Access', 'public')
+        return self.class_attrs.get("Access", "public")
 
     def is_constant_property(self, prop_name: str) -> bool:
         """Check if a property is Constant."""
         prop_attr = self.property_attrs.get(prop_name, {})
-        return bool(prop_attr.get('Constant', False))
+        return bool(prop_attr.get("Constant", False))
 
     def is_static_method(self, meth_name: str) -> bool:
         """Check if a method is Static."""
         meth_attr = self.method_attrs.get(meth_name, {})
-        return bool(meth_attr.get('Static', False))
+        return bool(meth_attr.get("Static", False))
 
     def get_property_access(self, prop_name: str) -> str:
         """Get the Access level for a property."""
         prop_attr = self.property_attrs.get(prop_name, {})
-        return prop_attr.get('Access', 'public')
+        return prop_attr.get("Access", "public")
 
     def get_method_access(self, meth_name: str) -> str:
         """Get the Access level for a method."""
         meth_attr = self.method_attrs.get(meth_name, {})
-        return meth_attr.get('Access', 'public')
+        return meth_attr.get("Access", "public")
 
     def __repr__(self) -> str:
         return f"<class '{self.name}'>"
@@ -319,11 +324,15 @@ class ClassInstance:
         """Set a property value with access control."""
         # Check if property is Constant
         if self._class_def.is_constant_property(name):
-            raise AttributeError(f"Cannot modify Constant property '{name}' of '{self._class_def.name}'")
+            raise AttributeError(
+                f"Cannot modify Constant property '{name}' of '{self._class_def.name}'"
+            )
         # Check Access level
         access = self._class_def.get_property_access(name)
-        if access == 'private' and caller_class != self._class_def.name:
-            raise AttributeError(f"Property '{name}' of '{self._class_def.name}' is private")
+        if access == "private" and caller_class != self._class_def.name:
+            raise AttributeError(
+                f"Property '{name}' of '{self._class_def.name}' is private"
+            )
         self._properties[name] = value
 
     def has_property(self, name: str) -> bool:
@@ -338,8 +347,10 @@ class ClassInstance:
             raise AttributeError(f"'{self._class_def.name}' has no method '{name}'")
         # Check Access level
         access = self._class_def.get_method_access(name)
-        if access == 'private' and caller_class != self._class_def.name:
-            raise AttributeError(f"Method '{name}' of '{self._class_def.name}' is private")
+        if access == "private" and caller_class != self._class_def.name:
+            raise AttributeError(
+                f"Method '{name}' of '{self._class_def.name}' is private"
+            )
         return self._class_def.methods[name]
 
     def property_names(self) -> list[str]:
@@ -358,7 +369,13 @@ class ClassInstance:
 class MException(Exception):
     """MATLAB MException object for try/catch error handling."""
 
-    def __init__(self, message: str, identifier: str = "", original: Exception | None = None, stack: list | None = None):
+    def __init__(
+        self,
+        message: str,
+        identifier: str = "",
+        original: Exception | None = None,
+        stack: list | None = None,
+    ):
         self.message = message
         self.identifier = identifier
         self._original = original
@@ -400,6 +417,7 @@ class MException(Exception):
 
 class MatPyRethrowError(Exception):
     """Exception wrapper for rethrow support."""
+
     def __init__(self, mexc: MException):
         self.mexception = mexc
         super().__init__(mexc.message)
@@ -416,7 +434,9 @@ class Table:
             lengths = {k: len(v) for k, v in self._data.items()}
             unique_lengths = set(lengths.values())
             if len(unique_lengths) > 1:
-                raise ValueError(f"Table columns must have the same length, got: {lengths}")
+                raise ValueError(
+                    f"Table columns must have the same length, got: {lengths}"
+                )
 
     @property
     def Variables(self) -> list[str]:
@@ -447,7 +467,12 @@ class Table:
         self._data[name] = np.array(value) if not isinstance(value, Mat) else value.data
 
     def has_field(self, name: str) -> bool:
-        return name in self._data or name in ("Variables", "Height", "Width", "RowNames")
+        return name in self._data or name in (
+            "Variables",
+            "Height",
+            "Width",
+            "RowNames",
+        )
 
     def field_names(self) -> list[str]:
         return list(self._data.keys())
@@ -503,7 +528,9 @@ class Table:
             header = "  " + "  ".join(f"{k:>10}" for k in self._data.keys())
             lines.append(header)
             for i in range(min(5, self.Height)):
-                row = "  " + "  ".join(f"{self._data[k][i]:>10}" for k in self._data.keys())
+                row = "  " + "  ".join(
+                    f"{self._data[k][i]:>10}" for k in self._data.keys()
+                )
                 lines.append(row)
             if self.Height > 5:
                 lines.append("  ...")
@@ -513,7 +540,7 @@ class Table:
 class Map:
     """MATLAB containers.Map type for key-value storage."""
 
-    def __init__(self, keys=None, values=None, key_type='any', value_type='any'):
+    def __init__(self, keys=None, values=None, key_type="any", value_type="any"):
         self._data: dict = {}
         self._key_type = key_type
         self._value_type = value_type
@@ -572,11 +599,13 @@ class Map:
 
 # ── Datetime Types ─────────────────────────────────────────────
 
+
 class Datetime:
     """MATLAB datetime type."""
 
     def __init__(self, *args, **kwargs):
         import datetime as dt
+
         if len(args) == 0:
             self._dt = dt.datetime.now()
         elif len(args) == 1 and isinstance(args[0], str):
@@ -642,7 +671,10 @@ class Datetime:
     def __add__(self, other):
         if isinstance(other, Duration):
             import datetime as dt
-            return Datetime.from_dt(self._dt + dt.timedelta(days=other.days, seconds=other.seconds))
+
+            return Datetime.from_dt(
+                self._dt + dt.timedelta(days=other.days, seconds=other.seconds)
+            )
         return NotImplemented
 
     def __sub__(self, other):
@@ -651,7 +683,10 @@ class Datetime:
             return Duration(days=diff.days, seconds=diff.seconds)
         if isinstance(other, Duration):
             import datetime as dt
-            return Datetime.from_dt(self._dt - dt.timedelta(days=other.days, seconds=other.seconds))
+
+            return Datetime.from_dt(
+                self._dt - dt.timedelta(days=other.days, seconds=other.seconds)
+            )
         return NotImplemented
 
     @classmethod
@@ -751,6 +786,7 @@ class CalendarDuration:
 
 # ── Categorical Type ───────────────────────────────────────────
 
+
 class Categorical:
     """MATLAB categorical array type."""
 
@@ -761,7 +797,9 @@ class Categorical:
         if categories is None:
             categories = sorted(set(data))
         self._categories = list(categories)
-        self._codes = np.array([self._categories.index(x) if x in self._categories else -1 for x in data])
+        self._codes = np.array(
+            [self._categories.index(x) if x in self._categories else -1 for x in data]
+        )
         self._data = data
 
     @property
@@ -786,7 +824,9 @@ class Categorical:
         return f"Categorical({len(self._data)} elements, {len(self._categories)} categories)"
 
     def __str__(self) -> str:
-        return " ".join(str(x) for x in self._data[:10]) + (" ..." if len(self._data) > 10 else "")
+        return " ".join(str(x) for x in self._data[:10]) + (
+            " ..." if len(self._data) > 10 else ""
+        )
 
     def __len__(self) -> int:
         return len(self._data)

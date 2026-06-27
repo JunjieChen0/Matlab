@@ -7,6 +7,7 @@ from matpy.runtime.types import Mat, CellArray, Struct, StringArray
 
 # ── Array Creation ────────────────────────────────────────────
 
+
 @register("meshgrid")
 def _meshgrid(*args):
     arrays = [a.data if isinstance(a, Mat) else np.array(a).flatten() for a in args]
@@ -17,13 +18,14 @@ def _meshgrid(*args):
 @register("ndgrid")
 def _ndgrid(*args):
     arrays = [a.data if isinstance(a, Mat) else np.array(a).flatten() for a in args]
-    result = np.meshgrid(*arrays, indexing='ij')
+    result = np.meshgrid(*arrays, indexing="ij")
     return tuple(Mat(r) for r in result)
 
 
 @register("blkdiag")
 def _blkdiag(*args):
     from scipy.linalg import block_diag
+
     arrays = [a.data if isinstance(a, Mat) else np.array(a) for a in args]
     return Mat(block_diag(*arrays))
 
@@ -31,6 +33,7 @@ def _blkdiag(*args):
 @register("toeplitz")
 def _toeplitz(c, r=None):
     from scipy.linalg import toeplitz
+
     cd = c.data if isinstance(c, Mat) else np.array(c).flatten()
     if r is not None:
         rd = r.data if isinstance(r, Mat) else np.array(r).flatten()
@@ -41,6 +44,7 @@ def _toeplitz(c, r=None):
 @register("hankel")
 def _hankel(c, r=None):
     from scipy.linalg import hankel
+
     cd = c.data if isinstance(c, Mat) else np.array(c).flatten()
     if r is not None:
         rd = r.data if isinstance(r, Mat) else np.array(r).flatten()
@@ -59,10 +63,12 @@ def _vander(x, n=None):
 @register("pascal")
 def _pascal(n, kind=1):
     from scipy.linalg import pascal
+
     return Mat(pascal(int(n), kind=int(kind)))
 
 
 # ── Array Manipulation ────────────────────────────────────────
+
 
 @register("cell2mat")
 def _cell2mat(c):
@@ -85,11 +91,15 @@ def _mat2cell(x, *args):
     data = x.data if isinstance(x, Mat) else np.array(x)
     if len(args) == 0:
         return CellArray([[data]])
-    row_sizes = [int(a) for a in args[0].flat] if isinstance(args[0], Mat) else [int(a) for a in np.array(args[0]).flat]
+    row_sizes = (
+        [int(a) for a in args[0].flat]
+        if isinstance(args[0], Mat)
+        else [int(a) for a in np.array(args[0]).flat]
+    )
     result = []
     start = 0
     for sz in row_sizes:
-        result.append([data[start:start+sz]])
+        result.append([data[start : start + sz]])
         start += sz
     return CellArray(result)
 
@@ -120,11 +130,14 @@ def _arrayfun(func, *args):
 
 # ── Type Checking ─────────────────────────────────────────────
 
+
 @register("isnumeric")
 def _isnumeric_enhanced(x):
     if isinstance(x, Mat):
         return np.issubdtype(x.dtype, np.number)
-    return isinstance(x, (int, float, complex, np.integer, np.floating, np.complexfloating))
+    return isinstance(
+        x, (int, float, complex, np.integer, np.floating, np.complexfloating)
+    )
 
 
 @register("isfloat")
@@ -144,17 +157,17 @@ def _isinteger(x):
 @register("isa")
 def _isa_enhanced(x, class_name):
     class_name = str(class_name)
-    if class_name == 'double':
+    if class_name == "double":
         return isinstance(x, (int, float, Mat))
-    elif class_name == 'char':
+    elif class_name == "char":
         return isinstance(x, str)
-    elif class_name == 'logical':
+    elif class_name == "logical":
         return isinstance(x, bool)
-    elif class_name == 'cell':
+    elif class_name == "cell":
         return isinstance(x, CellArray)
-    elif class_name == 'struct':
+    elif class_name == "struct":
         return isinstance(x, Struct)
-    elif class_name == 'string':
+    elif class_name == "string":
         return isinstance(x, StringArray)
     return False
 
@@ -162,17 +175,17 @@ def _isa_enhanced(x, class_name):
 @register("class")
 def _class_enhanced(x):
     if isinstance(x, Mat):
-        return 'double'
+        return "double"
     elif isinstance(x, str):
-        return 'char'
+        return "char"
     elif isinstance(x, bool):
-        return 'logical'
+        return "logical"
     elif isinstance(x, CellArray):
-        return 'cell'
+        return "cell"
     elif isinstance(x, Struct):
-        return 'struct'
+        return "struct"
     elif isinstance(x, StringArray):
-        return 'string'
+        return "string"
     return type(x).__name__
 
 
@@ -181,52 +194,63 @@ def _cast(x, class_name):
     data = x.data if isinstance(x, Mat) else np.array(x)
     class_name = str(class_name)
     dtype_map = {
-        'double': np.float64, 'single': np.float32,
-        'int32': np.int32, 'int64': np.int64,
-        'uint8': np.uint8, 'uint16': np.uint16, 'uint32': np.uint32,
+        "double": np.float64,
+        "single": np.float32,
+        "int32": np.int32,
+        "int64": np.int64,
+        "uint8": np.uint8,
+        "uint16": np.uint16,
+        "uint32": np.uint32,
     }
     dtype = dtype_map.get(class_name, np.float64)
     return Mat(data.astype(dtype))
 
 
 @register("intmax")
-def _intmax(class_name='int32'):
+def _intmax(class_name="int32"):
     class_name = str(class_name)
-    dtype_map = {'int32': np.int32, 'int64': np.int64, 'uint8': np.uint8, 'uint16': np.uint16, 'uint32': np.uint32}
+    dtype_map = {
+        "int32": np.int32,
+        "int64": np.int64,
+        "uint8": np.uint8,
+        "uint16": np.uint16,
+        "uint32": np.uint32,
+    }
     return np.iinfo(dtype_map.get(class_name, np.int32)).max
 
 
 @register("intmin")
-def _intmin(class_name='int32'):
+def _intmin(class_name="int32"):
     class_name = str(class_name)
-    dtype_map = {'int32': np.int32, 'int64': np.int64, 'uint8': np.uint8}
+    dtype_map = {"int32": np.int32, "int64": np.int64, "uint8": np.uint8}
     return np.iinfo(dtype_map.get(class_name, np.int32)).min
 
 
 @register("realmax")
-def _realmax(class_name='double'):
+def _realmax(class_name="double"):
     class_name = str(class_name)
-    if class_name == 'single':
+    if class_name == "single":
         return np.finfo(np.float32).max
     return np.finfo(np.float64).max
 
 
 @register("realmin")
-def _realmin(class_name='double'):
+def _realmin(class_name="double"):
     class_name = str(class_name)
-    if class_name == 'single':
+    if class_name == "single":
         return np.finfo(np.float32).tiny
     return np.finfo(np.float64).tiny
 
 
 @register("flintmax")
-def _flintmax(class_name='double'):
-    if str(class_name) == 'single':
+def _flintmax(class_name="double"):
+    if str(class_name) == "single":
         return 2**24
     return 2**53
 
 
 # ── Explicit Type Conversion Functions ─────────────────────────
+
 
 @register("int8")
 def _int8(x):
@@ -318,15 +342,18 @@ def _eps(x=None):
 
 # ── Timing ────────────────────────────────────────────────────
 
+
 @register("tic")
 def _tic():
     import time
+
     return time.time()
 
 
 @register("toc")
 def _toc(start=None):
     import time
+
     if start is not None:
         return time.time() - start
     return time.time()
@@ -335,19 +362,24 @@ def _toc(start=None):
 @register("cputime")
 def _cputime():
     import time
+
     return time.process_time()
 
 
 @register("clock")
 def _clock():
     import datetime
+
     now = datetime.datetime.now()
-    return Mat(np.array([now.year, now.month, now.day, now.hour, now.minute, now.second]))
+    return Mat(
+        np.array([now.year, now.month, now.day, now.hour, now.minute, now.second])
+    )
 
 
 @register("now")
 def _now():
     import datetime
+
     epoch = datetime.datetime(1900, 1, 1)
     now = datetime.datetime.now()
     delta = now - epoch
@@ -357,13 +389,15 @@ def _now():
 @register("date")
 def _date():
     import datetime
-    return datetime.datetime.now().strftime('%d-%b-%Y')
+
+    return datetime.datetime.now().strftime("%d-%b-%Y")
 
 
 @register("datetime")
 def _datetime(*args, **kwargs):
     """Create datetime object."""
     from matpy.runtime.types import Datetime
+
     if len(args) == 0:
         return Datetime()
     elif len(args) == 1 and isinstance(args[0], str):
@@ -376,6 +410,7 @@ def _datetime(*args, **kwargs):
 @register("pause")
 def _pause(seconds=None):
     import time
+
     if seconds is not None:
         time.sleep(float(seconds))
     else:
@@ -383,6 +418,7 @@ def _pause(seconds=None):
 
 
 # ── Display ────────────────────────────────────────────────────
+
 
 @register("disp")
 def _disp_enhanced(*args):
@@ -392,10 +428,10 @@ def _disp_enhanced(*args):
             if data.ndim == 0:
                 print(data.item())
             elif data.ndim == 1:
-                print('  '.join(str(x) for x in data))
+                print("  ".join(str(x) for x in data))
             else:
                 for row in data:
-                    print('  '.join(str(x) for x in row))
+                    print("  ".join(str(x) for x in row))
         elif isinstance(arg, Struct):
             print(arg)
         elif isinstance(arg, CellArray):
@@ -416,18 +452,19 @@ def _format(fmt=None):
     if fmt is None:
         return
     import numpy as np
+
     fmt = str(fmt).lower()
-    if fmt == 'short':
+    if fmt == "short":
         np.set_printoptions(precision=4)
-    elif fmt == 'long':
+    elif fmt == "long":
         np.set_printoptions(precision=15)
-    elif fmt == 'shorte':
-        np.set_printoptions(formatter={'float_kind': lambda x: f'{x:.4e}'})
-    elif fmt == 'longe':
-        np.set_printoptions(formatter={'float_kind': lambda x: f'{x:.15e}'})
-    elif fmt == 'compact':
+    elif fmt == "shorte":
+        np.set_printoptions(formatter={"float_kind": lambda x: f"{x:.4e}"})
+    elif fmt == "longe":
+        np.set_printoptions(formatter={"float_kind": lambda x: f"{x:.15e}"})
+    elif fmt == "compact":
         np.set_printoptions(linewidth=80)
-    elif fmt == 'loose':
+    elif fmt == "loose":
         np.set_printoptions(linewidth=75)
 
 
@@ -437,12 +474,12 @@ def _fprintf_enhanced(fmt, *args):
     for a in args:
         if isinstance(a, Mat):
             a = a.to_python()
-        result = result.replace('%d', str(int(a)), 1) if '%d' in result else result
-        result = result.replace('%f', str(float(a)), 1) if '%f' in result else result
-        result = result.replace('%s', str(a), 1) if '%s' in result else result
-        result = result.replace('%g', str(float(a)), 1) if '%g' in result else result
-        result = result.replace('%e', f'{float(a):e}', 1) if '%e' in result else result
-    print(result, end='')
+        result = result.replace("%d", str(int(a)), 1) if "%d" in result else result
+        result = result.replace("%f", str(float(a)), 1) if "%f" in result else result
+        result = result.replace("%s", str(a), 1) if "%s" in result else result
+        result = result.replace("%g", str(float(a)), 1) if "%g" in result else result
+        result = result.replace("%e", f"{float(a):e}", 1) if "%e" in result else result
+    print(result, end="")
     return len(result)
 
 
@@ -452,11 +489,11 @@ def _sprintf_enhanced(fmt, *args):
     for a in args:
         if isinstance(a, Mat):
             a = a.to_python()
-        result = result.replace('%d', str(int(a)), 1) if '%d' in result else result
-        result = result.replace('%f', str(float(a)), 1) if '%f' in result else result
-        result = result.replace('%s', str(a), 1) if '%s' in result else result
-        result = result.replace('%g', str(float(a)), 1) if '%g' in result else result
-        result = result.replace('%e', f'{float(a):e}', 1) if '%e' in result else result
+        result = result.replace("%d", str(int(a)), 1) if "%d" in result else result
+        result = result.replace("%f", str(float(a)), 1) if "%f" in result else result
+        result = result.replace("%s", str(a), 1) if "%s" in result else result
+        result = result.replace("%g", str(float(a)), 1) if "%g" in result else result
+        result = result.replace("%e", f"{float(a):e}", 1) if "%e" in result else result
     return result
 
 
@@ -464,14 +501,14 @@ def _sprintf_enhanced(fmt, *args):
 def _num2str_enhanced(x, fmt=None):
     data = x.data if isinstance(x, Mat) else np.array(x)
     if fmt:
-        return ' '.join(fmt % v for v in data.flat)
-    return ' '.join(str(v) for v in data.flat)
+        return " ".join(fmt % v for v in data.flat)
+    return " ".join(str(v) for v in data.flat)
 
 
 @register("int2str")
 def _int2str_enhanced(x):
     data = x.data if isinstance(x, Mat) else np.array(x)
-    return ' '.join(str(int(v)) for v in data.flat)
+    return " ".join(str(int(v)) for v in data.flat)
 
 
 @register("str2double")
@@ -479,7 +516,7 @@ def _str2double_enhanced(s):
     try:
         return float(str(s).strip())
     except ValueError:
-        return float('nan')
+        return float("nan")
 
 
 @register("str2num")
@@ -493,6 +530,7 @@ def _str2num_enhanced(s):
 
 # ── Array Query Functions ──────────────────────────────────────
 
+
 @register("isvector")
 def _isvector(x):
     """Check if input is a vector."""
@@ -500,7 +538,9 @@ def _isvector(x):
         data = x.data
     else:
         data = np.array(x)
-    return data.ndim == 1 or (data.ndim == 2 and (data.shape[0] == 1 or data.shape[1] == 1))
+    return data.ndim == 1 or (
+        data.ndim == 2 and (data.shape[0] == 1 or data.shape[1] == 1)
+    )
 
 
 @register("isscalar")
@@ -652,6 +692,7 @@ def _isstruct(x):
 
 # ── Set Operations ─────────────────────────────────────────────
 
+
 @register("unique")
 def _unique(x):
     """Unique values."""
@@ -701,6 +742,7 @@ def _ismember(a, b):
 
 # ── Sorting ────────────────────────────────────────────────────
 
+
 @register("sort")
 def _sort(x, dim=None, mode="ascend"):
     """Sort array."""
@@ -740,9 +782,11 @@ def _find(x):
 
 # ── Datetime Functions ─────────────────────────────────────────
 
+
 def _datetime(*args, **kwargs):
     """Create datetime object."""
     from matpy.runtime.types import Datetime
+
     if len(args) == 0:
         return Datetime()
     elif len(args) == 1 and isinstance(args[0], str):
@@ -756,6 +800,7 @@ def _datetime(*args, **kwargs):
 def _duration(hours=0, minutes=0, seconds=0):
     """Create duration object."""
     from matpy.runtime.types import Duration
+
     return Duration(hours=float(hours), minutes=float(minutes), seconds=float(seconds))
 
 
@@ -763,6 +808,7 @@ def _duration(hours=0, minutes=0, seconds=0):
 def _years(x):
     """Convert to years duration."""
     from matpy.runtime.types import CalendarDuration
+
     return CalendarDuration(years=int(x))
 
 
@@ -770,6 +816,7 @@ def _years(x):
 def _months(x):
     """Convert to months duration."""
     from matpy.runtime.types import CalendarDuration
+
     return CalendarDuration(months=int(x))
 
 
@@ -777,6 +824,7 @@ def _months(x):
 def _days(x):
     """Convert to days duration."""
     from matpy.runtime.types import CalendarDuration
+
     return CalendarDuration(days=int(x))
 
 
@@ -784,6 +832,7 @@ def _days(x):
 def _hours(x):
     """Convert to hours duration."""
     from matpy.runtime.types import Duration
+
     return Duration(hours=float(x))
 
 
@@ -791,6 +840,7 @@ def _hours(x):
 def _minutes(x):
     """Convert to minutes duration."""
     from matpy.runtime.types import Duration
+
     return Duration(minutes=float(x))
 
 
@@ -798,6 +848,7 @@ def _minutes(x):
 def _seconds(x):
     """Convert to seconds duration."""
     from matpy.runtime.types import Duration
+
     return Duration(seconds=float(x))
 
 
@@ -815,6 +866,7 @@ def _year(dt):
     if isinstance(dt, Datetime):
         return dt.Year
     import datetime
+
     return datetime.datetime.now().year
 
 
@@ -824,6 +876,7 @@ def _month(dt):
     if isinstance(dt, Datetime):
         return dt.Month
     import datetime
+
     return datetime.datetime.now().month
 
 
@@ -833,6 +886,7 @@ def _day(dt):
     if isinstance(dt, Datetime):
         return dt.Day
     import datetime
+
     return datetime.datetime.now().day
 
 
@@ -872,6 +926,7 @@ def _weekday(dt):
 def _isdatetime(x):
     """Check if input is datetime."""
     from matpy.runtime.types import Datetime
+
     return isinstance(x, Datetime)
 
 
@@ -879,15 +934,18 @@ def _isdatetime(x):
 def _isduration(x):
     """Check if input is duration."""
     from matpy.runtime.types import Duration
+
     return isinstance(x, Duration)
 
 
 # ── Categorical Functions ──────────────────────────────────────
 
+
 @register("categorical")
 def _categorical(x, categories=None):
     """Create categorical array."""
     from matpy.runtime.types import Categorical
+
     return Categorical(x, categories)
 
 
@@ -911,6 +969,7 @@ def _isundefined(x):
 def _iscategorical(x):
     """Check if input is categorical."""
     from matpy.runtime.types import Categorical
+
     return isinstance(x, Categorical)
 
 

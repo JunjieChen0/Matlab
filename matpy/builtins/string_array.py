@@ -16,7 +16,9 @@ def _string(*args):
             return StringArray(np.array([Missing()] * n, dtype=object))
         elif isinstance(arg, Mat):
             data = arg.data
-            return StringArray(np.array([str(x) for x in data.flat], dtype=object).reshape(data.shape))
+            return StringArray(
+                np.array([str(x) for x in data.flat], dtype=object).reshape(data.shape)
+            )
         elif isinstance(arg, StringArray):
             return arg
         elif isinstance(arg, str):

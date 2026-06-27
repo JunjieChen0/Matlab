@@ -9,11 +9,33 @@ from typing import Any
 import numpy as np
 
 from matpy.ast_nodes import (
-    Program, NumberLiteral, StringLiteral, Identifier, BinaryOp, UnaryOp,
-    RangeExpr, MatrixLiteral, CellLiteral, IndexExpr, FieldAccess,
-    FuncCallExpr, ParenExpr, ExprStmt, Assignment, IfStmt, ForStmt,
-    WhileStmt, SwitchStmt, ReturnStmt, BreakStmt, ContinueStmt, FuncDef,
-    GlobalStmt, PersistentStmt, Expr, Stmt,
+    Program,
+    NumberLiteral,
+    StringLiteral,
+    Identifier,
+    BinaryOp,
+    UnaryOp,
+    RangeExpr,
+    MatrixLiteral,
+    CellLiteral,
+    IndexExpr,
+    FieldAccess,
+    FuncCallExpr,
+    ParenExpr,
+    ExprStmt,
+    Assignment,
+    IfStmt,
+    ForStmt,
+    WhileStmt,
+    SwitchStmt,
+    ReturnStmt,
+    BreakStmt,
+    ContinueStmt,
+    FuncDef,
+    GlobalStmt,
+    PersistentStmt,
+    Expr,
+    Stmt,
 )
 from matpy.runtime.types import Mat
 
@@ -128,7 +150,9 @@ class BytecodeCompiler:
         for i, instr in enumerate(instructions):
             if instr.op in (OpCode.JUMP, OpCode.JUMP_IF_FALSE, OpCode.JUMP_IF_TRUE):
                 if instr.arg in self.labels:
-                    instructions[i] = Instruction(instr.op, self.labels[instr.arg], instr.line)
+                    instructions[i] = Instruction(
+                        instr.op, self.labels[instr.arg], instr.line
+                    )
 
     def _emit(self, op: OpCode, arg: Any = None):
         self.instructions.append(Instruction(op, arg))
@@ -165,7 +189,12 @@ class BytecodeCompiler:
                         for idx in target.indices:
                             self._compile_expr(idx)
                         self._emit(OpCode.INDEX_ASSIGN, len(target.indices))
-            case IfStmt(condition=condition, body=body, elif_branches=elif_branches, else_body=else_body):
+            case IfStmt(
+                condition=condition,
+                body=body,
+                elif_branches=elif_branches,
+                else_body=else_body,
+            ):
                 end_label = self._new_label()
                 self._compile_expr(condition)
                 false_label = self._new_label()
@@ -246,7 +275,9 @@ class BytecodeCompiler:
                     for s in stmt.otherwise:
                         self._compile_stmt(s)
                 self._emit_label(end_label)
-            case TryCatchStmt(try_body=try_body, catch_var=catch_var, catch_body=catch_body):
+            case TryCatchStmt(
+                try_body=try_body, catch_var=catch_var, catch_body=catch_body
+            ):
                 # Compile try/catch as try-start/try-end/catch-start markers
                 catch_label = self._new_label()
                 end_label = self._new_label()
@@ -256,7 +287,10 @@ class BytecodeCompiler:
                 self._emit(OpCode.TRY_END)
                 self._emit(OpCode.JUMP, end_label)
                 self._emit_label(catch_label)
-                self._emit(OpCode.CATCH_START, self._add_constant(catch_var) if catch_var else None)
+                self._emit(
+                    OpCode.CATCH_START,
+                    self._add_constant(catch_var) if catch_var else None,
+                )
                 for s in catch_body:
                     self._compile_stmt(s)
                 self._emit_label(end_label)
@@ -281,12 +315,24 @@ class BytecodeCompiler:
                 self._compile_expr(left)
                 self._compile_expr(right)
                 op_map = {
-                    "+": OpCode.ADD, "-": OpCode.SUB, "*": OpCode.MUL,
-                    "/": OpCode.DIV, "^": OpCode.POW,
-                    ".*": OpCode.DOT_MUL, "./": OpCode.DOT_DIV, ".^": OpCode.DOT_POW,
-                    "==": OpCode.EQ, "~=": OpCode.NEQ,
-                    "<": OpCode.LT, ">": OpCode.GT, "<=": OpCode.LE, ">=": OpCode.GE,
-                    "&": OpCode.AND, "|": OpCode.OR, "&&": OpCode.LAND, "||": OpCode.LOR,
+                    "+": OpCode.ADD,
+                    "-": OpCode.SUB,
+                    "*": OpCode.MUL,
+                    "/": OpCode.DIV,
+                    "^": OpCode.POW,
+                    ".*": OpCode.DOT_MUL,
+                    "./": OpCode.DOT_DIV,
+                    ".^": OpCode.DOT_POW,
+                    "==": OpCode.EQ,
+                    "~=": OpCode.NEQ,
+                    "<": OpCode.LT,
+                    ">": OpCode.GT,
+                    "<=": OpCode.LE,
+                    ">=": OpCode.GE,
+                    "&": OpCode.AND,
+                    "|": OpCode.OR,
+                    "&&": OpCode.LAND,
+                    "||": OpCode.LOR,
                 }
                 self._emit(op_map.get(op, OpCode.NOP))
             case UnaryOp(op=op, operand=operand):
@@ -307,7 +353,9 @@ class BytecodeCompiler:
                 for row in rows:
                     for elem in row:
                         self._compile_expr(elem)
-                self._emit(OpCode.BUILD_MATRIX, (len(rows), len(rows[0]) if rows else 0))
+                self._emit(
+                    OpCode.BUILD_MATRIX, (len(rows), len(rows[0]) if rows else 0)
+                )
             case RangeExpr(start=start, stop=stop, step=step):
                 self._compile_expr(start)
                 self._compile_expr(stop)
@@ -343,7 +391,9 @@ class BytecodeVM:
         self.variables = {}
         return self._execute_bytecode(instructions)
 
-    def _run_main_loop(self, instructions: list[Instruction], constants: list[Any]) -> Any:
+    def _run_main_loop(
+        self, instructions: list[Instruction], constants: list[Any]
+    ) -> Any:
         """Legacy main loop - kept for compatibility."""
         self.constants = constants
         self.ip = 0
@@ -444,7 +494,11 @@ class BytecodeVM:
                             result = base.data[tuple(converted)]
                             if isinstance(result, np.ndarray) and result.ndim == 0:
                                 result = result.item()
-                            self.stack.append(Mat(result) if isinstance(result, np.ndarray) else result)
+                            self.stack.append(
+                                Mat(result)
+                                if isinstance(result, np.ndarray)
+                                else result
+                            )
                         except (IndexError, ValueError):
                             self.stack.append(None)
                     else:
@@ -485,6 +539,7 @@ class BytecodeVM:
                     args.reverse()
                     # Call built-in function
                     from matpy.builtins import get_builtin
+
                     builtin = get_builtin(name)
                     if builtin:
                         result = builtin(*args)
@@ -505,7 +560,9 @@ class BytecodeVM:
                     if not self.call_stack:
                         return self.stack[-1] if self.stack else None
                     # Restore caller's state
-                    saved_ip, saved_instructions, saved_variables, saved_constants = self.call_stack.pop()
+                    saved_ip, saved_instructions, saved_variables, saved_constants = (
+                        self.call_stack.pop()
+                    )
                     ret_val = self.stack.pop() if self.stack else None
                     self.ip = saved_ip
                     self.instructions = saved_instructions
@@ -516,11 +573,21 @@ class BytecodeVM:
                     rows, cols = instr.arg
                     elems = [self.stack.pop() for _ in range(rows * cols)]
                     elems.reverse()
-                    self.stack.append(Mat(np.array(elems).reshape(rows, cols) if rows > 1 else np.array(elems)))
+                    self.stack.append(
+                        Mat(
+                            np.array(elems).reshape(rows, cols)
+                            if rows > 1
+                            else np.array(elems)
+                        )
+                    )
                 case OpCode.BUILD_RANGE:
                     count = instr.arg
                     if count == 3:
-                        step, stop, start = self.stack.pop(), self.stack.pop(), self.stack.pop()
+                        step, stop, start = (
+                            self.stack.pop(),
+                            self.stack.pop(),
+                            self.stack.pop(),
+                        )
                     else:
                         stop, start = self.stack.pop(), self.stack.pop()
                         step = 1
@@ -566,11 +633,11 @@ class BytecodeVM:
                     self.stack.append(idx >= len(items))
                 case OpCode.TRY_START:
                     # Store catch label for exception handling
-                    self._try_catch_stack = getattr(self, '_try_catch_stack', [])
+                    self._try_catch_stack = getattr(self, "_try_catch_stack", [])
                     self._try_catch_stack.append(instr.arg)
                 case OpCode.TRY_END:
                     # Pop try context if no exception
-                    if hasattr(self, '_try_catch_stack') and self._try_catch_stack:
+                    if hasattr(self, "_try_catch_stack") and self._try_catch_stack:
                         self._try_catch_stack.pop()
                 case OpCode.CATCH_START:
                     # Exception was caught, store it in variable if specified
@@ -610,7 +677,7 @@ class BytecodeVM:
 
     def _pow(self, a, b):
         a, b = self._to_numpy(a), self._to_numpy(b)
-        r = np.linalg.matrix_power(a, int(b)) if isinstance(a, np.ndarray) else a ** b
+        r = np.linalg.matrix_power(a, int(b)) if isinstance(a, np.ndarray) else a**b
         return Mat(r) if isinstance(r, np.ndarray) else r
 
     def _neg(self, a):
@@ -628,7 +695,7 @@ class BytecodeVM:
 
     def _dot_pow(self, a, b):
         a, b = self._to_numpy(a), self._to_numpy(b)
-        return Mat(a ** b)
+        return Mat(a**b)
 
     def _eq(self, a, b):
         a, b = self._to_numpy(a), self._to_numpy(b)
@@ -819,7 +886,11 @@ class BytecodeVM:
                             result = base.data[tuple(converted)]
                             if isinstance(result, np.ndarray) and result.ndim == 0:
                                 result = result.item()
-                            self.stack.append(Mat(result) if isinstance(result, np.ndarray) else result)
+                            self.stack.append(
+                                Mat(result)
+                                if isinstance(result, np.ndarray)
+                                else result
+                            )
                         except (IndexError, ValueError):
                             self.stack.append(None)
                     else:
@@ -857,6 +928,7 @@ class BytecodeVM:
                     args = [self.stack.pop() for _ in range(argc)]
                     args.reverse()
                     from matpy.builtins import get_builtin
+
                     builtin = get_builtin(name)
                     if builtin:
                         result = builtin(*args)
@@ -876,11 +948,21 @@ class BytecodeVM:
                     rows, cols = instr.arg
                     elems = [self.stack.pop() for _ in range(rows * cols)]
                     elems.reverse()
-                    self.stack.append(Mat(np.array(elems).reshape(rows, cols) if rows > 1 else np.array(elems)))
+                    self.stack.append(
+                        Mat(
+                            np.array(elems).reshape(rows, cols)
+                            if rows > 1
+                            else np.array(elems)
+                        )
+                    )
                 case OpCode.BUILD_RANGE:
                     count = instr.arg
                     if count == 3:
-                        step, stop, start = self.stack.pop(), self.stack.pop(), self.stack.pop()
+                        step, stop, start = (
+                            self.stack.pop(),
+                            self.stack.pop(),
+                            self.stack.pop(),
+                        )
                     else:
                         stop, start = self.stack.pop(), self.stack.pop()
                         step = 1
@@ -916,10 +998,10 @@ class BytecodeVM:
                     idx = self.variables.get(index_name, 0)
                     self.stack.append(idx >= len(items))
                 case OpCode.TRY_START:
-                    self._try_catch_stack = getattr(self, '_try_catch_stack', [])
+                    self._try_catch_stack = getattr(self, "_try_catch_stack", [])
                     self._try_catch_stack.append(instr.arg)
                 case OpCode.TRY_END:
-                    if hasattr(self, '_try_catch_stack') and self._try_catch_stack:
+                    if hasattr(self, "_try_catch_stack") and self._try_catch_stack:
                         self._try_catch_stack.pop()
                 case OpCode.CATCH_START:
                     if instr.arg is not None:

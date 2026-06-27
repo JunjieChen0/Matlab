@@ -43,6 +43,7 @@ def _mfilename():
 
 # ── Additional I/O Functions ───────────────────────────────────
 
+
 @register("inputname")
 def _inputname(n):
     """Get name of input argument."""
@@ -96,17 +97,19 @@ def _validateattributes(x, classes, attributes=None):
     dtype_str = str(data.dtype).lower()
     type_ok = False
     for cls in class_strs:
-        if cls in ('double', 'float64', 'float') and np.issubdtype(data.dtype, np.floating):
+        if cls in ("double", "float64", "float") and np.issubdtype(
+            data.dtype, np.floating
+        ):
             type_ok = True
-        elif cls in ('single', 'float32') and data.dtype == np.float32:
+        elif cls in ("single", "float32") and data.dtype == np.float32:
             type_ok = True
-        elif cls in ('int32', 'int') and np.issubdtype(data.dtype, np.integer):
+        elif cls in ("int32", "int") and np.issubdtype(data.dtype, np.integer):
             type_ok = True
-        elif cls in ('logical', 'bool') and data.dtype == bool:
+        elif cls in ("logical", "bool") and data.dtype == bool:
             type_ok = True
-        elif cls in ('char', 'string') and isinstance(x, str):
+        elif cls in ("char", "string") and isinstance(x, str):
             type_ok = True
-        elif cls == 'numeric' and np.issubdtype(data.dtype, np.number):
+        elif cls == "numeric" and np.issubdtype(data.dtype, np.number):
             type_ok = True
 
     if not type_ok:
@@ -117,15 +120,15 @@ def _validateattributes(x, classes, attributes=None):
         if isinstance(attributes, (list, tuple)):
             for attr in attributes:
                 attr_str = str(attr).lower()
-                if attr_str == 'nonempty' and data.size == 0:
+                if attr_str == "nonempty" and data.size == 0:
                     raise ValueError("Array must be nonempty")
-                elif attr_str == 'positive' and np.any(data <= 0):
+                elif attr_str == "positive" and np.any(data <= 0):
                     raise ValueError("All elements must be positive")
-                elif attr_str == 'nonnegative' and np.any(data < 0):
+                elif attr_str == "nonnegative" and np.any(data < 0):
                     raise ValueError("All elements must be nonnegative")
-                elif attr_str == 'finite' and not np.all(np.isfinite(data)):
+                elif attr_str == "finite" and not np.all(np.isfinite(data)):
                     raise ValueError("All elements must be finite")
-                elif attr_str == 'integer' and not np.all(data == np.floor(data)):
+                elif attr_str == "integer" and not np.all(data == np.floor(data)):
                     raise ValueError("All elements must be integers")
 
     return True
@@ -184,6 +187,7 @@ class _Timer:
 
     def start(self):
         import time
+
         self._start = time.time()
 
     def stop(self):
@@ -191,10 +195,12 @@ class _Timer:
 
     def tic(self):
         import time
+
         self._start = time.time()
 
     def toc(self):
         import time
+
         if self._start is not None:
             return time.time() - self._start
         return 0.0
@@ -202,10 +208,12 @@ class _Timer:
 
 # ── MEX Interface Functions ────────────────────────────────────
 
+
 @register("py.numpy.array")
 def _py_numpy_array(*args):
     """Create numpy array."""
     import numpy as np
+
     return Mat(np.array(*args))
 
 
@@ -213,6 +221,7 @@ def _py_numpy_array(*args):
 def _py_numpy_zeros(*args):
     """Create numpy zeros array."""
     import numpy as np
+
     return Mat(np.zeros(*args))
 
 
@@ -220,6 +229,7 @@ def _py_numpy_zeros(*args):
 def _py_numpy_ones(*args):
     """Create numpy ones array."""
     import numpy as np
+
     return Mat(np.ones(*args))
 
 
@@ -227,6 +237,7 @@ def _py_numpy_ones(*args):
 def _py_numpy_linspace(*args):
     """Create numpy linspace array."""
     import numpy as np
+
     return Mat(np.linspace(*args))
 
 
@@ -234,6 +245,7 @@ def _py_numpy_linspace(*args):
 def _py_numpy_reshape(arr, shape):
     """Reshape numpy array."""
     import numpy as np
+
     if isinstance(arr, Mat):
         return Mat(arr.data.reshape(*shape))
     return Mat(np.array(arr).reshape(*shape))
@@ -243,6 +255,7 @@ def _py_numpy_reshape(arr, shape):
 def _py_numpy_dot(a, b):
     """Compute dot product."""
     import numpy as np
+
     da = a.data if isinstance(a, Mat) else np.array(a)
     db = b.data if isinstance(b, Mat) else np.array(b)
     return Mat(np.dot(da, db))
@@ -252,6 +265,7 @@ def _py_numpy_dot(a, b):
 def _py_numpy_cross(a, b):
     """Compute cross product."""
     import numpy as np
+
     da = a.data if isinstance(a, Mat) else np.array(a)
     db = b.data if isinstance(b, Mat) else np.array(b)
     return Mat(np.cross(da, db))
@@ -261,6 +275,7 @@ def _py_numpy_cross(a, b):
 def _py_numpy_linalg_norm(x, ord=None):
     """Compute matrix or vector norm."""
     import numpy as np
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     return np.linalg.norm(data, ord)
 
@@ -269,6 +284,7 @@ def _py_numpy_linalg_norm(x, ord=None):
 def _py_numpy_linalg_inv(x):
     """Compute matrix inverse."""
     import numpy as np
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(np.linalg.inv(data))
 
@@ -277,6 +293,7 @@ def _py_numpy_linalg_inv(x):
 def _py_numpy_linalg_det(x):
     """Compute matrix determinant."""
     import numpy as np
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     return np.linalg.det(data)
 
@@ -285,6 +302,7 @@ def _py_numpy_linalg_det(x):
 def _py_numpy_linalg_eig(x):
     """Compute eigenvalues and eigenvectors."""
     import numpy as np
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     eigenvalues, eigenvectors = np.linalg.eig(data)
     return Mat(eigenvalues), Mat(eigenvectors)
@@ -294,6 +312,7 @@ def _py_numpy_linalg_eig(x):
 def _py_numpy_linalg_svd(x):
     """Compute singular value decomposition."""
     import numpy as np
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     U, S, Vt = np.linalg.svd(data)
     return Mat(U), Mat(S), Mat(Vt)
@@ -304,6 +323,7 @@ def _py_scipy_linalg_expm(x):
     """Compute matrix exponential."""
     from scipy.linalg import expm
     import numpy as np
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(expm(data))
 
@@ -313,6 +333,7 @@ def _py_scipy_linalg_logm(x):
     """Compute matrix logarithm."""
     from scipy.linalg import logm
     import numpy as np
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(logm(data))
 
@@ -322,6 +343,7 @@ def _py_scipy_linalg_sqrtm(x):
     """Compute matrix square root."""
     from scipy.linalg import sqrtm
     import numpy as np
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     return Mat(sqrtm(data))
 
@@ -331,6 +353,7 @@ def _py_scipy_optimize_minimize(func, x0, *args, **kwargs):
     """Minimize a function."""
     from scipy.optimize import minimize
     import numpy as np
+
     x0_data = x0.data if isinstance(x0, Mat) else np.array(x0)
     result = minimize(func, x0_data.flatten(), *args, **kwargs)
     return Mat(result.x), float(result.fun)
@@ -340,15 +363,17 @@ def _py_scipy_optimize_minimize(func, x0, *args, **kwargs):
 def _py_scipy_integrate_quad(func, a, b, *args, **kwargs):
     """Compute a definite integral."""
     from scipy.integrate import quad
+
     result, error = quad(func, float(a), float(b), *args, **kwargs)
     return float(result), float(error)
 
 
 @register("py.scipy.interpolate.interp1d")
-def _py_scipy_interpolate_interp1d(x, y, kind='linear'):
+def _py_scipy_interpolate_interp1d(x, y, kind="linear"):
     """Create a 1-D interpolation function."""
     from scipy.interpolate import interp1d
     import numpy as np
+
     xd = x.data if isinstance(x, Mat) else np.array(x)
     yd = y.data if isinstance(y, Mat) else np.array(y)
     return interp1d(xd.flatten(), yd.flatten(), kind=str(kind))
@@ -359,6 +384,7 @@ def _py_matplotlib_pyplot_plot(*args):
     """Create a plot."""
     import matplotlib.pyplot as plt
     import numpy as np
+
     processed_args = []
     for arg in args:
         if isinstance(arg, Mat):
@@ -373,6 +399,7 @@ def _py_matplotlib_pyplot_plot(*args):
 def _py_matplotlib_pyplot_show():
     """Show the current plot."""
     import matplotlib.pyplot as plt
+
     plt.show()
     return None
 
@@ -381,6 +408,7 @@ def _py_matplotlib_pyplot_show():
 def _py_matplotlib_pyplot_savefig(filename, **kwargs):
     """Save the current plot to a file."""
     import matplotlib.pyplot as plt
+
     plt.savefig(str(filename), **kwargs)
     return None
 
@@ -391,6 +419,7 @@ def _rethrow(exc):
     Usage: try ... catch e; rethrow(e); end
     """
     from matpy.runtime.types import MException, MatPyRethrowError
+
     if isinstance(exc, MException):
         exc.throw()
     raise RuntimeError(str(exc))
@@ -403,7 +432,7 @@ _last_error = None
 @register("lasterror")
 def _lasterror():
     """Return last error as MException.
-    
+
     Usage: e = lasterror()
     """
     return _last_error
@@ -412,7 +441,7 @@ def _lasterror():
 @register("warning")
 def _warning(*args):
     """Display warning message.
-    
+
     Usage:
         warning(msg) - Display warning message
         warning('off', id) - Turn off warning
@@ -421,24 +450,24 @@ def _warning(*args):
     """
     if len(args) == 0:
         return
-    
+
     if len(args) == 1:
         # Simple warning message
         msg = str(args[0])
         print(f"Warning: {msg}", file=sys.stderr)
         return
-    
+
     if len(args) >= 2:
         action = str(args[0]).lower()
         warning_id = str(args[1])
-        
-        if action == 'off':
+
+        if action == "off":
             # Suppress warning (store in global state)
             pass
-        elif action == 'on':
+        elif action == "on":
             # Enable warning
             pass
-        elif action == 'error':
+        elif action == "error":
             # Convert warning to error
             pass
         return
@@ -447,24 +476,25 @@ def _warning(*args):
 @register("error")
 def _error(*args):
     """Throw error with message and optional identifier.
-    
+
     Usage:
         error(msg)
         error(id, msg)
     """
     from matpy.runtime.types import MException
+
     global _last_error
-    
+
     if len(args) == 1:
         msg = str(args[0])
-        exc = MException(message=msg, identifier='MATLAB:error')
+        exc = MException(message=msg, identifier="MATLAB:error")
     elif len(args) >= 2:
         identifier = str(args[0])
         msg = str(args[1])
         exc = MException(message=msg, identifier=identifier)
     else:
-        exc = MException(message='Unknown error', identifier='MATLAB:error')
-    
+        exc = MException(message="Unknown error", identifier="MATLAB:error")
+
     _last_error = exc
     raise exc
 
@@ -472,8 +502,9 @@ def _error(*args):
 @register("exception")
 def _exception(identifier, message):
     """Create MException object.
-    
+
     Usage: exc = MException(id, msg)
     """
     from matpy.runtime.types import MException
+
     return MException(message=str(message), identifier=str(identifier))

@@ -11,17 +11,20 @@ class TestEnvironmentFunctions:
 
     def test_environment_create(self):
         from matpy.environment import Environment
+
         env = Environment()
         assert env is not None
 
     def test_environment_set_get(self):
         from matpy.environment import Environment
+
         env = Environment()
         env.set("x", 42)
         assert env.get("x") == 42
 
     def test_environment_has(self):
         from matpy.environment import Environment
+
         env = Environment()
         env.set("x", 42)
         assert env.has("x") == True
@@ -29,6 +32,7 @@ class TestEnvironmentFunctions:
 
     def test_environment_child(self):
         from matpy.environment import Environment
+
         env = Environment()
         child = env.child("test")
         assert child is not None
@@ -36,6 +40,7 @@ class TestEnvironmentFunctions:
 
     def test_environment_child_get_parent(self):
         from matpy.environment import Environment
+
         env = Environment()
         env.set("x", 42)
         child = env.child("test")
@@ -43,6 +48,7 @@ class TestEnvironmentFunctions:
 
     def test_environment_child_set_override(self):
         from matpy.environment import Environment
+
         env = Environment()
         env.set("x", 42)
         child = env.child("test")
@@ -52,6 +58,7 @@ class TestEnvironmentFunctions:
 
     def test_environment_global(self):
         from matpy.environment import Environment
+
         env = Environment()
         env.define_global("x")
         env.set("x", 42)
@@ -59,6 +66,7 @@ class TestEnvironmentFunctions:
 
     def test_environment_persistent(self):
         from matpy.environment import Environment
+
         env = Environment()
         env.define_persistent("x", 0)
         assert env.get("x") == 0
@@ -67,6 +75,7 @@ class TestEnvironmentFunctions:
 
     def test_environment_local_vars(self):
         from matpy.environment import Environment
+
         env = Environment()
         env.set("x", 1)
         env.set("y", 2)
@@ -76,6 +85,7 @@ class TestEnvironmentFunctions:
 
     def test_environment_all_vars(self):
         from matpy.environment import Environment
+
         env = Environment()
         env.set("x", 1)
         child = env.child("test")
@@ -86,11 +96,13 @@ class TestEnvironmentFunctions:
 
     def test_environment_name(self):
         from matpy.environment import Environment
+
         env = Environment(name="global")
         assert env.name == "global"
 
     def test_environment_parent(self):
         from matpy.environment import Environment
+
         env = Environment()
         child = env.child("test")
         assert child.parent == env
@@ -101,11 +113,13 @@ class TestBytecodeFunctions:
 
     def test_bytecode_compiler_create(self):
         from matpy.bytecode import BytecodeCompiler
+
         compiler = BytecodeCompiler()
         assert compiler is not None
 
     def test_bytecode_vm_create(self):
         from matpy.bytecode import BytecodeVM
+
         vm = BytecodeVM()
         assert vm is not None
 
@@ -113,6 +127,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2;")
         tokens = lexer.tokenize()
@@ -125,6 +140,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 42;")
         tokens = lexer.tokenize()
@@ -137,6 +153,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2 * 3;")
         tokens = lexer.tokenize()
@@ -149,6 +166,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("if x > 0; y = 1; else; y = 0; end")
         tokens = lexer.tokenize()
@@ -161,6 +179,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("for i = 1:10; x = i; end")
         tokens = lexer.tokenize()
@@ -173,6 +192,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("while x > 0; x = x - 1; end")
         tokens = lexer.tokenize()
@@ -185,6 +205,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("function y = f(x); y = x^2; end")
         tokens = lexer.tokenize()
@@ -197,6 +218,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2;")
         tokens = lexer.tokenize()
@@ -211,6 +233,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 42;")
         tokens = lexer.tokenize()
@@ -225,6 +248,7 @@ class TestBytecodeFunctions:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2 * 3;")
         tokens = lexer.tokenize()
@@ -287,6 +311,7 @@ class TestBytecodeIntegration:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2;")
         tokens = lexer.tokenize()
@@ -301,6 +326,7 @@ class TestBytecodeIntegration:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 42;")
         tokens = lexer.tokenize()
@@ -315,6 +341,7 @@ class TestBytecodeIntegration:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1 + 2 * 3;")
         tokens = lexer.tokenize()
@@ -329,6 +356,7 @@ class TestBytecodeIntegration:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 1;\nif x > 0; y = 1; else; y = 0; end")
         tokens = lexer.tokenize()
@@ -343,6 +371,7 @@ class TestBytecodeIntegration:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("total = 0;\nfor i = 1:5; total = total + i; end")
         tokens = lexer.tokenize()
@@ -357,6 +386,7 @@ class TestBytecodeIntegration:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("x = 5;\nwhile x > 0; x = x - 1; end")
         tokens = lexer.tokenize()
@@ -371,6 +401,7 @@ class TestBytecodeIntegration:
         from matpy.bytecode import BytecodeCompiler, BytecodeVM
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         compiler = BytecodeCompiler()
         lexer = Lexer("function y = f(x); y = x^2; end\nresult = f(3);")
         tokens = lexer.tokenize()

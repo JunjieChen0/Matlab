@@ -12,7 +12,7 @@ _next_handle = 1
 def _scipy_to_matpy(val):
     """Convert scipy loaded data to MatPy types."""
     from scipy.io.matlab import mat_struct
-    
+
     if isinstance(val, mat_struct):
         # Convert MATLAB struct to MatPy Struct
         fields = {}
@@ -20,7 +20,7 @@ def _scipy_to_matpy(val):
             fields[field_name] = _scipy_to_matpy(getattr(val, field_name))
         return Struct(fields)
     elif isinstance(val, np.ndarray):
-        if val.dtype.kind in ('U', 'S', 'O'):
+        if val.dtype.kind in ("U", "S", "O"):
             # String or object array
             if val.size == 1:
                 return str(val.flat[0])
@@ -29,7 +29,9 @@ def _scipy_to_matpy(val):
             return Mat(val.astype(bool))
         else:
             return Mat(val)
-    elif isinstance(val, (int, float, complex, np.integer, np.floating, np.complexfloating)):
+    elif isinstance(
+        val, (int, float, complex, np.integer, np.floating, np.complexfloating)
+    ):
         return val
     elif isinstance(val, str):
         return val
@@ -107,7 +109,7 @@ def _csvwrite(filename, data):
 @register("load")
 def _load(filename, *args):
     """Load variables from .mat file.
-    
+
     Usage:
         load(filename) - Load all variables
         load(filename, 'var1', 'var2') - Load specific variables
@@ -116,18 +118,19 @@ def _load(filename, *args):
     if filename.endswith(".mat"):
         try:
             from scipy.io import loadmat
+
             data = loadmat(filename, squeeze_me=True, struct_as_record=False)
             result = {}
             for key, val in data.items():
                 if not key.startswith("__"):
                     # Convert to MatPy types
                     result[key] = _scipy_to_matpy(val)
-            
+
             # If specific variables requested, filter
             if args:
                 vars_to_load = [str(a) for a in args]
                 result = {k: v for k, v in result.items() if k in vars_to_load}
-            
+
             return result
         except ImportError:
             print("scipy required for .mat files")
@@ -138,8 +141,9 @@ def _load(filename, *args):
     elif filename.endswith(".h5") or filename.endswith(".hdf5"):
         try:
             import h5py
+
             result = {}
-            with h5py.File(filename, 'r') as f:
+            with h5py.File(filename, "r") as f:
                 for key in f.keys():
                     result[key] = Mat(np.array(f[key]))
             return result
@@ -161,7 +165,7 @@ def _load(filename, *args):
 @register("save")
 def _save(filename, *args):
     """Save variables to .mat file.
-    
+
     Usage:
         save(filename, var1, var2, ...) - Save variables
         save(filename, '-struct', s) - Save struct fields
@@ -171,10 +175,11 @@ def _save(filename, *args):
         if filename.endswith(".mat"):
             try:
                 from scipy.io import savemat
+
                 data = {}
-                
+
                 # Handle -struct option
-                if len(args) >= 2 and str(args[0]) == '-struct':
+                if len(args) >= 2 and str(args[0]) == "-struct":
                     s = args[1]
                     if isinstance(s, Struct):
                         for field in s.field_names():
@@ -199,7 +204,7 @@ def _save(filename, *args):
                             data[f"var{i}"] = struct_data
                         else:
                             data[f"var{i}"] = np.array(arg)
-                
+
                 savemat(filename, data)
                 return 0
             except ImportError:
@@ -208,7 +213,8 @@ def _save(filename, *args):
         elif filename.endswith(".h5") or filename.endswith(".hdf5"):
             try:
                 import h5py
-                with h5py.File(filename, 'w') as f:
+
+                with h5py.File(filename, "w") as f:
                     for i, arg in enumerate(args):
                         if isinstance(arg, Mat):
                             f.create_dataset(f"var{i}", data=arg.data)
@@ -232,12 +238,13 @@ def _save(filename, *args):
 
 
 @register("matfile")
-def _matfile(filename, mode='r'):
+def _matfile(filename, mode="r"):
     """MATLAB .mat file access."""
     try:
         from scipy.io import loadmat, savemat
+
         filename = str(filename)
-        if mode == 'r':
+        if mode == "r":
             return loadmat(filename)
         else:
             return {}  # Return empty dict for writing
@@ -251,7 +258,8 @@ def _h5read(filename, dataset):
     """Read dataset from HDF5 file."""
     try:
         import h5py
-        with h5py.File(str(filename), 'r') as f:
+
+        with h5py.File(str(filename), "r") as f:
             return Mat(np.array(f[str(dataset)]))
     except ImportError:
         print("h5py required for HDF5 files")
@@ -266,7 +274,8 @@ def _h5write(filename, dataset, data):
     """Write dataset to HDF5 file."""
     try:
         import h5py
-        with h5py.File(str(filename), 'a') as f:
+
+        with h5py.File(str(filename), "a") as f:
             if isinstance(data, Mat):
                 f.create_dataset(str(dataset), data=data.data)
             else:
@@ -281,14 +290,22 @@ def _h5write(filename, dataset, data):
 
 
 @register("h5create")
-def _h5create(filename, dataset, size, datatype='double'):
+def _h5create(filename, dataset, size, datatype="double"):
     """Create dataset in HDF5 file."""
     try:
         import h5py
-        dtype_map = {'double': np.float64, 'single': np.float32, 'int32': np.int32, 'int64': np.int64}
+
+        dtype_map = {
+            "double": np.float64,
+            "single": np.float32,
+            "int32": np.int32,
+            "int64": np.int64,
+        }
         dtype = dtype_map.get(datatype, np.float64)
-        with h5py.File(str(filename), 'a') as f:
-            f.create_dataset(str(dataset), shape=tuple(int(s) for s in size), dtype=dtype)
+        with h5py.File(str(filename), "a") as f:
+            f.create_dataset(
+                str(dataset), shape=tuple(int(s) for s in size), dtype=dtype
+            )
         return 0
     except ImportError:
         print("h5py required for HDF5 files")
@@ -303,7 +320,8 @@ def _h5info(filename):
     """Get information about HDF5 file."""
     try:
         import h5py
-        with h5py.File(str(filename), 'r') as f:
+
+        with h5py.File(str(filename), "r") as f:
             print(f"File: {filename}")
             print(f"Datasets:")
             for key in f.keys():
@@ -322,6 +340,7 @@ def _h5info(filename):
 def _jsonencode(x):
     """Encode to JSON string."""
     import json
+
     if isinstance(x, Mat):
         return json.dumps(x.data.tolist())
     elif isinstance(x, dict):
@@ -335,6 +354,7 @@ def _jsonencode(x):
 def _jsondecode(s):
     """Decode JSON string."""
     import json
+
     data = json.loads(str(s))
     if isinstance(data, list):
         return Mat(np.array(data))
@@ -346,6 +366,7 @@ def _readtable(filename, *args):
     """Read table from file."""
     try:
         import pandas as pd
+
         return pd.read_csv(str(filename))
     except ImportError:
         print("pandas required for readtable")
@@ -357,6 +378,7 @@ def _writetable(T, filename):
     """Write table to file."""
     try:
         import pandas as pd
+
         if isinstance(T, pd.DataFrame):
             T.to_csv(str(filename), index=False)
             return 0
@@ -381,6 +403,7 @@ def _exist(name, kind="any"):
     elif kind in ("func", "builtin"):
         # Check if function exists
         from matpy.builtins import get_builtin
+
         return get_builtin(name) is not None
     return os.path.exists(name)
 
@@ -436,6 +459,7 @@ def _delete(filename):
 
 
 # ── Additional File I/O Functions ──────────────────────────────
+
 
 @register("isfile")
 def _isfile(path):
@@ -497,6 +521,7 @@ def _fileattrib(filepath):
 def _tempname():
     """Generate temporary file name."""
     import tempfile
+
     # Use NamedTemporaryFile instead of insecure mktemp()
     with tempfile.NamedTemporaryFile(delete=False) as f:
         return f.name
@@ -506,6 +531,7 @@ def _tempname():
 def _tempdir():
     """Get temporary directory."""
     import tempfile
+
     return tempfile.gettempdir()
 
 
@@ -513,6 +539,7 @@ def _tempdir():
 def _addpath(*args):
     """Add directory to MATLAB path."""
     import sys
+
     for arg in args:
         path = str(arg)
         if path not in sys.path:
@@ -524,6 +551,7 @@ def _addpath(*args):
 def _rmpath(*args):
     """Remove directory from MATLAB path."""
     import sys
+
     for arg in args:
         path = str(arg)
         if path in sys.path:
@@ -535,6 +563,7 @@ def _rmpath(*args):
 def _path(*args):
     """Get or set MATLAB path."""
     import sys
+
     if args:
         # Prepend new paths to existing path (MATLAB-compatible behavior)
         new_paths = [str(a) for a in args]
@@ -559,7 +588,7 @@ def _fileread(filename):
     """Read entire file as string."""
     filename = str(filename)
     try:
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             return f.read()
     except Exception as e:
         print(f"Error: {e}")
@@ -571,7 +600,7 @@ def _readlines(filename):
     """Read file as list of lines."""
     filename = str(filename)
     try:
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             return f.readlines()
     except Exception as e:
         print(f"Error: {e}")
@@ -583,7 +612,7 @@ def _writelines(filename, lines):
     """Write list of lines to file."""
     filename = str(filename)
     try:
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.writelines(lines)
         return 0
     except Exception as e:

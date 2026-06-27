@@ -11,22 +11,28 @@ class TestSparseFunctions:
 
     def test_sparse_create(self):
         from matpy.builtins.sparse import _sparse
-        result = _sparse(Mat(np.array([1, 2])), Mat(np.array([1, 2])), Mat(np.array([1, 1])), 3, 3)
+
+        result = _sparse(
+            Mat(np.array([1, 2])), Mat(np.array([1, 2])), Mat(np.array([1, 1])), 3, 3
+        )
         assert result is not None
 
     def test_speye(self):
         from matpy.builtins.sparse import _speye
+
         result = _speye(3)
         assert result is not None
 
     def test_spzeros(self):
         from matpy.builtins.sparse import _spzeros
+
         result = _spzeros(3, 3)
         assert result is not None
 
     def test_full(self):
         from matpy.builtins.sparse import _full
         from scipy import sparse as sp
+
         S = sp.eye(3)
         result = _full(S)
         assert isinstance(result, Mat)
@@ -48,28 +54,33 @@ class TestSparseFunctions:
 
     def test_sprand(self):
         from matpy.builtins.sparse import _sprand
+
         result = _sprand(3, 3, 0.5)
         assert result is not None
 
     def test_sprandn(self):
         from matpy.builtins.sparse import _sprandn
+
         result = _sprandn(3, 3, 0.5)
         assert result is not None
 
     def test_spones(self):
         from scipy import sparse as sp
+
         S = sp.eye(3)
         result = S.copy()
         assert result is not None
 
     def test_spfun(self):
         from scipy import sparse as sp
+
         S = sp.eye(3)
         result = S * 2
         assert result is not None
 
     def test_spdiags(self):
         from scipy import sparse as sp
+
         result = sp.diags([1, 2, 3], 0, shape=(3, 3))
         assert result is not None
 
@@ -94,66 +105,79 @@ class TestPlottingFunctions:
 
     def test_figure(self):
         from matpy.builtins.plotting import _figure
+
         _figure()
         assert True
 
     def test_subplot(self):
         from matpy.builtins.plotting import _subplot
+
         _subplot(2, 2, 1)
         assert True
 
     def test_title(self):
         from matpy.builtins.plotting import _title
+
         _title("Test Title")
         assert True
 
     def test_xlabel(self):
         from matpy.builtins.plotting import _xlabel
+
         _xlabel("X Axis")
         assert True
 
     def test_ylabel(self):
         from matpy.builtins.plotting import _ylabel
+
         _ylabel("Y Axis")
         assert True
 
     def test_legend(self):
         from matpy.builtins.plotting import _legend
+
         _legend("Test")
         assert True
 
     def test_grid_on(self):
         from matpy.builtins.plotting import _grid
+
         _grid("on")
         assert True
 
     def test_axis(self):
         from matpy.builtins.plotting import _axis
+
         _axis([0, 10, 0, 10])
         assert True
 
     def test_xlim(self):
         from matpy.builtins.plotting import _xlim
+
         _xlim(0, 10)
         assert True
 
     def test_ylim(self):
         from matpy.builtins.plotting import _ylim
+
         _ylim(0, 10)
         assert True
 
     def test_hold_on(self):
         from matpy.builtins.plotting import _hold
+
         _hold("on")
         assert True
 
     def test_clf(self):
         from matpy.builtins.plotting import _clf
+
         _clf()
         assert True
 
     def test_close(self):
         from matpy.builtins.plotting import _close
+
         _close(1)
         assert True
 
@@ -161,7 +185,8 @@ class TestPlottingFunctions:
         from matpy.builtins.plotting import _saveas
         import tempfile
         import os
-        tmpfile = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+
+        tmpfile = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
         tmpfile.close()
         try:
             _saveas(None, tmpfile.name)
@@ -171,27 +196,32 @@ class TestPlottingFunctions:
 
     def test_gcf(self):
         from matpy.builtins.plotting import _gcf
+
         result = _gcf()
         assert result is not None
 
     def test_gca(self):
         from matpy.builtins.plotting import _gca
+
         result = _gca()
         assert result is not None
 
     def test_axes(self):
         from matpy.builtins.plotting import _axes
+
         result = _axes()
         # May return None
         assert True
 
     def test_text(self):
         from matpy.builtins.plotting import _text
+
         _text(0.5, 0.5, "Hello")
         assert True
 
     def test_annotation(self):
         from matpy.builtins.plotting import _annotation
+
         _annotation("textarrow", 0.1, 0.5)
         assert True
 
@@ -201,61 +231,73 @@ class TestStringArrayFunctions:
 
     def test_string_create(self):
         from matpy.builtins.string_array import _string
+
         result = _string("hello")
         assert result is not None
 
     def test_string_length(self):
         from matpy.builtins.string_array import _strlength
+
         result = _strlength("hello")
         assert result == 5
 
     def test_string_upper(self):
         from matpy.builtins.string import _upper
+
         result = _upper("hello")
         assert result == "HELLO"
 
     def test_string_lower(self):
         from matpy.builtins.string import _lower
+
         result = _lower("HELLO")
         assert result == "hello"
 
     def test_string_strip(self):
         from matpy.builtins.string import _strtrim
+
         result = _strtrim("  hello  ")
         assert result == "hello"
 
     def test_string_contains(self):
         from matpy.builtins.string import _strfind
+
         result = _strfind("hello world", "world")
         assert result is not None
 
     def test_string_replace(self):
         from matpy.builtins.string import _strrep
+
         result = _strrep("hello world", "world", "matlab")
         assert result == "hello matlab"
 
     def test_string_split(self):
         from matpy.builtins.string import _strsplit
+
         result = _strsplit("hello world", " ")
         assert isinstance(result, list)
 
     def test_string_join(self):
         from matpy.builtins.string import _strjoin
+
         result = _strjoin(["hello", "world"], " ")
         assert result == "hello world"
 
     def test_string_startsWith(self):
         from matpy.builtins.string import _startsWith
+
         result = _startsWith("hello", "hel")
         assert result == True
 
     def test_string_endsWith(self):
         from matpy.builtins.string import _endsWith
+
         result = _endsWith("hello", "llo")
         assert result == True
 
     def test_string_find(self):
         from matpy.builtins.string import _strfind
+
         result = _strfind("hello world", "world")
         assert result is not None
 

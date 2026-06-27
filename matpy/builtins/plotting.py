@@ -10,8 +10,10 @@ def _get_plt():
     global _plt
     if _plt is None:
         import matplotlib
+
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
+
         _plt = plt
     return _plt
 
@@ -394,16 +396,18 @@ def _drawnow():
 
 # ── Additional Plotting Functions ──────────────────────────────
 
+
 def _plot3(x, y, z, *args):
     """3-D line plot."""
     plt = _get_plt()
     from mpl_toolkits.mplot3d import Axes3D
+
     fig = plt.gcf()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     xd = x.data if isinstance(x, Mat) else np.array(x)
     yd = y.data if isinstance(y, Mat) else np.array(y)
     zd = z.data if isinstance(z, Mat) else np.array(z)
-    fmt = str(args[0]) if args else '-'
+    fmt = str(args[0]) if args else "-"
     ax.plot(xd.flatten(), yd.flatten(), zd.flatten(), fmt)
 
 
@@ -411,8 +415,9 @@ def _surf(x, y, z):
     """3-D surface plot."""
     plt = _get_plt()
     from mpl_toolkits.mplot3d import Axes3D
+
     fig = plt.gcf()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     xd = x.data if isinstance(x, Mat) else np.array(x)
     yd = y.data if isinstance(y, Mat) else np.array(y)
     zd = z.data if isinstance(z, Mat) else np.array(z)
@@ -423,8 +428,9 @@ def _mesh(x, y, z):
     """3-D mesh plot."""
     plt = _get_plt()
     from mpl_toolkits.mplot3d import Axes3D
+
     fig = plt.gcf()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     xd = x.data if isinstance(x, Mat) else np.array(x)
     yd = y.data if isinstance(y, Mat) else np.array(y)
     zd = z.data if isinstance(z, Mat) else np.array(z)
@@ -471,8 +477,9 @@ def _scatter3(x, y, z, s=None, c=None):
     """3-D scatter plot."""
     plt = _get_plt()
     from mpl_toolkits.mplot3d import Axes3D
+
     fig = plt.gcf()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     xd = x.data if isinstance(x, Mat) else np.array(x)
     yd = y.data if isinstance(y, Mat) else np.array(y)
     zd = z.data if isinstance(z, Mat) else np.array(z)
@@ -484,8 +491,9 @@ def _bar3(x):
     """3-D bar plot."""
     plt = _get_plt()
     from mpl_toolkits.mplot3d import Axes3D
+
     fig = plt.gcf()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     data = x.data if isinstance(x, Mat) else np.array(x)
     ax.bar(range(len(data.flatten())), data.flatten())
 
@@ -495,8 +503,9 @@ def _stem3(x, y, z):
     """3-D stem plot."""
     plt = _get_plt()
     from mpl_toolkits.mplot3d import Axes3D
+
     fig = plt.gcf()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     xd = x.data if isinstance(x, Mat) else np.array(x)
     yd = y.data if isinstance(y, Mat) else np.array(y)
     zd = z.data if isinstance(z, Mat) else np.array(z)
@@ -508,8 +517,9 @@ def _waterfall(x, y, z):
     """Waterfall plot."""
     plt = _get_plt()
     from mpl_toolkits.mplot3d import Axes3D
+
     fig = plt.gcf()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
     xd = x.data if isinstance(x, Mat) else np.array(x)
     yd = y.data if isinstance(y, Mat) else np.array(y)
     zd = z.data if isinstance(z, Mat) else np.array(z)

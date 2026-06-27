@@ -1,4 +1,5 @@
 """Additional coverage tests for MatPy - all tests verified to pass."""
+
 import numpy as np
 import pytest
 from tests.conftest import run_matlab, get_val
@@ -942,7 +943,7 @@ class TestOptimization:
 
     def test_integral(self, run):
         interp = run("result = integral(@(x) x^2, 0, 1);")
-        assert abs(get_val(interp.global_env.get("result")) - 1/3) < 1e-6
+        assert abs(get_val(interp.global_env.get("result")) - 1 / 3) < 1e-6
 
 
 class TestMatrixAdvanced:
@@ -1070,5 +1071,3 @@ class TestNdimAdvanced:
         interp = run("B = shiftdim(zeros(1, 2, 3));")
         B = interp.global_env.get("B")
         assert B.data.shape == (2, 3)
-
-

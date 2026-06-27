@@ -11,76 +11,91 @@ class TestMathBoost:
 
     def test_sin(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.sin)(0)
         assert result is not None
 
     def test_cos(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.cos)(0)
         assert result is not None
 
     def test_tan(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.tan)(0)
         assert result is not None
 
     def test_exp(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.exp)(0)
         assert result is not None
 
     def test_log(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.log)(1)
         assert result is not None
 
     def test_sqrt(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.sqrt)(4)
         assert result is not None
 
     def test_abs(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.abs)(-5)
         assert result is not None
 
     def test_ceil(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.ceil)(3.2)
         assert result is not None
 
     def test_floor(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.floor)(3.8)
         assert result is not None
 
     def test_round(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.round)(3.7)
         assert result is not None
 
     def test_sign(self):
         from matpy.builtins.math import _wrap_math
+
         result = _wrap_math(np.sign)(-5)
         assert result is not None
 
     def test_min(self):
         from matpy.builtins.math import _min
+
         result = _min(Mat(np.array([3, 1, 4, 1, 5])))
         assert result is not None
 
     def test_max(self):
         from matpy.builtins.math import _max
+
         result = _max(Mat(np.array([3, 1, 4, 1, 5])))
         assert result is not None
 
     def test_sum(self):
         from matpy.builtins.math import _sum
+
         result = _sum(Mat(np.array([1, 2, 3, 4, 5])))
         assert result is not None
 
     def test_prod(self):
         from matpy.builtins.math import _prod
+
         result = _prod(Mat(np.array([1, 2, 3, 4, 5])))
         assert result is not None
 
@@ -106,11 +121,13 @@ class TestMathBoost:
 
     def test_cumsum(self):
         from matpy.builtins.math import _cumsum
+
         result = _cumsum(Mat(np.array([1, 2, 3, 4, 5])))
         assert isinstance(result, Mat)
 
     def test_cumprod(self):
         from matpy.builtins.math import _cumprod
+
         result = _cumprod(Mat(np.array([1, 2, 3, 4, 5])))
         assert isinstance(result, Mat)
 
@@ -130,151 +147,181 @@ class TestMatrixOpsBoost:
 
     def test_zeros(self):
         from matpy.builtins.matrix_ops import _zeros
+
         result = _zeros(3, 4)
         assert isinstance(result, Mat)
 
     def test_ones(self):
         from matpy.builtins.matrix_ops import _ones
+
         result = _ones(3, 4)
         assert isinstance(result, Mat)
 
     def test_eye(self):
         from matpy.builtins.matrix_ops import _eye
+
         result = _eye(3)
         assert isinstance(result, Mat)
 
     def test_linspace(self):
         from matpy.builtins.matrix_ops import _linspace
+
         result = _linspace(0, 1, 5)
         assert isinstance(result, Mat)
 
     def test_logspace(self):
         from matpy.builtins.matrix_ops import _logspace
+
         result = _logspace(0, 2, 3)
         assert isinstance(result, Mat)
 
     def test_size(self):
         from matpy.builtins.matrix_ops import _size
+
         result = _size(Mat(np.array([[1, 2], [3, 4]])))
         assert result is not None
 
     def test_length(self):
         from matpy.builtins.matrix_ops import _length
+
         result = _length(Mat(np.array([[1, 2, 3], [4, 5, 6]])))
         assert result == 3
 
     def test_numel(self):
         from matpy.builtins.matrix_ops import _numel
+
         result = _numel(Mat(np.array([[1, 2], [3, 4]])))
         assert result == 4
 
     def test_ndims(self):
         from matpy.builtins.matrix_ops import _ndims
+
         result = _ndims(Mat(np.array([[1, 2], [3, 4]])))
         assert result == 2
 
     def test_transpose(self):
         from matpy.builtins.matrix_ops import _transpose
+
         result = _transpose(Mat(np.array([[1, 2], [3, 4]])))
         assert isinstance(result, Mat)
 
     def test_ctranspose(self):
         from matpy.builtins.matrix_ops import _ctranspose
-        result = _ctranspose(Mat(np.array([[1+1j, 2], [3, 4]])))
+
+        result = _ctranspose(Mat(np.array([[1 + 1j, 2], [3, 4]])))
         assert isinstance(result, Mat)
 
     def test_diag_create(self):
         from matpy.builtins.matrix_ops import _diag
+
         result = _diag(Mat(np.array([1, 2, 3])))
         assert isinstance(result, Mat)
 
     def test_diag_extract(self):
         from matpy.builtins.matrix_ops import _diag
+
         result = _diag(Mat(np.array([[1, 2], [3, 4]])))
         assert isinstance(result, Mat)
 
     def test_triu(self):
         from matpy.builtins.matrix_ops import _triu
+
         result = _triu(Mat(np.array([[1, 2], [3, 4]])))
         assert isinstance(result, Mat)
 
     def test_tril(self):
         from matpy.builtins.matrix_ops import _tril
+
         result = _tril(Mat(np.array([[1, 2], [3, 4]])))
         assert isinstance(result, Mat)
 
     def test_flipud(self):
         from matpy.builtins.matrix_ops import _flipud
+
         result = _flipud(Mat(np.array([[1, 2], [3, 4]])))
         assert isinstance(result, Mat)
 
     def test_fliplr(self):
         from matpy.builtins.matrix_ops import _fliplr
+
         result = _fliplr(Mat(np.array([[1, 2], [3, 4]])))
         assert isinstance(result, Mat)
 
     def test_repmat(self):
         from matpy.builtins.matrix_ops import _repmat
+
         result = _repmat(Mat(np.array([1, 2])), 2, 3)
         assert isinstance(result, Mat)
 
     def test_cat(self):
         from matpy.builtins.matrix_ops import _cat
+
         result = _cat(1, Mat(np.array([1, 2])), Mat(np.array([3, 4])))
         assert isinstance(result, Mat)
 
     def test_horzcat(self):
         from matpy.builtins.matrix_ops import _horzcat
+
         result = _horzcat(Mat(np.array([1, 2])), Mat(np.array([3, 4])))
         assert isinstance(result, Mat)
 
     def test_vertcat(self):
         from matpy.builtins.matrix_ops import _vertcat
+
         result = _vertcat(Mat(np.array([1, 2])), Mat(np.array([3, 4])))
         assert isinstance(result, Mat)
 
     def test_rand(self):
         from matpy.builtins.matrix_ops import _rand
+
         result = _rand(3, 4)
         assert isinstance(result, Mat)
 
     def test_randn(self):
         from matpy.builtins.matrix_ops import _randn
+
         result = _randn(3, 4)
         assert isinstance(result, Mat)
 
     def test_reshape(self):
         from matpy.builtins.matrix_ops import _reshape
+
         result = _reshape(Mat(np.array([1, 2, 3, 4, 5, 6])), 2, 3)
         assert isinstance(result, Mat)
 
     def test_sort(self):
         from matpy.builtins.matrix_ops import _sort
+
         result = _sort(Mat(np.array([3, 1, 2])))
         assert isinstance(result, Mat)
 
     def test_unique(self):
         from matpy.builtins.matrix_ops import _unique
+
         result = _unique(Mat(np.array([1, 2, 2, 3, 3, 3])))
         assert isinstance(result, Mat)
 
     def test_find(self):
         from matpy.builtins.matrix_ops import _find
+
         result = _find(Mat(np.array([0, 1, 0, 1])))
         assert isinstance(result, Mat)
 
     def test_cross(self):
         from matpy.builtins.matrix_ops import _cross
+
         result = _cross(Mat(np.array([1, 0, 0])), Mat(np.array([0, 1, 0])))
         assert isinstance(result, Mat)
 
     def test_dot(self):
         from matpy.builtins.matrix_ops import _dot
+
         result = _dot(Mat(np.array([1, 2, 3])), Mat(np.array([4, 5, 6])))
         assert result is not None
 
     def test_norm(self):
         from matpy.builtins.matrix_ops import _norm
+
         result = _norm(Mat(np.array([3, 4])))
         assert abs(result - 5.0) < 0.01
 
@@ -520,7 +567,9 @@ class TestInterpreterBoost:
         assert get_val(x) == 9
 
     def test_switch_case(self):
-        interp = run_matlab("x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end")
+        interp = run_matlab(
+            "x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end"
+        )
         y = interp.global_env.get("y")
         assert y == "two"
 
@@ -530,12 +579,16 @@ class TestInterpreterBoost:
         assert get_val(x) == -1
 
     def test_break(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 6
 
     def test_continue(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 5
 

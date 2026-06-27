@@ -9,6 +9,7 @@ from matpy.runtime.types import Mat
 def _imread(filename):
     try:
         import matplotlib.image as mpimg
+
         return Mat(mpimg.imread(str(filename)))
     except Exception as e:
         print(f"Error reading image: {e}")
@@ -19,6 +20,7 @@ def _imread(filename):
 def _imwrite(img, filename):
     try:
         import matplotlib.image as mpimg
+
         data = img.data if isinstance(img, Mat) else np.array(img)
         mpimg.imsave(str(filename), data)
         return 0
@@ -30,6 +32,7 @@ def _imwrite(img, filename):
 @register("imshow")
 def _imshow(img):
     import matplotlib.pyplot as plt
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     plt.imshow(data)
     plt.axis("off")
@@ -40,7 +43,9 @@ def _imshow(img):
 def _rgb2gray(img):
     data = img.data if isinstance(img, Mat) else np.array(img)
     if data.ndim == 3 and data.shape[2] >= 3:
-        return Mat(0.2989 * data[:,:,0] + 0.5870 * data[:,:,1] + 0.1140 * data[:,:,2])
+        return Mat(
+            0.2989 * data[:, :, 0] + 0.5870 * data[:, :, 1] + 0.1140 * data[:, :, 2]
+        )
     return img
 
 
@@ -63,6 +68,7 @@ def _im2uint8(img):
 @register("imresize")
 def _imresize(img, scale):
     from scipy.ndimage import zoom
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     scale = float(scale.data.flat[0]) if isinstance(scale, Mat) else float(scale)
     if data.ndim == 3:
@@ -73,6 +79,7 @@ def _imresize(img, scale):
 @register("imrotate")
 def _imrotate(img, angle):
     from scipy.ndimage import rotate
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     angle = float(angle.data.flat[0]) if isinstance(angle, Mat) else float(angle)
     return Mat(rotate(data, angle, reshape=False))
@@ -84,13 +91,14 @@ def _imcrop(img, rect=None):
     if rect is not None:
         r = rect.data if isinstance(rect, Mat) else np.array(rect)
         y, x, h, w = int(r[0]), int(r[1]), int(r[2]), int(r[3])
-        return Mat(data[y:y+h, x:x+w])
+        return Mat(data[y : y + h, x : x + w])
     return img
 
 
 @register("edge")
 def _edge(img, method="sobel"):
     from scipy.ndimage import sobel
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     if data.ndim == 3:
         data = np.mean(data, axis=2)
@@ -102,6 +110,7 @@ def _edge(img, method="sobel"):
 @register("imhist")
 def _imhist(img, bins=256):
     import matplotlib.pyplot as plt
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     plt.hist(data.flatten(), bins=int(bins))
     plt.title("Image Histogram")
@@ -125,9 +134,15 @@ def _histeq(img, nbins=256):
 def _imadjust(img, low_in=0, high_in=1, low_out=0, high_out=1, gamma=1):
     data = img.data if isinstance(img, Mat) else np.array(img)
     low_in = float(low_in.data.flat[0]) if isinstance(low_in, Mat) else float(low_in)
-    high_in = float(high_in.data.flat[0]) if isinstance(high_in, Mat) else float(high_in)
-    low_out = float(low_out.data.flat[0]) if isinstance(low_out, Mat) else float(low_out)
-    high_out = float(high_out.data.flat[0]) if isinstance(high_out, Mat) else float(high_out)
+    high_in = (
+        float(high_in.data.flat[0]) if isinstance(high_in, Mat) else float(high_in)
+    )
+    low_out = (
+        float(low_out.data.flat[0]) if isinstance(low_out, Mat) else float(low_out)
+    )
+    high_out = (
+        float(high_out.data.flat[0]) if isinstance(high_out, Mat) else float(high_out)
+    )
     gamma = float(gamma.data.flat[0]) if isinstance(gamma, Mat) else float(gamma)
     data_norm = (data - low_in) / (high_in - low_in)
     data_norm = np.clip(data_norm, 0, 1)
@@ -139,14 +154,20 @@ def _imadjust(img, low_in=0, high_in=1, low_out=0, high_out=1, gamma=1):
 @register("medfilt2")
 def _medfilt2(img, kernel_size=3):
     from scipy.ndimage import median_filter
+
     data = img.data if isinstance(img, Mat) else np.array(img)
-    kernel_size = int(kernel_size.data.flat[0]) if isinstance(kernel_size, Mat) else int(kernel_size)
+    kernel_size = (
+        int(kernel_size.data.flat[0])
+        if isinstance(kernel_size, Mat)
+        else int(kernel_size)
+    )
     return Mat(median_filter(data, size=kernel_size))
 
 
 @register("imgaussfilt")
 def _imgaussfilt(img, sigma=1):
     from scipy.ndimage import gaussian_filter
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     sigma = float(sigma.data.flat[0]) if isinstance(sigma, Mat) else float(sigma)
     return Mat(gaussian_filter(data, sigma=sigma))
@@ -155,6 +176,7 @@ def _imgaussfilt(img, sigma=1):
 @register("imfilter")
 def _imfilter(img, h):
     from scipy.ndimage import convolve
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     h_data = h.data if isinstance(h, Mat) else np.array(h)
     return Mat(convolve(data, h_data))
@@ -163,6 +185,7 @@ def _imfilter(img, h):
 @register("imerode")
 def _imerode(img, se=None):
     from scipy.ndimage import binary_erosion, grey_erosion
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     if data.dtype == bool:
         return Mat(binary_erosion(data))
@@ -172,6 +195,7 @@ def _imerode(img, se=None):
 @register("imdilate")
 def _imdilate(img, se=None):
     from scipy.ndimage import binary_dilation, grey_dilation
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     if data.dtype == bool:
         return Mat(binary_dilation(data))
@@ -181,6 +205,7 @@ def _imdilate(img, se=None):
 @register("imopen")
 def _imopen(img, se=None):
     from scipy.ndimage import binary_opening, grey_opening
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     if data.dtype == bool:
         return Mat(binary_opening(data))
@@ -190,6 +215,7 @@ def _imopen(img, se=None):
 @register("imclose")
 def _imclose(img, se=None):
     from scipy.ndimage import binary_closing, grey_closing
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     if data.dtype == bool:
         return Mat(binary_closing(data))
@@ -201,7 +227,7 @@ def _strel(shape, size=3):
     shape = str(shape).lower()
     size = int(size.data.flat[0]) if isinstance(size, Mat) else int(size)
     if shape == "disk" or shape == "circle":
-        y, x = np.ogrid[-size:size+1, -size:size+1]
+        y, x = np.ogrid[-size : size + 1, -size : size + 1]
         return Mat((x**2 + y**2) <= size**2)
     elif shape == "square":
         return Mat(np.ones((size, size), dtype=bool))
@@ -214,7 +240,11 @@ def _strel(shape, size=3):
 def _imbinarize(img, threshold=None):
     data = img.data if isinstance(img, Mat) else np.array(img)
     if threshold is not None:
-        t = float(threshold.data.flat[0]) if isinstance(threshold, Mat) else float(threshold)
+        t = (
+            float(threshold.data.flat[0])
+            if isinstance(threshold, Mat)
+            else float(threshold)
+        )
     else:
         t = np.mean(data)
     return Mat((data > t).astype(np.uint8))
@@ -231,6 +261,7 @@ def _imcomplement(img):
 @register("imtranslate")
 def _imtranslate(img, tx, ty):
     from scipy.ndimage import shift
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     tx = float(tx.data.flat[0]) if isinstance(tx, Mat) else float(tx)
     ty = float(ty.data.flat[0]) if isinstance(ty, Mat) else float(ty)
@@ -240,6 +271,7 @@ def _imtranslate(img, tx, ty):
 @register("imsharpen")
 def _imsharpen(img, amount=1, radius=1):
     from scipy.ndimage import gaussian_filter
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     amount = float(amount.data.flat[0]) if isinstance(amount, Mat) else float(amount)
     radius = float(radius.data.flat[0]) if isinstance(radius, Mat) else float(radius)
@@ -275,6 +307,7 @@ def _imnoise(img, noise_type="gaussian", *args):
 
 
 # ── Additional Image Processing Functions ──────────────────────
+
 
 def _imhist(img, nbins=256):
     """Display histogram of image data."""
@@ -325,6 +358,7 @@ def _imbinarize(img, level=None):
     if level is None:
         # Use Otsu's method
         from skimage.filters import threshold_otsu
+
         level = threshold_otsu(data)
     else:
         level = float(level)
@@ -334,6 +368,7 @@ def _imbinarize(img, level=None):
 def _edge(img, method="sobel"):
     """Detect edges in image."""
     from scipy.ndimage import sobel, prewitt, laplace
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     method = str(method).lower()
     if method == "sobel":
@@ -355,13 +390,14 @@ def _imcrop(img, rect=None):
     if rect is not None:
         rect_data = rect.data if isinstance(rect, Mat) else np.array(rect)
         x, y, w, h = [int(v) for v in rect_data.flat]
-        return Mat(data[y:y+h, x:x+w])
+        return Mat(data[y : y + h, x : x + w])
     return img
 
 
 def _imresize(img, scale):
     """Resize image."""
     from scipy.ndimage import zoom
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     if isinstance(scale, Mat):
         scale = scale.data
@@ -378,6 +414,7 @@ def _imresize(img, scale):
 def _imrotate(img, angle, method="bilinear"):
     """Rotate image."""
     from scipy.ndimage import rotate
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     angle = float(angle)
     if method == "nearest":
@@ -392,6 +429,7 @@ def _imrotate(img, angle, method="bilinear"):
 def _imfilter(img, h):
     """Filter image with filter kernel."""
     from scipy.ndimage import convolve
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     h_data = h.data if isinstance(h, Mat) else np.array(h)
     return Mat(convolve(data, h_data))
@@ -400,6 +438,7 @@ def _imfilter(img, h):
 def _imopen(img, se):
     """Morphological opening."""
     from scipy.ndimage import binary_opening, grey_opening
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     se_data = se.data if isinstance(se, Mat) else np.array(se)
     if data.dtype == bool:
@@ -410,6 +449,7 @@ def _imopen(img, se):
 def _imclose(img, se):
     """Morphological closing."""
     from scipy.ndimage import binary_closing, grey_closing
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     se_data = se.data if isinstance(se, Mat) else np.array(se)
     if data.dtype == bool:
@@ -420,6 +460,7 @@ def _imclose(img, se):
 def _imdilate(img, se):
     """Morphological dilation."""
     from scipy.ndimage import binary_dilation, grey_dilation
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     se_data = se.data if isinstance(se, Mat) else np.array(se)
     if data.dtype == bool:
@@ -430,6 +471,7 @@ def _imdilate(img, se):
 def _imerode(img, se):
     """Morphological erosion."""
     from scipy.ndimage import binary_erosion, grey_erosion
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     se_data = se.data if isinstance(se, Mat) else np.array(se)
     if data.dtype == bool:
@@ -441,6 +483,7 @@ def _imerode(img, se):
 def _bwlabel(img, connectivity=8):
     """Label connected components in binary image."""
     from scipy.ndimage import label
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     if connectivity == 8:
         structure = np.ones((3, 3))
@@ -454,6 +497,7 @@ def _bwlabel(img, connectivity=8):
 def _regionprops(img):
     """Measure properties of image regions."""
     from scipy.ndimage import find_objects, center_of_mass
+
     data = img.data if isinstance(img, Mat) else np.array(img)
     labels = np.unique(data)
     labels = labels[labels > 0]
@@ -461,9 +505,11 @@ def _regionprops(img):
     for label_val in labels:
         mask = data == label_val
         com = center_of_mass(mask)
-        props.append({
-            "label": int(label_val),
-            "centroid": com,
-            "area": int(mask.sum()),
-        })
+        props.append(
+            {
+                "label": int(label_val),
+                "centroid": com,
+                "area": int(mask.sum()),
+            }
+        )
     return props

@@ -38,7 +38,9 @@ def resolve_end(data: np.ndarray, dim: int) -> int:
     return 1
 
 
-def make_range(start: float, step_or_stop: float, stop: float | None = None) -> np.ndarray:
+def make_range(
+    start: float, step_or_stop: float, stop: float | None = None
+) -> np.ndarray:
     if stop is None:
         return np.arange(start, step_or_stop + 1)
     else:
@@ -50,7 +52,9 @@ def to_mat(value: Any) -> Any:
         return value
     if isinstance(value, np.ndarray):
         return Mat(value)
-    if isinstance(value, (int, float, complex, bool, np.integer, np.floating, np.complexfloating)):
+    if isinstance(
+        value, (int, float, complex, bool, np.integer, np.floating, np.complexfloating)
+    ):
         return Mat(np.array(value))
     return value
 

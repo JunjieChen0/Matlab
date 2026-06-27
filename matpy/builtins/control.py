@@ -163,7 +163,9 @@ def _series(sys1, sys2):
     """Series connection: sys1 * sys2."""
     if not isinstance(sys1, TransferFunction) or not isinstance(sys2, TransferFunction):
         return sys1
-    return TransferFunction(np.polymul(sys1.num, sys2.num), np.polymul(sys1.den, sys2.den), sys1.dt)
+    return TransferFunction(
+        np.polymul(sys1.num, sys2.num), np.polymul(sys1.den, sys2.den), sys1.dt
+    )
 
 
 @register("parallel")
@@ -194,6 +196,7 @@ def _zero(sys):
 @register("bode")
 def _bode(sys, w=None):
     import matplotlib.pyplot as plt
+
     if isinstance(sys, TransferFunction):
         w, mag, phase = sys.bode_data(w)
         fig, (ax1, ax2) = plt.subplots(2, 1)
@@ -213,6 +216,7 @@ def _bode(sys, w=None):
 @register("step")
 def _step(sys, t=None):
     import matplotlib.pyplot as plt
+
     if isinstance(sys, TransferFunction):
         if t is None:
             poles = sys.poles()
@@ -239,6 +243,7 @@ def _step(sys, t=None):
 @register("nyquist")
 def _nyquist(sys, w=None):
     import matplotlib.pyplot as plt
+
     if isinstance(sys, TransferFunction):
         if w is None:
             w = np.logspace(-2, 2, 500)
@@ -261,6 +266,7 @@ def _nyquist(sys, w=None):
 @register("pzmap")
 def _pzmap(sys):
     import matplotlib.pyplot as plt
+
     p = sys.poles() if isinstance(sys, (TransferFunction, StateSpace)) else np.array([])
     z = sys.zeros() if isinstance(sys, (TransferFunction, StateSpace)) else np.array([])
     plt.figure()
@@ -364,6 +370,7 @@ def _ssdata(sys):
 
 
 # ── Additional Control Functions ───────────────────────────────
+
 
 def _dcgain(sys):
     """DC gain of system."""
@@ -496,22 +503,24 @@ def _zpk(z, p, k):
 
 # ── Additional Control System Functions ───────────────────────
 
+
 @register("lqr")
 def _lqr(A, B, Q, R):
     """Linear quadratic regulator."""
     from scipy.linalg import solve_continuous_are
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     B_data = B.data if isinstance(B, Mat) else np.array(B)
     Q_data = Q.data if isinstance(Q, Mat) else np.array(Q)
     R_data = R.data if isinstance(R, Mat) else np.array(R)
-    
+
     # Solve Riccati equation
     P = solve_continuous_are(A_data, B_data, Q_data, R_data)
-    
+
     # Compute optimal gain
     R_inv = np.linalg.inv(R_data)
     K = R_inv @ B_data.T @ P
-    
+
     return Mat(K), Mat(P)
 
 
@@ -519,18 +528,19 @@ def _lqr(A, B, Q, R):
 def _lqe(A, G, C, Q, R):
     """Linear quadratic estimator (Kalman filter gain)."""
     from scipy.linalg import solve_continuous_are
+
     A_data = A.data if isinstance(A, Mat) else np.array(A)
     G_data = G.data if isinstance(G, Mat) else np.array(G)
     C_data = C.data if isinstance(C, Mat) else np.array(C)
     Q_data = Q.data if isinstance(Q, Mat) else np.array(Q)
     R_data = R.data if isinstance(R, Mat) else np.array(R)
-    
+
     # Solve dual Riccati equation
     P = solve_continuous_are(A_data.T, C_data.T, G_data @ Q_data @ G_data.T, R_data)
-    
+
     # Compute Kalman gain
     L = P @ C_data.T @ np.linalg.inv(R_data)
-    
+
     return Mat(L), Mat(P)
 
 
@@ -539,12 +549,12 @@ def _rlocus(sys, k=None):
     """Root locus plot data."""
     if not isinstance(sys, TransferFunction):
         raise TypeError("First argument must be a transfer function")
-    
+
     if k is None:
         k = np.linspace(0, 100, 1000)
     else:
         k = k.data if isinstance(k, Mat) else np.array(k)
-    
+
     poles_list = []
     for ki in k:
         # Characteristic equation: 1 + k*num/den = 0
@@ -552,7 +562,7 @@ def _rlocus(sys, k=None):
         char_poly = sys.den + ki * sys.num
         poles = np.roots(char_poly)
         poles_list.append(poles)
-    
+
     return Mat(np.array(poles_list)), Mat(k)
 
 
@@ -560,29 +570,29 @@ def _rlocus(sys, k=None):
 def _margin(sys):
     """Gain and phase margins."""
     from scipy.signal import freqresp
-    
+
     if not isinstance(sys, TransferFunction):
         raise TypeError("First argument must be a transfer function")
-    
+
     # Compute frequency response
     w = np.logspace(-2, 2, 1000)
     w, h = freqresp((sys.num, sys.den), w)
-    
+
     # Gain margin
     phase_cross = np.where(np.diff(np.sign(np.angle(h) + np.pi)))[0]
     if len(phase_cross) > 0:
         gain_margin = -20 * np.log10(np.abs(h[phase_cross[0]]))
     else:
-        gain_margin = float('inf')
-    
+        gain_margin = float("inf")
+
     # Phase margin
     gain_cross = np.where(np.diff(np.sign(np.abs(h) - 1)))[0]
     if len(gain_cross) > 0:
         phase_margin = np.pi + np.angle(h[gain_cross[0]])
         phase_margin = np.degrees(phase_margin)
     else:
-        phase_margin = float('inf')
-    
+        phase_margin = float("inf")
+
     return float(gain_margin), float(phase_margin)
 
 
@@ -591,11 +601,11 @@ def _damp(sys):
     """Natural frequency and damping ratio."""
     if not isinstance(sys, TransferFunction):
         raise TypeError("First argument must be a transfer function")
-    
+
     poles = sys.poles()
     wn = np.abs(poles)
     zeta = -np.real(poles) / wn
-    
+
     return Mat(wn), Mat(zeta)
 
 
@@ -604,5 +614,5 @@ def _dcgain(sys):
     """DC gain of transfer function."""
     if not isinstance(sys, TransferFunction):
         raise TypeError("First argument must be a transfer function")
-    
+
     return float(np.polyval(sys.num, 0) / np.polyval(sys.den, 0))

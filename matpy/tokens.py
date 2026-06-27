@@ -39,52 +39,52 @@ class TokenType(Enum):
     ARGUMENTS = auto()
 
     # Arithmetic operators
-    PLUS = auto()         # +
-    MINUS = auto()        # -
-    STAR = auto()         # *
-    SLASH = auto()        # /
-    BACKSLASH = auto()    # \
-    CARET = auto()        # ^
-    DOT_STAR = auto()     # .*
-    DOT_SLASH = auto()    # ./
+    PLUS = auto()  # +
+    MINUS = auto()  # -
+    STAR = auto()  # *
+    SLASH = auto()  # /
+    BACKSLASH = auto()  # \
+    CARET = auto()  # ^
+    DOT_STAR = auto()  # .*
+    DOT_SLASH = auto()  # ./
     DOT_BACKSLASH = auto()  # .\
-    DOT_CARET = auto()    # .^
+    DOT_CARET = auto()  # .^
 
     # Comparison operators
-    EQ = auto()           # ==
-    NEQ = auto()          # ~=
-    LT = auto()           # <
-    GT = auto()           # >
-    LE = auto()           # <=
-    GE = auto()           # >=
+    EQ = auto()  # ==
+    NEQ = auto()  # ~=
+    LT = auto()  # <
+    GT = auto()  # >
+    LE = auto()  # <=
+    GE = auto()  # >=
 
     # Logical operators
-    AMP = auto()          # &
-    PIPE = auto()         # |
-    TILDE = auto()        # ~
-    AMP_AMP = auto()      # &&
-    PIPE_PIPE = auto()    # ||
+    AMP = auto()  # &
+    PIPE = auto()  # |
+    TILDE = auto()  # ~
+    AMP_AMP = auto()  # &&
+    PIPE_PIPE = auto()  # ||
 
     # Assignment
-    ASSIGN = auto()       # =
+    ASSIGN = auto()  # =
 
     # Delimiters
-    LPAREN = auto()       # (
-    RPAREN = auto()       # )
-    LBRACKET = auto()     # [
-    RBRACKET = auto()     # ]
-    LBRACE = auto()       # {
-    RBRACE = auto()       # }
-    SEMICOLON = auto()    # ;
-    COMMA = auto()        # ,
-    COLON = auto()        # :
-    DOT = auto()          # .
-    AT = auto()           # @
+    LPAREN = auto()  # (
+    RPAREN = auto()  # )
+    LBRACKET = auto()  # [
+    RBRACKET = auto()  # ]
+    LBRACE = auto()  # {
+    RBRACE = auto()  # }
+    SEMICOLON = auto()  # ;
+    COMMA = auto()  # ,
+    COLON = auto()  # :
+    DOT = auto()  # .
+    AT = auto()  # @
 
     # Special
-    TRANSPOSE = auto()    # '  (conjugate transpose)
+    TRANSPOSE = auto()  # '  (conjugate transpose)
     DOT_TRANSPOSE = auto()  # .'
-    ELLIPSIS = auto()     # ...
+    ELLIPSIS = auto()  # ...
     NEWLINE = auto()
 
     # End of file

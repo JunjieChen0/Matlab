@@ -27,18 +27,21 @@ def interp():
 @pytest.fixture
 def run():
     """Execute MATLAB code and return the interpreter."""
+
     def _run(source: str) -> Interpreter:
         return run_matlab(source)
+
     return _run
 
 
 def get_val(x):
     """Extract scalar value from Mat or raw number."""
-    if hasattr(x, 'data'):
+    if hasattr(x, "data"):
         data = x.data
-        if hasattr(data, 'flat'):
+        if hasattr(data, "flat"):
             return data.flat[0]
         # memoryview or other buffer types
         import numpy as np
+
         return np.array(data).flat[0]
     return x

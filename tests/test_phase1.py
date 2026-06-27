@@ -1,4 +1,5 @@
 """Phase 1 tests: Language core enhancements."""
+
 import numpy as np
 import pytest
 from tests.conftest import run_matlab, get_val
@@ -9,25 +10,25 @@ class TestCommandSyntax:
 
     def test_disp_command(self, run):
         """Test disp with command syntax."""
-        interp = run('disp hello')
+        interp = run("disp hello")
         # Should not raise
 
     def test_load_command(self, run):
         """Test load with command syntax."""
         # Just verify it parses correctly
-        interp = run('load data.mat')
+        interp = run("load data.mat")
 
     def test_multiple_args(self, run):
         """Test command syntax with multiple arguments."""
-        interp = run('disp hello world')
+        interp = run("disp hello world")
 
     def test_grid_on(self, run):
         """Test grid on command."""
-        interp = run('grid on')
+        interp = run("grid on")
 
     def test_hold_on(self, run):
         """Test hold on command."""
-        interp = run('hold on')
+        interp = run("hold on")
 
 
 class TestSwitchCaseCell:

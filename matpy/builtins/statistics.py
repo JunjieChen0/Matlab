@@ -9,6 +9,7 @@ from matpy.runtime.types import Mat
 @register("fitlm")
 def _fitlm(X, y, *args):
     from sklearn.linear_model import LinearRegression
+
     Xd = X.data if isinstance(X, Mat) else np.array(X)
     yd = y.data if isinstance(y, Mat) else np.array(y).flatten()
     if Xd.ndim == 1:
@@ -30,6 +31,7 @@ def _fitlm(X, y, *args):
 @register("stepwiselm")
 def _stepwiselm(X, y, *args):
     from sklearn.linear_model import LinearRegression
+
     Xd = X.data if isinstance(X, Mat) else np.array(X)
     yd = y.data if isinstance(y, Mat) else np.array(y).flatten()
     if Xd.ndim == 1:
@@ -42,6 +44,7 @@ def _stepwiselm(X, y, *args):
 @register("glmfit")
 def _glmfit(X, y, distr="normal", *args):
     from sklearn.linear_model import LinearRegression
+
     Xd = X.data if isinstance(X, Mat) else np.array(X)
     yd = y.data if isinstance(y, Mat) else np.array(y).flatten()
     if Xd.ndim == 1:
@@ -199,7 +202,9 @@ def _vartest2(x, y):
 def _chi2test(observed, expected=None):
     obs = observed.data if isinstance(observed, Mat) else np.array(observed).flatten()
     if expected is not None:
-        exp = expected.data if isinstance(expected, Mat) else np.array(expected).flatten()
+        exp = (
+            expected.data if isinstance(expected, Mat) else np.array(expected).flatten()
+        )
         stat, p = scipy_stats.chisquare(obs, exp)
     else:
         stat, p = scipy_stats.chisquare(obs)
@@ -209,18 +214,24 @@ def _chi2test(observed, expected=None):
 @register("pca")
 def _pca(x, *args):
     from sklearn.decomposition import PCA
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     if data.ndim == 1:
         data = data.reshape(-1, 1)
     n_components = int(args[0]) if args else min(data.shape)
     pca = PCA(n_components=n_components)
     pca.fit(data)
-    return Mat(pca.components_), Mat(pca.explained_variance_ratio_), Mat(pca.transform(data))
+    return (
+        Mat(pca.components_),
+        Mat(pca.explained_variance_ratio_),
+        Mat(pca.transform(data)),
+    )
 
 
 @register("factoran")
 def _factoran(x, n_factors=1):
     from sklearn.decomposition import FactorAnalysis
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     if data.ndim == 1:
         data = data.reshape(-1, 1)
@@ -232,6 +243,7 @@ def _factoran(x, n_factors=1):
 @register("kmeans")
 def _kmeans(x, k, *args):
     from scipy.cluster.vq import kmeans as scipy_kmeans
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     if data.ndim == 1:
         data = data.reshape(-1, 1)
@@ -242,6 +254,7 @@ def _kmeans(x, k, *args):
 @register("linkage")
 def _linkage(x, method="ward"):
     from scipy.cluster.hierarchy import linkage as scipy_linkage
+
     data = x.data if isinstance(x, Mat) else np.array(x)
     if data.ndim == 1:
         data = data.reshape(-1, 1)
@@ -252,6 +265,7 @@ def _linkage(x, method="ward"):
 @register("cluster")
 def _cluster(Z, maxclust=2):
     from scipy.cluster.hierarchy import fcluster
+
     Z_data = Z.data if isinstance(Z, Mat) else np.array(Z)
     T = fcluster(Z_data, int(maxclust), criterion="maxclust")
     return Mat(T)
@@ -261,6 +275,7 @@ def _cluster(Z, maxclust=2):
 def _dendrogram(Z):
     import matplotlib.pyplot as plt
     from scipy.cluster.hierarchy import dendrogram as scipy_dendrogram
+
     Z_data = Z.data if isinstance(Z, Mat) else np.array(Z)
     scipy_dendrogram(Z_data)
     plt.title("Dendrogram")
@@ -305,7 +320,9 @@ def _mle(data, name="normal"):
 @register("trimmean")
 def _trimmean(x, percent):
     data = x.data.flatten() if isinstance(x, Mat) else np.array(x).flatten()
-    percent = float(percent.data.flat[0]) if isinstance(percent, Mat) else float(percent)
+    percent = (
+        float(percent.data.flat[0]) if isinstance(percent, Mat) else float(percent)
+    )
     return float(scipy_stats.trim_mean(data, percent / 100))
 
 
@@ -549,11 +566,20 @@ def _cdf(name, x, *args):
     data = x.data if isinstance(x, Mat) else np.array(x)
     name = str(name).lower()
     dist_map = {
-        "norm": (scipy_stats.norm, {"loc": args[0] if len(args) > 0 else 0, "scale": args[1] if len(args) > 1 else 1}),
+        "norm": (
+            scipy_stats.norm,
+            {
+                "loc": args[0] if len(args) > 0 else 0,
+                "scale": args[1] if len(args) > 1 else 1,
+            },
+        ),
         "chi2": (scipy_stats.chi2, {"df": args[0]}),
         "t": (scipy_stats.t, {"df": args[0]}),
         "f": (scipy_stats.f, {"dfn": args[0], "dfd": args[1]}),
-        "gamma": (scipy_stats.gamma, {"a": args[0], "scale": args[1] if len(args) > 1 else 1}),
+        "gamma": (
+            scipy_stats.gamma,
+            {"a": args[0], "scale": args[1] if len(args) > 1 else 1},
+        ),
         "beta": (scipy_stats.beta, {"a": args[0], "b": args[1]}),
         "uniform": (scipy_stats.uniform, {"loc": args[0], "scale": args[1] - args[0]}),
         "expon": (scipy_stats.expon, {"scale": args[0]}),
@@ -569,11 +595,20 @@ def _icdf(name, p, *args):
     data = p.data if isinstance(p, Mat) else np.array(p)
     name = str(name).lower()
     dist_map = {
-        "norm": (scipy_stats.norm, {"loc": args[0] if len(args) > 0 else 0, "scale": args[1] if len(args) > 1 else 1}),
+        "norm": (
+            scipy_stats.norm,
+            {
+                "loc": args[0] if len(args) > 0 else 0,
+                "scale": args[1] if len(args) > 1 else 1,
+            },
+        ),
         "chi2": (scipy_stats.chi2, {"df": args[0]}),
         "t": (scipy_stats.t, {"df": args[0]}),
         "f": (scipy_stats.f, {"dfn": args[0], "dfd": args[1]}),
-        "gamma": (scipy_stats.gamma, {"a": args[0], "scale": args[1] if len(args) > 1 else 1}),
+        "gamma": (
+            scipy_stats.gamma,
+            {"a": args[0], "scale": args[1] if len(args) > 1 else 1},
+        ),
         "beta": (scipy_stats.beta, {"a": args[0], "b": args[1]}),
         "uniform": (scipy_stats.uniform, {"loc": args[0], "scale": args[1] - args[0]}),
         "expon": (scipy_stats.expon, {"scale": args[0]}),
@@ -589,11 +624,20 @@ def _pdf(name, x, *args):
     data = x.data if isinstance(x, Mat) else np.array(x)
     name = str(name).lower()
     dist_map = {
-        "norm": (scipy_stats.norm, {"loc": args[0] if len(args) > 0 else 0, "scale": args[1] if len(args) > 1 else 1}),
+        "norm": (
+            scipy_stats.norm,
+            {
+                "loc": args[0] if len(args) > 0 else 0,
+                "scale": args[1] if len(args) > 1 else 1,
+            },
+        ),
         "chi2": (scipy_stats.chi2, {"df": args[0]}),
         "t": (scipy_stats.t, {"df": args[0]}),
         "f": (scipy_stats.f, {"dfn": args[0], "dfd": args[1]}),
-        "gamma": (scipy_stats.gamma, {"a": args[0], "scale": args[1] if len(args) > 1 else 1}),
+        "gamma": (
+            scipy_stats.gamma,
+            {"a": args[0], "scale": args[1] if len(args) > 1 else 1},
+        ),
         "beta": (scipy_stats.beta, {"a": args[0], "b": args[1]}),
         "uniform": (scipy_stats.uniform, {"loc": args[0], "scale": args[1] - args[0]}),
         "expon": (scipy_stats.expon, {"scale": args[0]}),
@@ -616,11 +660,14 @@ def _random(name, *args):
         a = args[0] if len(args) > 0 else 0
         b = args[1] if len(args) > 1 else 1
         shape = tuple(int(a) for a in args[2:]) if len(args) > 2 else (1,)
-        return Mat(scipy_stats.uniform.rvs(loc=float(a), scale=float(b) - float(a), size=shape))
+        return Mat(
+            scipy_stats.uniform.rvs(loc=float(a), scale=float(b) - float(a), size=shape)
+        )
     return Mat(np.random.rand(1))
 
 
 # ── Additional Statistics Functions ────────────────────────────
+
 
 @register("geomean")
 def _geomean(x):
@@ -706,7 +753,9 @@ def _bootstrp(n, func, x):
     n = int(n)
     results = []
     for _ in range(n):
-        sample = np.random.choice(data.flatten(), size=len(data.flatten()), replace=True)
+        sample = np.random.choice(
+            data.flatten(), size=len(data.flatten()), replace=True
+        )
         results.append(func(Mat(sample)))
     return Mat(np.array(results))
 
@@ -723,6 +772,7 @@ def _jackknife(func, x):
 
 
 # ── Additional Statistics Functions ───────────────────────────
+
 
 @register("median")
 def _median(x, dim=None):

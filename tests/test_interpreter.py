@@ -83,7 +83,9 @@ class TestControlFlow:
         assert get_val(interp.global_env.get("s")) == 55
 
     def test_while_loop(self):
-        interp = run_matlab("i = 0; s = 0;\nwhile i < 10\n  i = i + 1;\n  s = s + i;\nend")
+        interp = run_matlab(
+            "i = 0; s = 0;\nwhile i < 10\n  i = i + 1;\n  s = s + i;\nend"
+        )
         assert get_val(interp.global_env.get("s")) == 55
 
     def test_if_else(self):
@@ -91,22 +93,30 @@ class TestControlFlow:
         assert get_val(interp.global_env.get("y")) == 1
 
     def test_switch_case(self):
-        interp = run_matlab("x = 2;\nswitch x\n  case 1\n    y = 'one';\n  case 2\n    y = 'two';\n  otherwise\n    y = 'other';\nend")
+        interp = run_matlab(
+            "x = 2;\nswitch x\n  case 1\n    y = 'one';\n  case 2\n    y = 'two';\n  otherwise\n    y = 'other';\nend"
+        )
         assert interp.global_env.get("y") == "two"
 
 
 class TestFunctions:
     def test_basic(self):
-        interp = run_matlab("function y = square(x)\n  y = x^2;\nend\nresult = square(5);")
+        interp = run_matlab(
+            "function y = square(x)\n  y = x^2;\nend\nresult = square(5);"
+        )
         assert get_val(interp.global_env.get("result")) == 25
 
     def test_multiple_returns(self):
-        interp = run_matlab("function [q, r] = mydiv(a, b)\n  q = floor(a / b);\n  r = a - q * b;\nend\n[q, r] = mydiv(17, 5);")
+        interp = run_matlab(
+            "function [q, r] = mydiv(a, b)\n  q = floor(a / b);\n  r = a - q * b;\nend\n[q, r] = mydiv(17, 5);"
+        )
         assert get_val(interp.global_env.get("q")) == 3
         assert get_val(interp.global_env.get("r")) == 2
 
     def test_recursive(self):
-        interp = run_matlab("function r = fact(n)\nif n <= 1\n  r = 1;\nelse\n  r = n * fact(n-1);\nend\nend\nx = fact(5);")
+        interp = run_matlab(
+            "function r = fact(n)\nif n <= 1\n  r = 1;\nelse\n  r = n * fact(n-1);\nend\nend\nx = fact(5);"
+        )
         assert get_val(interp.global_env.get("x")) == 120
 
     def test_handle(self):
@@ -141,7 +151,7 @@ class TestStruct:
 
 class TestClassInheritance:
     def test_basic(self):
-        source = '''
+        source = """
         classdef Base
             properties
                 x = 0
@@ -166,7 +176,7 @@ class TestClassInheritance:
         end
 
         c = Child(3, 4);
-        '''
+        """
         interp = run_matlab(source)
         c = interp.global_env.get("c")
         assert isinstance(c, ClassInstance)
@@ -174,7 +184,7 @@ class TestClassInheritance:
         assert c.get_property("y") == 4
 
     def test_inherited_method(self):
-        source = '''
+        source = """
         classdef Base
             properties
                 x = 0
@@ -203,7 +213,7 @@ class TestClassInheritance:
 
         c = Child(3, 4);
         result = c.get_x();
-        '''
+        """
         interp = run_matlab(source)
         assert get_val(interp.global_env.get("result")) == 3
 

@@ -91,7 +91,7 @@ class TestMatrixDecomposition:
 class TestAdvancedMath:
     def test_integral(self):
         interp = run_matlab("result = integral(@(x) x^2, 0, 1);")
-        assert abs(get_val(interp.global_env.get("result")) - 1/3) < 0.01
+        assert abs(get_val(interp.global_env.get("result")) - 1 / 3) < 0.01
 
     def test_mean(self):
         interp = run_matlab("x = [1 2 3 4 5];\nm = mean(x);")
@@ -224,6 +224,7 @@ class TestSparseMatrix:
 class TestStringArray:
     def test_string_create(self):
         from matpy.runtime.types import StringArray
+
         interp = run_matlab('s = string("hello");')
         assert isinstance(interp.global_env.get("s"), StringArray)
 

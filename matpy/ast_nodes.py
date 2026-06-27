@@ -6,6 +6,7 @@ from typing import Any
 
 # ── Base ──────────────────────────────────────────────────────
 
+
 class Node:
     pass
 
@@ -19,6 +20,7 @@ class Stmt(Node):
 
 
 # ── Expressions ───────────────────────────────────────────────
+
 
 @dataclass
 class NumberLiteral(Expr):
@@ -109,6 +111,7 @@ class AnonFuncExpr(Expr):
 
 
 # ── Statements ────────────────────────────────────────────────
+
 
 @dataclass
 class ExprStmt(Stmt):

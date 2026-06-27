@@ -187,7 +187,9 @@ class TestInterpreterCore:
         assert get_val(x) == 9
 
     def test_switch_case(self):
-        interp = run_matlab("x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end")
+        interp = run_matlab(
+            "x = 2;\nswitch x; case 1; y = 'one'; case 2; y = 'two'; otherwise; y = 'other'; end"
+        )
         y = interp.global_env.get("y")
         assert y == "two"
 
@@ -197,12 +199,16 @@ class TestInterpreterCore:
         assert get_val(x) == -1
 
     def test_break(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; x = x + 1; if x > 5; break; end; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 6
 
     def test_continue(self):
-        interp = run_matlab("x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end")
+        interp = run_matlab(
+            "x = 0;\nfor i = 1:10; if i > 5; continue; end; x = x + 1; end"
+        )
         x = interp.global_env.get("x")
         assert get_val(x) == 5
 
@@ -266,35 +272,41 @@ class TestLexerParser:
 
     def test_lexer_create(self):
         from matpy.lexer import Lexer
+
         lexer = Lexer("x = 1;")
         assert lexer is not None
 
     def test_lexer_tokenize(self):
         from matpy.lexer import Lexer
+
         lexer = Lexer("x = 1;")
         tokens = lexer.tokenize()
         assert len(tokens) > 0
 
     def test_lexer_numbers(self):
         from matpy.lexer import Lexer
+
         lexer = Lexer("x = 42; y = 3.14; z = 1e-3;")
         tokens = lexer.tokenize()
         assert len(tokens) > 0
 
     def test_lexer_strings(self):
         from matpy.lexer import Lexer
+
         lexer = Lexer("s = 'hello'; t = \"world\";")
         tokens = lexer.tokenize()
         assert len(tokens) > 0
 
     def test_lexer_operators(self):
         from matpy.lexer import Lexer
+
         lexer = Lexer("x = 1 + 2 * 3 - 4 / 2;")
         tokens = lexer.tokenize()
         assert len(tokens) > 0
 
     def test_lexer_keywords(self):
         from matpy.lexer import Lexer
+
         lexer = Lexer("if x > 0; y = 1; else; y = 0; end")
         tokens = lexer.tokenize()
         assert len(tokens) > 0
@@ -302,6 +314,7 @@ class TestLexerParser:
     def test_parser_create(self):
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         lexer = Lexer("x = 1;")
         tokens = lexer.tokenize()
         parser = Parser(tokens)
@@ -310,6 +323,7 @@ class TestLexerParser:
     def test_parser_parse(self):
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         lexer = Lexer("x = 1;")
         tokens = lexer.tokenize()
         parser = Parser(tokens)
@@ -319,6 +333,7 @@ class TestLexerParser:
     def test_parser_assignment(self):
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         lexer = Lexer("x = 42;")
         tokens = lexer.tokenize()
         parser = Parser(tokens)
@@ -328,6 +343,7 @@ class TestLexerParser:
     def test_parser_if(self):
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         lexer = Lexer("if x > 0; y = 1; else; y = 0; end")
         tokens = lexer.tokenize()
         parser = Parser(tokens)
@@ -337,6 +353,7 @@ class TestLexerParser:
     def test_parser_for(self):
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         lexer = Lexer("for i = 1:10; x = i; end")
         tokens = lexer.tokenize()
         parser = Parser(tokens)
@@ -346,6 +363,7 @@ class TestLexerParser:
     def test_parser_while(self):
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         lexer = Lexer("while x > 0; x = x - 1; end")
         tokens = lexer.tokenize()
         parser = Parser(tokens)
@@ -355,6 +373,7 @@ class TestLexerParser:
     def test_parser_function(self):
         from matpy.parser import Parser
         from matpy.lexer import Lexer
+
         lexer = Lexer("function y = f(x); y = x^2; end")
         tokens = lexer.tokenize()
         parser = Parser(tokens)
@@ -367,125 +386,149 @@ class TestRuntimeTypes:
 
     def test_mat_create(self):
         from matpy.runtime.types import Mat
+
         m = Mat(np.array([1, 2, 3]))
         assert m is not None
 
     def test_mat_shape(self):
         from matpy.runtime.types import Mat
+
         m = Mat(np.array([[1, 2], [3, 4]]))
         assert m.shape == (2, 2)
 
     def test_mat_ndim(self):
         from matpy.runtime.types import Mat
+
         m = Mat(np.array([[1, 2], [3, 4]]))
         assert m.ndim == 2
 
     def test_mat_dtype(self):
         from matpy.runtime.types import Mat
+
         m = Mat(np.array([1, 2, 3]))
         assert m.dtype == np.int64 or m.dtype == np.int32
 
     def test_mat_scalar(self):
         from matpy.runtime.types import Mat
+
         m = Mat(np.array(42))
         assert m.is_scalar()
 
     def test_mat_to_python(self):
         from matpy.runtime.types import Mat
+
         m = Mat(np.array(42))
         assert m.to_python() == 42
 
     def test_cell_array_create(self):
         from matpy.runtime.types import CellArray
+
         c = CellArray([[1, 2], [3, 4]])
         assert c is not None
 
     def test_cell_array_get(self):
         from matpy.runtime.types import CellArray
+
         c = CellArray([[1, 2], [3, 4]])
         assert c.get(1, 1) == 1
 
     def test_cell_array_set(self):
         from matpy.runtime.types import CellArray
+
         c = CellArray([[1, 2], [3, 4]])
         c.set(1, 1, 100)
         assert c.get(1, 1) == 100
 
     def test_struct_create(self):
         from matpy.runtime.types import Struct
+
         s = Struct({"a": 1, "b": 2})
         assert s is not None
 
     def test_struct_get_field(self):
         from matpy.runtime.types import Struct
+
         s = Struct({"a": 1, "b": 2})
         assert s.get_field("a") == 1
 
     def test_struct_set_field(self):
         from matpy.runtime.types import Struct
+
         s = Struct({"a": 1})
         s.set_field("b", 2)
         assert s.get_field("b") == 2
 
     def test_struct_has_field(self):
         from matpy.runtime.types import Struct
+
         s = Struct({"a": 1, "b": 2})
         assert s.has_field("a") == True
         assert s.has_field("c") == False
 
     def test_func_handle_create(self):
         from matpy.runtime.types import FuncHandle
+
         f = FuncHandle(lambda x: x * 2, "double")
         assert f is not None
 
     def test_func_handle_call(self):
         from matpy.runtime.types import FuncHandle
+
         f = FuncHandle(lambda x: x * 2, "double")
         assert f(5) == 10
 
     def test_string_array_create(self):
         from matpy.runtime.types import StringArray
+
         s = StringArray("hello")
         assert s is not None
 
     def test_string_array_data(self):
         from matpy.runtime.types import StringArray
+
         s = StringArray("hello")
         assert s.data is not None
 
     def test_missing_create(self):
         from matpy.runtime.types import Missing
+
         m = Missing()
         assert m is not None
 
     def test_table_create(self):
         from matpy.runtime.types import Table
+
         t = Table({"a": np.array([1, 2, 3]), "b": np.array([4, 5, 6])})
         assert t is not None
 
     def test_table_height(self):
         from matpy.runtime.types import Table
+
         t = Table({"a": np.array([1, 2, 3]), "b": np.array([4, 5, 6])})
         assert t.Height == 3
 
     def test_table_width(self):
         from matpy.runtime.types import Table
+
         t = Table({"a": np.array([1, 2, 3]), "b": np.array([4, 5, 6])})
         assert t.Width == 2
 
     def test_map_create(self):
         from matpy.runtime.types import Map
+
         m = Map()
         assert m is not None
 
     def test_map_set_get(self):
         from matpy.runtime.types import Map
+
         m = Map()
         m["a"] = 1
         assert m["a"] == 1
 
     def test_map_iskey(self):
         from matpy.runtime.types import Map
+
         m = Map()
         m["a"] = 1
         assert m.isKey("a") == True
@@ -493,16 +536,19 @@ class TestRuntimeTypes:
 
     def test_datetime_create(self):
         from matpy.runtime.types import Datetime
+
         d = Datetime()
         assert d is not None
 
     def test_duration_create(self):
         from matpy.runtime.types import Duration
+
         d = Duration(hours=1, minutes=30)
         assert d is not None
 
     def test_categorical_create(self):
         from matpy.runtime.types import Categorical
+
         c = Categorical(["a", "b", "a", "c"])
         assert c is not None
 
@@ -538,18 +584,21 @@ class TestCommonFunctions:
     def test_whos(self, capsys):
         from matpy.builtins.common import _disp_enhanced
         from matpy.runtime.types import Mat
+
         _disp_enhanced(Mat(np.array([1, 2, 3])))
         captured = capsys.readouterr()
         assert "1" in captured.out
 
     def test_who(self, capsys):
         from matpy.builtins.common import _disp_enhanced
+
         _disp_enhanced("hello")
         captured = capsys.readouterr()
         assert "hello" in captured.out
 
     def test_clear(self):
         from matpy.environment import Environment
+
         env = Environment()
         env.set("x", 1)
         env._vars.clear()
