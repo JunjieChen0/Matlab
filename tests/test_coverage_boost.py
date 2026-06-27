@@ -245,6 +245,7 @@ class TestOptimizationFunctions:
         # fzero finds root of x^2 - 4 = 0 near x=1, should find x=2
         def f(x):
             return x**2 - 4
+
         result = _fzero(f, 1.0)
         assert abs(result - 2.0) < 0.01
 
@@ -253,6 +254,7 @@ class TestOptimizationFunctions:
 
         def f(x):
             return (x - 2) ** 2
+
         result = _fminbnd(f, 0, 4)
         # result may be a tuple (x, fval)
         x = result[0] if isinstance(result, tuple) else result
@@ -263,6 +265,7 @@ class TestOptimizationFunctions:
 
         def f(x):
             return (x[0] - 1) ** 2 + (x[1] - 2) ** 2
+
         result = _fminsearch(f, Mat(np.array([0, 0])))
         # result may be a tuple (x, fval)
         assert result is not None
@@ -291,6 +294,7 @@ class TestOptimizationFunctions:
 
         def f(x):
             return [x[0] ** 2 + x[1] ** 2 - 1, x[0] - x[1]]
+
         result = _fsolve(f, Mat(np.array([0.5, 0.5])))
         assert result is not None
 

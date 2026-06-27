@@ -582,17 +582,23 @@ class Interpreter(NodeVisitor):
             case "-":
                 result = left_val - right_val
             case "*":
-                if isinstance(left_val, np.ndarray) and isinstance(right_val, np.ndarray):
+                if isinstance(left_val, np.ndarray) and isinstance(
+                    right_val, np.ndarray
+                ):
                     result = left_val @ right_val
                 else:
                     result = left_val * right_val
             case "/":
-                if isinstance(left_val, np.ndarray) and isinstance(right_val, np.ndarray):
+                if isinstance(left_val, np.ndarray) and isinstance(
+                    right_val, np.ndarray
+                ):
                     try:
                         result = np.linalg.solve(right_val.T, left_val.T).T
                     except np.linalg.LinAlgError:
                         # Use least-squares for non-square or singular matrices
-                        result, _, _, _ = np.linalg.lstsq(right_val.T, left_val.T, rcond=None)
+                        result, _, _, _ = np.linalg.lstsq(
+                            right_val.T, left_val.T, rcond=None
+                        )
                         result = result.T
                 else:
                     result = left_val / right_val
@@ -602,7 +608,9 @@ class Interpreter(NodeVisitor):
                         result = np.linalg.solve(left_val, right_val)
                     except np.linalg.LinAlgError:
                         # Use least-squares for non-square or singular matrices
-                        result, _, _, _ = np.linalg.lstsq(left_val, right_val, rcond=None)
+                        result, _, _, _ = np.linalg.lstsq(
+                            left_val, right_val, rcond=None
+                        )
                 else:
                     result = right_val / left_val
             case "^":
@@ -615,7 +623,11 @@ class Interpreter(NodeVisitor):
                     elif left_val.shape[0] == left_val.shape[1]:
                         # Fractional matrix power via eigendecomposition for square matrices
                         eigvals, eigvecs = np.linalg.eig(left_val)
-                        result = eigvecs @ np.diag(eigvals**right_val) @ np.linalg.inv(eigvecs)
+                        result = (
+                            eigvecs
+                            @ np.diag(eigvals**right_val)
+                            @ np.linalg.inv(eigvecs)
+                        )
                         result = np.real(result)
                     else:
                         raise InterpreterError(
